@@ -1,51 +1,59 @@
+use bevy::prelude::KeyCode;
 
 #[derive(Debug)]
 enum InputKind {
-  Axis,
-  Button,
+    Axis,
+    Button,
 }
 
 #[derive(Debug)]
 enum Input {
-  Axis(f32),
-  Button(bool),
+    Axis(f32),
+    Button(bool),
 }
 
 impl Input {
-  fn get_kind(&self) -> InputKind {
-    match *self {
-      Self::Axis(_) => InputKind::Axis,
-      Self::Button(_) => InputKind::Button,
+    fn get_kind(&self) -> InputKind {
+        match *self {
+            Self::Axis(_) => InputKind::Axis,
+            Self::Button(_) => InputKind::Button,
+        }
     }
-  }
 }
 
-struct ControllerKey {
-  name: &'static str,
-  input_kind: InputKind,
+struct InputSourceKey {
+    name: &'static str,
+    input_kind: InputKind,
 }
 
-impl ControllerKey {
-  fn new_button(name: &'static str) -> ControllerKey {
-    ControllerKey { name, input_kind: InputKind::Button }
-  }
+impl InputSourceKey {
+    fn new_button(name: &'static str) -> InputSourceKey {
+        InputSourceKey {
+            name,
+            input_kind: InputKind::Button,
+        }
+    }
 }
 
-struct Controller {
-  id: i64,
-  name: String,
-  keys: Vec<ControllerKey>,
+struct InputSource {
+    id: i64,
+    name: String,
+    keys: Vec<InputSourceKey>,
 }
 
-fn make_keyboard() -> Controller {
-  Controller {
-    id: 0,
-    name: "keyboard".to_string(),
-    keys: vec![
-      ControllerKey::new_button("w"),
-      ControllerKey::new_button("a"),
-      ControllerKey::new_button("s"),
-      ControllerKey::new_button("d"),
-    ]
-  }
+const NUM_KEYBOARD_KEYS: usize = 4;
+
+#[derive(Debug)]
+pub struct InputState {
+    pub keyboard: [bool; NUM_KEYBOARD_KEYS],
 }
+
+impl Default for InputState {
+    fn default() -> Self {
+        InputState {
+            keyboard: [false, false, false, false],
+        }
+    }
+}
+
+pub const KEYBOARD_KEYS: [KeyCode; 4] = [KeyCode::W, KeyCode::A, KeyCode::S, KeyCode::D];
