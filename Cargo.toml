@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 bevy = "0.6"
 bevy_prototype_lyon = "0.4.0"
+multiinput = "0.1.0"
