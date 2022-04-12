@@ -1963,15 +1963,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "multiinput"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "53f15c51cba0cc1234ace7ee6848df669a6da0d6a8bfc5fccd4a3f376a136e2f"
-dependencies = [
- "winapi",
-]
-
-[[package]]
 name = "naga"
 version = "0.8.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2977,7 +2968,6 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy_prototype_lyon",
- "multiinput",
 ]
 
 [[package]]

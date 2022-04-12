@@ -1,3 +1,4 @@
+#[cfg(target_os="windows")]
 pub fn test_raw_input() {
     use multiinput::*;
     let mut manager = RawInputManager::new().unwrap();
