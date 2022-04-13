@@ -11,7 +11,7 @@ pub enum InputValue {
 pub type HidId = usize;
 pub type HidButtonId = usize;
 
-#[derive(PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum HidHatSwitchId {
     Center,
     Up,
@@ -21,7 +21,7 @@ pub enum HidHatSwitchId {
 }
 
 // Duplicate of multiinput::Axis
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum HidAxisId {
     X,
     Y,
@@ -32,6 +32,7 @@ pub enum HidAxisId {
     SLIDER,
 }
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum InputSource {
     Key(KeyCode),
     Button(GamepadButton),
@@ -96,7 +97,7 @@ impl InputSink {
     }
 }
 
-// Mutate each `InputSink` component with the current value of the input source 
+// Mutate each `InputSink` component with the current value of the input source
 // given by its `InputSource` field.
 pub fn resolve_input_sinks_system(
     keyboard_input: Res<Input<KeyCode>>,
@@ -113,7 +114,6 @@ pub fn resolve_input_sinks_system(
 
     let input_values =
         poll_input_sources(keyboard_input, button_input, axis_input, raw_input, sources);
-    println!("values={:?}", input_values);
     for (i, mut sink) in query.iter_mut().enumerate() {
         sink.value = input_values[i];
     }
@@ -135,6 +135,4 @@ pub fn test_gamepad_system(
     ];
 
     let values = poll_input_sources(keyboard_input, button_input, axis_input, raw_input, sources);
-
-    println!("values: {:?}", values);
 }

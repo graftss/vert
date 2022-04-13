@@ -3,9 +3,45 @@ use bevy_prototype_lyon::prelude::*;
 
 use crate::input::input::{InputSink, InputSource, InputValue};
 
+use super::display::Displayable;
+
 #[derive(Component)]
 pub struct ButtonDisplayMarker {
     pub pressed: bool,
+}
+
+pub struct ButtonDisplayData {
+    displayable: Displayable,
+    on_mode: DrawMode,
+    off_mode: DrawMode,
+    transform: Transform,
+    input_source: InputSource,
+}
+
+pub fn add_button_display(commands: &mut Commands, display_data: ButtonDisplayData) {
+    let ButtonDisplayData {
+        displayable,
+        on_mode,
+        off_mode,
+        transform,
+        input_source,
+    } = display_data;
+    let shape = displayable.to_geometry();
+
+    let mut on_bundle = GeometryBuilder::build_as(shape, on_mode, transform);
+    on_bundle.visibility = Visibility { is_visible: false };
+
+    let off_bundle = GeometryBuilder::build_as(shape, off_mode, transform);
+
+    commands
+        .spawn_bundle(on_bundle)
+        .insert(ButtonDisplayMarker { pressed: true })
+        .insert(InputSink::new(input_source));
+
+    commands
+        .spawn_bundle(off_bundle)
+        .insert(ButtonDisplayMarker { pressed: false })
+        .insert(InputSink::new(input_source));
 }
 
 pub fn test_button_startup_system(mut commands: Commands) {
@@ -25,22 +61,24 @@ pub fn test_button_startup_system(mut commands: Commands) {
         outline_mode: StrokeMode::new(Color::GREEN, 6.0),
     };
 
-    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+    let w_button = ButtonDisplayData {
+        on_mode,
+        off_mode,
+        displayable: Displayable::RegularPolygon(shape),
+        transform: Transform::from_xyz(100.0, 100.0, 100.0),
+        input_source: InputSource::Key(KeyCode::W),
+    };
 
-    let on_bundle = GeometryBuilder::build_as(&shape, on_mode, Transform::default());
+    let d_button = ButtonDisplayData {
+        on_mode,
+        off_mode,
+        displayable: Displayable::RegularPolygon(shape),
+        transform: Transform::from_xyz(200.0, 200.0, 200.0),
+        input_source: InputSource::Key(KeyCode::D),
+    };
 
-    let mut off_bundle = GeometryBuilder::build_as(&shape, off_mode, Transform::default());
-    off_bundle.visibility = Visibility { is_visible: false };
-
-    commands
-        .spawn_bundle(on_bundle)
-        .insert(ButtonDisplayMarker { pressed: true })
-        .insert(InputSink::new(InputSource::Key(KeyCode::W)));
-
-    commands
-        .spawn_bundle(off_bundle)
-        .insert(ButtonDisplayMarker { pressed: false })
-        .insert(InputSink::new(InputSource::Key(KeyCode::W)));
+    add_button_display(&mut commands, w_button);
+    add_button_display(&mut commands, d_button);
 }
 
 pub fn button_display_system(
