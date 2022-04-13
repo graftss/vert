@@ -61,24 +61,35 @@ pub fn test_button_startup_system(mut commands: Commands) {
         outline_mode: StrokeMode::new(Color::GREEN, 6.0),
     };
 
-    let w_button = ButtonDisplayData {
-        on_mode,
-        off_mode,
-        displayable: Displayable::RegularPolygon(shape),
-        transform: Transform::from_xyz(100.0, 100.0, 100.0),
-        input_source: InputSource::Key(KeyCode::W),
-    };
+    for x in (std::ops::Range { start: 10, end: 60 }) {
+        let z = (x * 10) as f32;
+        let input_source = InputSource::HidButton(0, 2);
+        add_button_display(
+            &mut commands,
+            ButtonDisplayData {
+                on_mode,
+                off_mode,
+                displayable: Displayable::RegularPolygon(shape),
+                transform: Transform::from_xyz(z, z, 0.0),
+                input_source,
+            },
+        );
+    }
 
-    let d_button = ButtonDisplayData {
-        on_mode,
-        off_mode,
-        displayable: Displayable::RegularPolygon(shape),
-        transform: Transform::from_xyz(200.0, 200.0, 200.0),
-        input_source: InputSource::Key(KeyCode::D),
-    };
-
-    add_button_display(&mut commands, w_button);
-    add_button_display(&mut commands, d_button);
+    for x in (std::ops::Range { start: -40, end: 0 }) {
+        let z = (x * 10) as f32;
+        let input_source = InputSource::Key(KeyCode::W);
+        add_button_display(
+            &mut commands,
+            ButtonDisplayData {
+                on_mode,
+                off_mode,
+                displayable: Displayable::RegularPolygon(shape),
+                transform: Transform::from_xyz(z, z, 0.0),
+                input_source,
+            },
+        );
+    }
 }
 
 pub fn button_display_system(

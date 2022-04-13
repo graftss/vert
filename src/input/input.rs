@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
-use super::raw_input::{RawInputReader, RawInputRes};
+use super::raw_input_reader::*;
+use super::RawInputReader;
 
 #[derive(Debug, Clone, Copy)]
 pub enum InputValue {
