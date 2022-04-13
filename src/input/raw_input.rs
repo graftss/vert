@@ -5,8 +5,8 @@ use super::input::{HidAxisId, HidButtonId, HidHatSwitchId, HidId, InputValue};
 // A bevy system to poll the `RawInputManager` regularly so that it stays up-to-date
 // with all rawinput joysticks.
 #[cfg(target_os = "windows")]
-pub fn poll_rawinput_system(mut raw_inputs: NonSendMut<RawInputRes>) {
-    raw_inputs.0.poll_events();
+pub fn poll_rawinput_system(mut raw_input: NonSendMut<RawInputRes>) {
+    raw_input.0.poll_events();
 }
 
 pub trait RawInputReader {

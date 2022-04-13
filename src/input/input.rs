@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use super::raw_input::{RawInputReader, RawInputRes};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum InputValue {
     Axis(f64),
     Button(bool),
@@ -46,8 +46,8 @@ pub fn poll_input_sources(
     keyboard_input: Res<Input<KeyCode>>,
     button_input: Res<Input<GamepadButton>>,
     axis_input: Res<Axis<GamepadAxis>>,
-    mut raw_inputs: NonSendMut<RawInputRes>,
-    sources: Vec<InputSource>,
+    mut raw_input: NonSendMut<RawInputRes>,
+    sources: Vec<&InputSource>,
 ) -> Vec<Option<InputValue>> {
     use self::InputSource::*;
 
@@ -55,25 +55,25 @@ pub fn poll_input_sources(
 
     for source in sources.iter() {
         match source {
-            &Key(key_code) => {
+            &&Key(key_code) => {
                 let pressed = keyboard_input.pressed(key_code);
                 result.push(Some(InputValue::Button(pressed)));
             }
-            &Button(button) => {
+            &&Button(button) => {
                 let pressed = button_input.pressed(button);
                 result.push(Some(InputValue::Button(pressed)));
             }
-            &Axis(axis) => {
+            &&Axis(axis) => {
                 if let Some(value) = axis_input.get(axis) {
                     result.push(Some(InputValue::Axis(value as f64)));
                 } else {
                     result.push(None);
                 }
             }
-            HidAxis(id, axis) => result.push(raw_inputs.0.poll_hid_axis(&id, &axis)),
-            HidButton(id, button) => result.push(raw_inputs.0.poll_hid_button(&id, &button)),
+            HidAxis(id, axis) => result.push(raw_input.0.poll_hid_axis(&id, &axis)),
+            HidButton(id, button) => result.push(raw_input.0.poll_hid_button(&id, &button)),
             HidHatSwitch(id, hatswitch) => {
-                result.push(raw_inputs.0.poll_hid_hatswitch(&id, &hatswitch))
+                result.push(raw_input.0.poll_hid_hatswitch(&id, &hatswitch))
             }
         }
     }
@@ -81,28 +81,60 @@ pub fn poll_input_sources(
     result
 }
 
+#[derive(Component)]
+pub struct InputSink {
+    pub source: InputSource,
+    pub value: Option<InputValue>,
+}
+
+impl InputSink {
+    pub fn new(source: InputSource) -> InputSink {
+        InputSink {
+            source,
+            value: None,
+        }
+    }
+}
+
+// Mutate each `InputSink` component with the current value of the input source 
+// given by its `InputSource` field.
+pub fn resolve_input_sinks_system(
+    keyboard_input: Res<Input<KeyCode>>,
+    button_input: Res<Input<GamepadButton>>,
+    axis_input: Res<Axis<GamepadAxis>>,
+    mut raw_input: NonSendMut<RawInputRes>,
+    mut query: Query<&mut InputSink>,
+) {
+    let mut sources = Vec::new();
+
+    for sink in query.iter() {
+        sources.push(&sink.source);
+    }
+
+    let input_values =
+        poll_input_sources(keyboard_input, button_input, axis_input, raw_input, sources);
+    println!("values={:?}", input_values);
+    for (i, mut sink) in query.iter_mut().enumerate() {
+        sink.value = input_values[i];
+    }
+}
+
 pub fn test_gamepad_system(
     keyboard_input: Res<Input<KeyCode>>,
     button_input: Res<Input<GamepadButton>>,
     axis_input: Res<Axis<GamepadAxis>>,
-    mut raw_inputs: NonSendMut<RawInputRes>,
+    mut raw_input: NonSendMut<RawInputRes>,
 ) {
     use InputSource::*;
 
     let sources = vec![
-        Key(KeyCode::W),
-        HidAxis(0, HidAxisId::X),               // left stick x axis
-        HidHatSwitch(0, HidHatSwitchId::Right), // dpad right
-        HidButton(0, 2),                        // x button
+        &Key(KeyCode::W),
+        &HidAxis(0, HidAxisId::X),               // left stick x axis
+        &HidHatSwitch(0, HidHatSwitchId::Right), // dpad right
+        &HidButton(0, 2),                        // x button
     ];
 
-    let values = poll_input_sources(
-        keyboard_input,
-        button_input,
-        axis_input,
-        raw_inputs,
-        sources,
-    );
+    let values = poll_input_sources(keyboard_input, button_input, axis_input, raw_input, sources);
 
     println!("values: {:?}", values);
 }

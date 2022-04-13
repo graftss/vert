@@ -1,25 +1,43 @@
 use bevy::{core::FixedTimestep, prelude::*};
 use bevy_prototype_lyon::prelude::*;
+use input::{
+    input::{poll_input_sources, resolve_input_sinks_system, InputSource, InputValue},
+    RawInputRes,
+};
 
+mod display;
 mod input;
 
 const POLL_RAWINPUT_TIME_STEP: f32 = 1.0 / 30.0;
-const TIME_STEP: f32 = 1.0 / 5.0;
+const TIME_STEP: f32 = 1.0 / 60.0;
 
 fn main() {
     let mut app = App::new();
 
+    app.add_startup_system(display::button::test_button_startup_system);
+
     app.init_non_send_resource::<input::RawInputRes>()
         .add_plugins(DefaultPlugins)
+        .add_plugin(ShapePlugin)
         // .add_system_set(
         //     SystemSet::new()
         //         .with_run_criteria(FixedTimestep::step(POLL_RAWINPUT_TIME_STEP as f64))
         //         .with_system(input::poll_rawinput_system),
         // )
+        // .add_system_set(
+        //     SystemSet::new()
+        //         .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
+        //         .with_system(input::test_gamepad_system),
+        // );
         .add_system_set(
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
-                .with_system(input::test_gamepad_system),
+                .with_system(resolve_input_sinks_system),
+        )
+        .add_system_set(
+            SystemSet::new()
+                .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
+                .with_system(display::button::button_display_system),
         );
 
     app.run();
