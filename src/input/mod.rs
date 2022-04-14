@@ -9,3 +9,5 @@ pub use raw_input::windows as raw_input_reader;
 
 #[cfg(target_os = "macos")]
 pub use raw_input::macos as raw_input_reader;
+
+pub mod raw_input_test;

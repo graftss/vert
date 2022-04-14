@@ -26,22 +26,21 @@ pub fn add_button_display(commands: &mut Commands, display_data: ButtonDisplayDa
         transform,
         input_source,
     } = display_data;
-    let shape = displayable.to_geometry();
 
-    let mut on_bundle = GeometryBuilder::build_as(shape, on_mode, transform);
+    let mut on_bundle = displayable.build_as(on_mode, transform);
     on_bundle.visibility = Visibility { is_visible: false };
 
-    let off_bundle = GeometryBuilder::build_as(shape, off_mode, transform);
+    let off_bundle = displayable.build_as(off_mode, transform);
 
     commands
         .spawn_bundle(on_bundle)
         .insert(ButtonDisplayMarker { pressed: true })
-        .insert(InputSink::new(input_source));
+        .insert(InputSink::new(vec![input_source]));
 
     commands
         .spawn_bundle(off_bundle)
         .insert(ButtonDisplayMarker { pressed: false })
-        .insert(InputSink::new(input_source));
+        .insert(InputSink::new(vec![input_source]));
 }
 
 pub fn test_button_startup_system(mut commands: Commands) {
@@ -61,42 +60,42 @@ pub fn test_button_startup_system(mut commands: Commands) {
         outline_mode: StrokeMode::new(Color::GREEN, 6.0),
     };
 
-    for x in (std::ops::Range { start: 10, end: 60 }) {
-        let z = (x * 10) as f32;
-        let input_source = InputSource::HidButton(0, 2);
-        add_button_display(
-            &mut commands,
-            ButtonDisplayData {
-                on_mode,
-                off_mode,
-                displayable: Displayable::RegularPolygon(shape),
-                transform: Transform::from_xyz(z, z, 0.0),
-                input_source,
-            },
-        );
-    }
+    // for x in (std::ops::Range { start: 10, end: 15 }) {
+    //     let z = (x * 10) as f32;
+    //     let input_source = InputSource::HidButton(0, 2);
+    //     add_button_display(
+    //         &mut commands,
+    //         ButtonDisplayData {
+    //             on_mode,
+    //             off_mode,
+    //             displayable: Displayable::RegularPolygon(shape),
+    //             transform: Transform::from_xyz(z, z, 0.0),
+    //             input_source,
+    //         },
+    //     );
+    // }
 
-    for x in (std::ops::Range { start: -40, end: 0 }) {
-        let z = (x * 10) as f32;
-        let input_source = InputSource::Key(KeyCode::W);
-        add_button_display(
-            &mut commands,
-            ButtonDisplayData {
-                on_mode,
-                off_mode,
-                displayable: Displayable::RegularPolygon(shape),
-                transform: Transform::from_xyz(z, z, 0.0),
-                input_source,
-            },
-        );
-    }
+    // for x in (std::ops::Range { start: -40, end: 0 }) {
+    //     let z = (x * 10) as f32;
+    //     let input_source = InputSource::Key(KeyCode::W);
+    //     add_button_display(
+    //         &mut commands,
+    //         ButtonDisplayData {
+    //             on_mode,
+    //             off_mode,
+    //             displayable: Displayable::RegularPolygon(shape),
+    //             transform: Transform::from_xyz(z, z, 0.0),
+    //             input_source,
+    //         },
+    //     );
+    // }
 }
 
 pub fn button_display_system(
     mut query: Query<(&InputSink, &ButtonDisplayMarker, &mut Visibility)>,
 ) {
     for (sink, marker, mut vis) in query.iter_mut() {
-        match sink.value {
+        match sink.values[0] {
             Some(InputValue::Button(true)) => {
                 vis.is_visible = marker.pressed;
             }

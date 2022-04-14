@@ -1,10 +1,15 @@
-use super::input::{HidAxisId, HidButtonId, HidHatSwitchId, HidId, InputValue};
+use super::input::{AxisSign, HidAxisId, HidButtonId, HidHatSwitchId, HidId, InputValue};
 
 pub trait RawInputReader {
     fn update(&mut self) -> usize;
     fn num_joysticks(&self) -> usize;
     fn poll_hid_button(&mut self, id: &HidId, button_id: &HidButtonId) -> Option<InputValue>;
-    fn poll_hid_axis(&mut self, id: &HidId, axis_id: &HidAxisId) -> Option<InputValue>;
+    fn poll_hid_axis(
+        &mut self,
+        id: &HidId,
+        axis_id: &HidAxisId,
+        sign: &AxisSign,
+    ) -> Option<InputValue>;
     fn poll_hid_hatswitch(&mut self, id: &HidId, hat_id: &HidHatSwitchId) -> Option<InputValue>;
 }
 
@@ -62,10 +67,19 @@ pub mod windows {
     impl super::RawInputReader for RawInput {
         // Syncs the state of the `RawInputManager` based on pending rawinput events.
         fn update(&mut self) -> usize {
-            // Calling `get_events` updates the joystick state of `RawInputManager`.
-            let result = self.manager.get_events().into_iter().count();
+            let mut i = 0;
+
+            loop {
+                // Reading the events one by one like this has the effect of also updating
+                // the internal joystick state of `RawInputManager`.
+                if let Some(_) = self.manager.get_event() {
+                    i += 1;
+                } else {
+                    break;
+                }
+            }
             self.joystick_state = self.manager.get_joystick_state(0);
-            result
+            i
         }
 
         // Returns the number of joysticks in the device list.
@@ -80,7 +94,12 @@ pub mod windows {
         }
 
         // Reads the value of a `HidAxis` input source from the rawinput state.
-        fn poll_hid_axis(&mut self, id: &HidId, axis_id: &HidAxisId) -> Option<InputValue> {
+        fn poll_hid_axis(
+            &mut self,
+            id: &HidId,
+            axis_id: &HidAxisId,
+            axis_sign: &AxisSign,
+        ) -> Option<InputValue> {
             let js = self.get_cached_joystick_state(*id)?;
 
             let axis_state = match *axis_id {
@@ -93,7 +112,7 @@ pub mod windows {
                 HidAxisId::SLIDER => js.axis_states.slider,
             };
 
-            axis_state.map(InputValue::Axis)
+            axis_state.map(|s| InputValue::Axis(axis_sign.clamp_f64(s)))
         }
 
         // Reads the value of a `HidHatSwitch` input source from the raw input state.
