@@ -43,19 +43,19 @@ pub fn add_button_display(commands: &mut Commands, display_data: ButtonDisplayDa
         .insert(InputSink::new(vec![input_source]));
 }
 
-pub fn test_button_startup_system(mut commands: Commands) {
-    let shape = shapes::RegularPolygon {
+pub fn test_button_startup_system(_commands: Commands) {
+    let _shape = shapes::RegularPolygon {
         sides: 6,
         feature: shapes::RegularPolygonFeature::Radius(200.0),
         ..shapes::RegularPolygon::default()
     };
 
-    let on_mode = DrawMode::Outlined {
+    let _on_mode = DrawMode::Outlined {
         fill_mode: FillMode::color(Color::CYAN),
         outline_mode: StrokeMode::new(Color::BLACK, 10.0),
     };
 
-    let off_mode = DrawMode::Outlined {
+    let _off_mode = DrawMode::Outlined {
         fill_mode: FillMode::color(Color::RED),
         outline_mode: StrokeMode::new(Color::GREEN, 6.0),
     };

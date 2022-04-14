@@ -77,6 +77,7 @@ pub fn add_analog_stick_display(commands: &mut Commands, display_data: AnalogSti
         });
 }
 
+// Add some analog stick components for testing
 pub fn test_analog_stick_startup_system(mut commands: Commands) {
     let transform = Transform::from_xyz(-40.0, 0.0, 500.0);
 

@@ -44,8 +44,6 @@ pub mod windows {
         fn default() -> Self {
             use multiinput::*;
 
-            println!("initialize raw input manager");
-
             // Initialize the `multiinput::RawInputManager` to only listen to non-xinput joysticks.
             // These should be the only input devices not covered by the default bevy input plugin.
             let mut manager = RawInputManager::new().unwrap();
@@ -59,7 +57,7 @@ pub mod windows {
     }
 
     impl RawInput {
-        fn get_cached_joystick_state(&self, id: HidId) -> Option<&JoystickState> {
+        fn get_cached_joystick_state(&self, _id: HidId) -> Option<&JoystickState> {
             self.joystick_state.as_ref()
         }
     }

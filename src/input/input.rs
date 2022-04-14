@@ -1,5 +1,6 @@
+use bevy::core::FixedTimestep;
 use bevy::prelude::*;
-use bevy_inspector_egui::Inspectable;
+
 
 use super::raw_input_reader::*;
 use super::RawInputReader;
@@ -156,20 +157,35 @@ pub fn resolve_input_sinks_system(
     }
 }
 
-pub fn test_gamepad_system(
-    keyboard_input: Res<Input<KeyCode>>,
-    button_input: Res<Input<GamepadButton>>,
-    axis_input: Res<Axis<GamepadAxis>>,
-    mut raw_input: NonSendMut<RawInputRes>,
-) {
-    use InputSource::*;
+const POLL_INPUT_TIME_STEP: f32 = 1.0 / 60.0;
 
-    let sources = vec![
-        &Key(KeyCode::W),
-        &HidAxis(0, HidAxisId::X, AxisSign::Plus), // left stick x axis
-        &HidHatSwitch(0, HidHatSwitchId::Right),   // dpad right
-        &HidButton(0, 2),                          // x button
-    ];
+pub const POLL_RAWINPUT_LABEL: &'static str = "poll_rawinput";
+pub const RESOLVE_INPUT_LABEL: &'static str = "resolve_input";
 
-    let values = poll_input_sources(keyboard_input, button_input, axis_input, raw_input, sources);
+pub fn add_input_systems(app: &mut App) {
+    // Add the rawinput polling system when targeting Windows.
+    #[cfg(target_family = "windows")]
+    {
+        app.add_system_set(
+            SystemSet::new()
+                .with_run_criteria(FixedTimestep::step(POLL_INPUT_TIME_STEP as f64))
+                .with_system(
+                    super::raw_input_reader::poll_rawinput_system.label(POLL_RAWINPUT_LABEL),
+                ),
+        );
+    }
+
+    // Add the global rawinput resource, which is a no-op on platforms besides Windows.
+    app.init_non_send_resource::<RawInputRes>();
+
+    // Add the input resolution system to write up-to-date input to `InputSink` components.
+    app.add_system_set(
+        SystemSet::new()
+            .with_run_criteria(FixedTimestep::step(POLL_INPUT_TIME_STEP as f64))
+            .with_system(
+                resolve_input_sinks_system
+                    .label(RESOLVE_INPUT_LABEL)
+                    .after(POLL_RAWINPUT_LABEL),
+            ),
+    );
 }
