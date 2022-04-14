@@ -1,7 +1,10 @@
 use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
 
-use crate::input::input::{AxisSign, HidAxisId, InputSink, InputSource, InputValue};
+use crate::{
+    app_state::AppState,
+    input::input::{AxisSign, HidAxisId, InputSink, InputSource, InputValue},
+};
 
 use super::display::Displayable;
 

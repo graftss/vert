@@ -20,9 +20,6 @@ fn make_text_section(s: String, font: Handle<Font>) -> TextSection {
 }
 
 pub fn raw_input_test_startup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    // setup ui
-    commands.spawn_bundle(UiCameraBundle::default());
-
     // sink for left stick
     let pos_x = InputSource::HidAxis(0, HidAxisId::X, AxisSign::Plus);
     let neg_x = InputSource::HidAxis(0, HidAxisId::X, AxisSign::Minus);

@@ -1,7 +1,6 @@
 use bevy::core::FixedTimestep;
 use bevy::prelude::*;
 
-
 use super::raw_input_reader::*;
 use super::RawInputReader;
 
