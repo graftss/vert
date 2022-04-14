@@ -2,7 +2,7 @@ use app_state::{state_hotkey_system, AppState};
 use bevy::prelude::*;
 
 use bevy_prototype_lyon::prelude::*;
-use display::system::add_display_systems;
+use display::{system::add_display_systems, test::inject_debug_display};
 
 use input::input::add_input_systems;
 
@@ -39,7 +39,7 @@ fn main() {
     app.run();
 }
 
-fn root_startup_system(mut commands: Commands, mut app_state: ResMut<State<AppState>>) {
+fn root_startup_system(mut commands: Commands) {
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
     commands.spawn_bundle(UiCameraBundle::default());
 }
@@ -51,10 +51,6 @@ fn add_debug_tools(app: &mut App) {
     // app.add_plugin(LogDiagnosticsPlugin::default());
     // app.add_plugin(FrameTimeDiagnosticsPlugin::default());
 
-    // Add some fixed analog stick displays for testing
-    app.add_system_set(
-        SystemSet::on_enter(AppState::Display)
-            .with_system(display::analog_stick::test_analog_stick_startup_system)
-            .with_system(display::button::test_button_startup_system),
-    );
+    // Add some fixed input displays for testing
+    app.add_startup_system(inject_debug_display);
 }

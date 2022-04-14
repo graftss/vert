@@ -7,29 +7,31 @@ use crate::{
     util::despawn_all_with,
 };
 
-use super::display::Displayable;
+use super::display::Renderable;
+
+// The data parameterizing a button input display.
+#[derive(Clone, Copy)]
+pub struct ButtonDisplayData {
+    pub displayable: Renderable,
+    pub on_mode: DrawMode,
+    pub off_mode: DrawMode,
+    pub transform: Transform,
+    pub input_source: InputSource,
+}
 
 #[derive(Component)]
 pub struct ButtonDisplayMarker {
     pub pressed: bool,
 }
 
-pub struct ButtonDisplayData {
-    displayable: Displayable,
-    on_mode: DrawMode,
-    off_mode: DrawMode,
-    transform: Transform,
-    input_source: InputSource,
-}
-
-pub fn add_button_display(commands: &mut Commands, display_data: ButtonDisplayData) {
+pub fn spawn_button(commands: &mut Commands, display_data: &ButtonDisplayData) {
     let ButtonDisplayData {
         displayable,
         on_mode,
         off_mode,
         transform,
         input_source,
-    } = display_data;
+    } = *display_data;
 
     let mut on_bundle = displayable.build_as(on_mode, transform);
     on_bundle.visibility = Visibility { is_visible: false };
@@ -45,55 +47,6 @@ pub fn add_button_display(commands: &mut Commands, display_data: ButtonDisplayDa
         .spawn_bundle(off_bundle)
         .insert(ButtonDisplayMarker { pressed: false })
         .insert(InputSink::new(vec![input_source]));
-}
-
-pub fn test_button_startup_system(mut commands: Commands) {
-    println!("startup button ");
-    let shape = shapes::RegularPolygon {
-        sides: 6,
-        feature: shapes::RegularPolygonFeature::Radius(200.0),
-        ..shapes::RegularPolygon::default()
-    };
-
-    let on_mode = DrawMode::Outlined {
-        fill_mode: FillMode::color(Color::CYAN),
-        outline_mode: StrokeMode::new(Color::BLACK, 10.0),
-    };
-
-    let off_mode = DrawMode::Outlined {
-        fill_mode: FillMode::color(Color::RED),
-        outline_mode: StrokeMode::new(Color::GREEN, 6.0),
-    };
-
-    for x in (std::ops::Range { start: 10, end: 15 }) {
-        let z = (x * 5) as f32;
-        let input_source = InputSource::Key(KeyCode::W);
-        add_button_display(
-            &mut commands,
-            ButtonDisplayData {
-                on_mode,
-                off_mode,
-                displayable: Displayable::RegularPolygon(shape),
-                transform: Transform::from_xyz(z, z, 0.0),
-                input_source,
-            },
-        );
-    }
-
-    // for x in (std::ops::Range { start: -40, end: 0 }) {
-    //     let z = (x * 10) as f32;
-    //     let input_source = InputSource::Key(KeyCode::W);
-    //     add_button_display(
-    //         &mut commands,
-    //         ButtonDisplayData {
-    //             on_mode,
-    //             off_mode,
-    //             displayable: Displayable::RegularPolygon(shape),
-    //             transform: Transform::from_xyz(z, z, 0.0),
-    //             input_source,
-    //         },
-    //     );
-    // }
 }
 
 pub fn add_button_teardown_system(app: &mut App, display_state: AppState) {

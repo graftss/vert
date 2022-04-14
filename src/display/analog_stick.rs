@@ -7,7 +7,22 @@ use crate::{
     util::despawn_all_with,
 };
 
-use super::display::Displayable;
+use super::display::Renderable;
+
+// The data parameterizing an analog stick input display.
+pub struct AnalogStickDisplayData {
+    pub stick_display: Renderable,
+    pub stick_mode: DrawMode,
+    pub stick_radius: f32,
+    pub bg_display: Renderable,
+    pub bg_mode: DrawMode,
+    pub transform: Transform,
+    pub pos_x: InputSource,
+    pub neg_x: InputSource,
+    pub pos_y: InputSource,
+    pub neg_y: InputSource,
+    pub trigger: Option<InputSource>,
+}
 
 // An entity with this marker will have an `InputSink` with a source vector of:
 //   - 4 entries, if `use_trigger` is `false`;
@@ -25,21 +40,7 @@ pub struct ChildStickMarker;
 #[derive(Component)]
 pub struct ChildBgMarker;
 
-pub struct AnalogStickDisplayData {
-    stick_display: Displayable,
-    stick_mode: DrawMode,
-    stick_radius: f32,
-    bg_display: Displayable,
-    bg_mode: DrawMode,
-    transform: Transform,
-    pos_x: InputSource,
-    neg_x: InputSource,
-    pos_y: InputSource,
-    neg_y: InputSource,
-    trigger: Option<InputSource>,
-}
-
-pub fn add_analog_stick_display(commands: &mut Commands, display_data: AnalogStickDisplayData) {
+pub fn spawn_analog_stick(commands: &mut Commands, display_data: &AnalogStickDisplayData) {
     let AnalogStickDisplayData {
         stick_display,
         stick_mode,
@@ -52,7 +53,7 @@ pub fn add_analog_stick_display(commands: &mut Commands, display_data: AnalogSti
         neg_y,
         stick_radius,
         trigger,
-    } = display_data;
+    } = *display_data;
 
     let stick_bundle = stick_display.build_as(stick_mode, Transform::from_xyz(30.0, 0.0, 0.0));
     let bg_bundle = bg_display.build_as(bg_mode, Transform::identity());
@@ -79,71 +80,6 @@ pub fn add_analog_stick_display(commands: &mut Commands, display_data: AnalogSti
 
             parent.spawn_bundle(bg_bundle).insert(ChildBgMarker);
         });
-}
-
-// Add some analog stick components for testing
-pub fn test_analog_stick_startup_system(mut commands: Commands) {
-    let transform = Transform::from_xyz(-40.0, 0.0, 500.0);
-
-    let stick_shape = shapes::Circle {
-        radius: 9.0,
-        ..shapes::Circle::default()
-    };
-
-    let stick_mode = DrawMode::Outlined {
-        fill_mode: FillMode::color(Color::BLACK),
-        outline_mode: StrokeMode::new(Color::BLACK, 1.0),
-    };
-
-    let bg_shape = shapes::Circle {
-        radius: 30.0,
-        ..shapes::Circle::default()
-    };
-
-    let bg_mode = DrawMode::Outlined {
-        fill_mode: FillMode::color(Color::Rgba {
-            red: 0.0,
-            green: 0.0,
-            blue: 0.0,
-            alpha: 0.0,
-        }),
-        outline_mode: StrokeMode::new(Color::BLACK, 3.0),
-    };
-
-    let left_stick = AnalogStickDisplayData {
-        stick_display: Displayable::Circle(stick_shape),
-        stick_mode,
-        bg_display: Displayable::Circle(bg_shape),
-        bg_mode,
-        transform,
-        pos_x: InputSource::HidAxis(0, HidAxisId::X, AxisSign::Plus),
-        neg_x: InputSource::HidAxis(0, HidAxisId::X, AxisSign::Minus),
-        pos_y: InputSource::HidAxis(0, HidAxisId::Y, AxisSign::Plus),
-        neg_y: InputSource::HidAxis(0, HidAxisId::Y, AxisSign::Minus),
-        trigger: Some(InputSource::HidButton(0, 10)),
-        stick_radius: 20.0,
-    };
-
-    let right_stick = AnalogStickDisplayData {
-        stick_display: Displayable::Circle(stick_shape),
-        stick_mode,
-        bg_display: Displayable::Circle(bg_shape),
-        bg_mode,
-        transform: Transform::from_xyz(
-            transform.translation.x + 80.0,
-            transform.translation.y,
-            transform.translation.z,
-        ),
-        pos_x: InputSource::HidAxis(0, HidAxisId::RZ, AxisSign::Plus),
-        neg_x: InputSource::HidAxis(0, HidAxisId::RZ, AxisSign::Minus),
-        pos_y: InputSource::HidAxis(0, HidAxisId::Z, AxisSign::Plus),
-        neg_y: InputSource::HidAxis(0, HidAxisId::Z, AxisSign::Minus),
-        trigger: Some(InputSource::HidButton(0, 11)),
-        stick_radius: 20.0,
-    };
-
-    add_analog_stick_display(&mut commands, left_stick);
-    add_analog_stick_display(&mut commands, right_stick);
 }
 
 fn unwrap_axis(axis: Option<InputValue>) -> f32 {
