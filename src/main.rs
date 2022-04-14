@@ -9,6 +9,7 @@ use input::input::add_input_systems;
 mod app_state;
 mod display;
 mod input;
+mod util;
 
 fn main() {
     let mut app = App::new();
@@ -18,7 +19,7 @@ fn main() {
     app.add_plugin(ShapePlugin);
 
     // Set initial value of `AppState`.
-    app.add_state(AppState::ConfigureController);
+    app.add_state(AppState::Display);
 
     #[cfg(debug_assertions)]
     add_debug_tools(&mut app);
@@ -50,12 +51,10 @@ fn add_debug_tools(app: &mut App) {
     // app.add_plugin(LogDiagnosticsPlugin::default());
     // app.add_plugin(FrameTimeDiagnosticsPlugin::default());
 
-    // Add some fixed button displays for testing
-    // app.add_startup_system(display::button::test_button_startup_system);
-
     // Add some fixed analog stick displays for testing
     app.add_system_set(
         SystemSet::on_enter(AppState::Display)
-            .with_system(display::analog_stick::test_analog_stick_startup_system),
+            .with_system(display::analog_stick::test_analog_stick_startup_system)
+            .with_system(display::button::test_button_startup_system),
     );
 }

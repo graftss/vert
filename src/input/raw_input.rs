@@ -143,6 +143,8 @@ pub mod windows {
 
 #[cfg(target_os = "macos")]
 pub mod macos {
+    use super::RawInputReader;
+    use crate::input::input::*;
     pub struct RawInputRes(pub NoopRawInput);
 
     impl Default for RawInputRes {
@@ -154,7 +156,7 @@ pub mod macos {
     pub struct NoopRawInput;
 
     impl RawInputReader for NoopRawInput {
-        fn poll_events(&mut self) -> usize {
+        fn update(&mut self) -> usize {
             0
         }
         fn num_joysticks(&self) -> usize {
@@ -163,7 +165,12 @@ pub mod macos {
         fn poll_hid_button(&mut self, id: &HidId, button_id: &HidButtonId) -> Option<InputValue> {
             None
         }
-        fn poll_hid_axis(&mut self, id: &HidId, axis_id: &HidAxisId) -> Option<InputValue> {
+        fn poll_hid_axis(
+            &mut self,
+            id: &HidId,
+            axis_id: &HidAxisId,
+            sign: &AxisSign,
+        ) -> Option<InputValue> {
             None
         }
         fn poll_hid_hatswitch(

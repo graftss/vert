@@ -4,6 +4,7 @@ use bevy_prototype_lyon::prelude::*;
 use crate::{
     app_state::AppState,
     input::input::{AxisSign, HidAxisId, InputSink, InputSource, InputValue},
+    util::despawn_all_with,
 };
 
 use super::display::Displayable;
@@ -180,6 +181,15 @@ fn is_trigger_pressed(values: &Vec<Option<InputValue>>) -> bool {
         Some(&Some(InputValue::Button(v))) => v,
         _ => false,
     }
+}
+
+pub fn add_analog_stick_teardown_system(app: &mut App, display_state: AppState) {
+    app.add_system_set(
+        SystemSet::on_exit(display_state)
+            .with_system(despawn_all_with::<AnalogStickDisplayMarker>)
+            .with_system(despawn_all_with::<ChildStickMarker>)
+            .with_system(despawn_all_with::<ChildBgMarker>),
+    );
 }
 
 pub fn analog_stick_display_system(
