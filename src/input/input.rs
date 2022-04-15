@@ -1,5 +1,7 @@
 use bevy::core::FixedTimestep;
 use bevy::prelude::*;
+use serde::Deserialize;
+use serde::Serialize;
 
 use crate::controller::layout::ControllerKey;
 use crate::controller::layout::ControllerLayoutsRes;
@@ -20,7 +22,7 @@ pub enum InputValue {
 pub type HidId = usize;
 pub type HidButtonId = usize;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum HidHatSwitchId {
     Center,
     Up,
@@ -44,7 +46,7 @@ impl HidHatSwitchId {
 }
 
 // Duplicate of multiinput::Axis
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum HidAxisId {
     X,
     Y,
@@ -70,7 +72,7 @@ impl HidAxisId {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum AxisSign {
     Plus,
     Minus,
@@ -92,7 +94,7 @@ impl AxisSign {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum InputSource {
     Key(KeyCode),
     Button(GamepadButton),

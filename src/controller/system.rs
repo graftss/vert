@@ -5,7 +5,7 @@ use bevy_inspector_egui::egui;
 use crate::{
     app_state::AppState,
     input::{input::InputSource, raw_input_reader::RawInputRes, RawInputReader},
-    util::despawn_all_with,
+    util::{despawn_all_with, read_from_file, write_to_file},
 };
 
 use super::{
@@ -15,13 +15,21 @@ use super::{
     listener::{cleanup_input_listener_system, input_listener_system, InputListener},
 };
 
-pub fn startup(mut commands: Commands) {
-    commands.insert_resource(ControllerLayoutsRes {
-        ps2: Ps2Layout {
-            sources: HashMap::default(),
-        },
-    });
+pub const LAYOUTS_FILE_PATH: &'static str = "layouts.json";
 
+pub fn startup(mut commands: Commands) {
+    // Read and insert the layouts file from disk.
+    match read_from_file::<ControllerLayoutsRes>(LAYOUTS_FILE_PATH) {
+        Ok(layouts) => {
+            commands.insert_resource(layouts);
+        }
+        Err(e) => {
+            println!("Error in `read_layouts_file`: {:?}", e);
+            commands.insert_resource(ControllerLayoutsRes::default());
+        }
+    }
+
+    // Insert the `InputListener` resources.
     commands.insert_resource(InputListener::default());
 }
 
@@ -65,12 +73,12 @@ pub fn update(
     });
 }
 
-fn print_thing(layouts: Res<ControllerLayoutsRes>) {
-    println!("layouts: {:?}", layouts);
+fn save_layouts(layouts: Res<ControllerLayoutsRes>) {
+    write_to_file(&layouts.into_inner(), LAYOUTS_FILE_PATH);
 }
 
 pub fn add_controller_teardown_system(app: &mut App, controller_state: AppState) {
-    app.add_system_set(SystemSet::on_exit(controller_state).with_system(print_thing));
+    app.add_system_set(SystemSet::on_exit(controller_state).with_system(save_layouts));
 }
 
 pub fn add_controller_systems(app: &mut App, controller_state: AppState) {

@@ -1,8 +1,9 @@
 use bevy::utils::HashMap;
+use serde::{Deserialize, Serialize};
 
 use crate::input::input::InputSource;
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Serialize, Deserialize)]
 pub enum Ps2Key {
     PadU,
     PadL,
@@ -90,7 +91,7 @@ impl Ps2Key {
 
 const NUM_PS2_KEYS: usize = Ps2Key::RightNegY as usize + 1;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize, Default)]
 pub struct Ps2Layout {
     pub sources: HashMap<Ps2Key, InputSource>,
 }
@@ -118,7 +119,7 @@ pub trait ControllerLayout<K> {
     fn get_max_key(&self) -> usize;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize, Default)]
 pub struct ControllerLayoutsRes {
     pub ps2: Ps2Layout,
 }
