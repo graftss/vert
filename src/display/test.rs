@@ -9,15 +9,16 @@ use super::{
     analog_stick::AnalogStickParams,
     button::ButtonParams,
     display::{InputDisplay, Renderable, TaggedAtomicParams},
+    serialization::{CircleDef, RegularPolygonDef, RegularPolygonFeatureDef},
 };
 
 // Add some analog stick components for testing
 pub fn debug_analog_stick_data() -> Vec<TaggedAtomicParams> {
     let transform = Transform::from_xyz(-40.0, 0.0, 500.0);
 
-    let stick_shape = shapes::Circle {
+    let stick_shape = CircleDef {
         radius: 9.0,
-        ..shapes::Circle::default()
+        ..CircleDef::default()
     };
 
     let stick_mode = DrawMode::Outlined {
@@ -25,9 +26,9 @@ pub fn debug_analog_stick_data() -> Vec<TaggedAtomicParams> {
         outline_mode: StrokeMode::new(Color::BLACK, 1.0),
     };
 
-    let bg_shape = shapes::Circle {
+    let bg_shape = CircleDef {
         radius: 30.0,
-        ..shapes::Circle::default()
+        ..CircleDef::default()
     };
 
     let bg_mode = DrawMode::Outlined {
@@ -79,10 +80,10 @@ pub fn debug_analog_stick_data() -> Vec<TaggedAtomicParams> {
 }
 
 pub fn debug_button_data() -> Vec<TaggedAtomicParams> {
-    let shape = shapes::RegularPolygon {
+    let shape = RegularPolygonDef {
         sides: 6,
-        feature: shapes::RegularPolygonFeature::Radius(200.0),
-        ..shapes::RegularPolygon::default()
+        feature: RegularPolygonFeatureDef::Radius(200.0),
+        ..RegularPolygonDef::default()
     };
 
     let on_mode = DrawMode::Outlined {

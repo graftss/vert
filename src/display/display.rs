@@ -1,21 +1,32 @@
 use bevy::prelude::*;
 use bevy_prototype_lyon::{entity::ShapeBundle, prelude::*, shapes::Circle};
+use serde::{ser::SerializeStructVariant, Deserialize, Serialize};
 
 use crate::app_state::AppState;
 
-use super::{analog_stick::AnalogStickParams, button::ButtonParams};
+use super::{
+    analog_stick::AnalogStickParams,
+    button::ButtonParams,
+    serialization::{CircleDef, RegularPolygonDef},
+};
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Serialize, Deserialize)]
 pub enum Renderable {
-    RegularPolygon(RegularPolygon),
-    Circle(Circle),
+    RegularPolygon(RegularPolygonDef),
+    Circle(CircleDef),
 }
 
 impl Renderable {
     pub fn build_as(&self, mode: DrawMode, transform: bevy::prelude::Transform) -> ShapeBundle {
-        match self {
-            Renderable::RegularPolygon(rp) => GeometryBuilder::build_as(rp, mode, transform),
-            Renderable::Circle(c) => GeometryBuilder::build_as(c, mode, transform),
+        match *self {
+            Renderable::RegularPolygon(rp) => {
+                let trp: RegularPolygon = rp.into();
+                GeometryBuilder::build_as(&trp, mode, transform)
+            }
+            Renderable::Circle(c) => {
+                let tc: Circle = c.into();
+                GeometryBuilder::build_as(&tc, mode, transform)
+            }
         }
     }
 }
