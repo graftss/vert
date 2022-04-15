@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{input::input::RESOLVE_INPUT_LABEL, AppState};
+use crate::{controller::layout::ControllerLayoutsRes, AppState};
 
 use super::{
     analog_stick::AnalogStickAtomicDisplay,
@@ -27,9 +27,9 @@ macro_rules! add_display_systems {
     }};
 }
 
-pub fn display_startup_system(mut commands: Commands, display_data: Res<InputDisplay>) {
+pub fn display_startup_system(mut commands: Commands, display: Res<InputDisplay>) {
     // Spawn each `AtomicDisplay` in the `InputDisplay` resource.
-    for atom in display_data.atoms.iter() {
+    for atom in display.atoms.iter() {
         match atom {
             TaggedAtomicParams::Button(params) => ButtonAtomicDisplay::spawn(&mut commands, params),
             TaggedAtomicParams::AnalogStick(params) => {

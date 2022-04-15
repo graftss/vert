@@ -1,6 +1,10 @@
 use bevy::core::FixedTimestep;
 use bevy::prelude::*;
 
+use crate::controller::layout::ControllerKey;
+use crate::controller::layout::ControllerLayoutsRes;
+use crate::controller::listener::InputListener;
+
 use super::raw_input_reader::*;
 use super::RawInputReader;
 
@@ -121,54 +125,88 @@ pub fn poll_input_sources(
     button_input: Res<Input<GamepadButton>>,
     axis_input: Res<Axis<GamepadAxis>>,
     mut raw_input: NonSendMut<RawInputRes>,
-    sources: Vec<&InputSource>,
+    sources: Vec<&Option<InputSource>>,
 ) -> Vec<Option<InputValue>> {
     use self::InputSource::*;
 
-    let mut result = Vec::new();
-
-    for source in sources.iter() {
-        match source {
-            &&Key(key_code) => {
-                let pressed = keyboard_input.pressed(key_code);
-                result.push(Some(InputValue::Button(pressed)));
+    sources
+        .iter()
+        .map(|wrapped_source| match wrapped_source {
+            None => None,
+            Some(Key(key_code)) => {
+                let pressed = keyboard_input.pressed(*key_code);
+                Some(InputValue::Button(pressed))
             }
-            &&Button(button) => {
-                let pressed = button_input.pressed(button);
-                result.push(Some(InputValue::Button(pressed)));
+            Some(Button(button)) => {
+                let pressed = button_input.pressed(*button);
+                Some(InputValue::Button(pressed))
             }
-            &&Axis(axis, sign) => {
-                if let Some(value) = axis_input.get(axis) {
-                    let clamped_value = sign.clamp_f32(value);
-                    result.push(Some(InputValue::Axis(clamped_value)));
-                } else {
-                    result.push(None);
-                }
-            }
-            HidAxis(id, axis, sign) => result.push(raw_input.0.poll_hid_axis(&id, &axis, &sign)),
-            HidButton(id, button) => result.push(raw_input.0.poll_hid_button(&id, &button)),
-            HidHatSwitch(id, hatswitch) => {
-                result.push(raw_input.0.poll_hid_hatswitch(&id, &hatswitch))
-            }
-        }
-    }
-
-    result
+            Some(Axis(axis, sign)) => axis_input
+                .get(*axis)
+                .map(|value| InputValue::Axis(sign.clamp_f32(value))),
+            Some(HidAxis(id, axis, sign)) => raw_input.0.poll_hid_axis(&id, &axis, &sign),
+            Some(HidButton(id, button)) => raw_input.0.poll_hid_button(&id, &button),
+            Some(HidHatSwitch(id, hatswitch)) => raw_input.0.poll_hid_hatswitch(&id, &hatswitch),
+        })
+        .collect()
 }
 
 #[derive(Component)]
 pub struct InputSink {
-    pub sources: Vec<InputSource>,
+    // The abstract controller keys associated with this sink.
+    // Updating `keys` will automatically propagate to both `sources` and then `values`.
+    pub keys: Vec<ControllerKey>,
+
+    // The concrete input sources associated with this sink.
+    // Updating `sources` will automatically propagate to `values`.
+    pub sources: Vec<Option<InputSource>>,
+
+    // The concrete input values associated with the sources in `sources`.
+    // Automatically updated by the input sink resolution system.
     pub values: Vec<Option<InputValue>>,
+
+    // A flag indicating that `sources` is not synced with `keys`.
+    // The input sink resolution system will resync these vectors during the next
+    // execution of the input sink resolution system.
+    pub sources_dirty: bool,
 }
 
 impl InputSink {
-    pub fn new(sources: Vec<InputSource>) -> InputSink {
-        let size = sources.len();
+    pub fn new(keys: Vec<ControllerKey>) -> InputSink {
+        let size = keys.len();
         InputSink {
-            sources,
+            keys,
+            sources: vec![None; size],
             values: vec![None; size],
+            sources_dirty: true,
         }
+    }
+}
+
+// Mutate each `InputSink` with the `sources_dirty` flag set to `true`.
+// Update a dirty sink's `sources` vectors by mapping each entry of its `keys` vector
+// to the binding found in the global controller layout resource.
+pub fn resolve_dirty_sources_system(
+    layouts: Res<ControllerLayoutsRes>,
+    mut query: Query<&mut InputSink>,
+) {
+    for mut sink in query.iter_mut() {
+        if !sink.sources_dirty {
+            continue;
+        }
+
+        // Collect the `InputSource` bindings associated to each `ControllerKey`.
+        let mut bindings = vec![];
+        for &key in sink.keys.iter() {
+            bindings.push(layouts.get_binding(key));
+        }
+
+        // Write those bindings to the `InputSink`.
+        for (i, key) in bindings.iter().enumerate() {
+            sink.sources[i] = *key;
+        }
+
+        sink.sources_dirty = false;
     }
 }
 
@@ -197,7 +235,7 @@ pub fn resolve_input_sinks_system(
     // Write those values to their associated sources
     let mut sink_start = 0;
     for mut sink in query.iter_mut() {
-        let sink_len = sink.sources.len();
+        let sink_len = sink.keys.len();
         for i in 0..sink_len {
             sink.values[i] = input_values[sink_start + i];
         }
@@ -207,8 +245,12 @@ pub fn resolve_input_sinks_system(
 
 const POLL_INPUT_TIME_STEP: f32 = 1.0 / 60.0;
 
-pub const POLL_RAWINPUT_LABEL: &'static str = "poll_rawinput";
-pub const RESOLVE_INPUT_LABEL: &'static str = "resolve_input";
+#[derive(Debug, Clone, PartialEq, Eq, Hash, SystemLabel)]
+pub enum InputSystemLabel {
+    PollRawinput,
+    ResolveDirtySources,
+    ResolveInputValues,
+}
 
 pub fn add_input_systems(app: &mut App) {
     // Add the rawinput polling system when targeting Windows.
@@ -218,7 +260,8 @@ pub fn add_input_systems(app: &mut App) {
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(POLL_INPUT_TIME_STEP as f64))
                 .with_system(
-                    super::raw_input_reader::poll_rawinput_system.label(POLL_RAWINPUT_LABEL),
+                    super::raw_input_reader::poll_rawinput_system
+                        .label(InputSystemLabel::PollRawinput),
                 ),
         );
     }
@@ -230,10 +273,12 @@ pub fn add_input_systems(app: &mut App) {
     app.add_system_set(
         SystemSet::new()
             .with_run_criteria(FixedTimestep::step(POLL_INPUT_TIME_STEP as f64))
+            .with_system(resolve_dirty_sources_system.label(InputSystemLabel::ResolveDirtySources))
             .with_system(
                 resolve_input_sinks_system
-                    .label(RESOLVE_INPUT_LABEL)
-                    .after(POLL_RAWINPUT_LABEL),
+                    .label(InputSystemLabel::ResolveInputValues)
+                    .after(InputSystemLabel::PollRawinput)
+                    .after(InputSystemLabel::ResolveDirtySources),
             ),
     );
 }

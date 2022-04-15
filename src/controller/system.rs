@@ -9,13 +9,17 @@ use crate::{
 };
 
 use super::{
-    layout::{ControllerLayout, ControllerLayoutRes, Ps2Key, Ps2Layout, PS2_KEY_ORDER},
-    listener::{input_listener_system, InputListener},
+    layout::{
+        ControllerKey, ControllerLayout, ControllerLayoutsRes, Ps2Key, Ps2Layout, PS2_KEY_ORDER,
+    },
+    listener::{cleanup_input_listener_system, input_listener_system, InputListener},
 };
 
 pub fn startup(mut commands: Commands) {
-    commands.insert_resource(ControllerLayoutRes {
-        sources: HashMap::default(),
+    commands.insert_resource(ControllerLayoutsRes {
+        ps2: Ps2Layout {
+            sources: HashMap::default(),
+        },
     });
 
     commands.insert_resource(InputListener::default());
@@ -27,27 +31,31 @@ const CONTROLLER_WINDOW_TITLE: &'static str = "Controller";
 
 pub fn update(
     mut egui_ctx: ResMut<EguiContext>,
-    mut layout: ResMut<ControllerLayoutRes>,
-    mut listener_state: ResMut<InputListener>,
+    mut layout: ResMut<ControllerLayoutsRes>,
+    mut input_listener: ResMut<InputListener>,
 ) {
     egui::Window::new(CONTROLLER_WINDOW_TITLE).show(egui_ctx.ctx_mut(), |ui| {
         egui::Grid::new(69).show(ui, |ui| {
-            for key in PS2_KEY_ORDER {
+            for ps2_key in PS2_KEY_ORDER {
+                let key = ControllerKey::Ps2(ps2_key);
                 // Label with the controller key name
                 ui.label(key.to_string());
 
                 // Button with the current binding name/listening prompt
-                let listening = listener_state.listening && (key as u8 == listener_state.key_idx);
+                let listening = input_listener.is_listening()
+                    && input_listener.key == Some(ControllerKey::Ps2(ps2_key));
+
                 if listening {
                     if ui.button(LISTEN_FOR_BINDING.to_string()).clicked() {
-                        listener_state.end_listen();
+                        input_listener.end_listen();
                     }
                 } else {
                     let binding_str = &layout
                         .get_binding(key)
                         .map_or(NO_BINDING.to_string(), |key| key.to_string());
+
                     if ui.button(binding_str).clicked() {
-                        listener_state.start_listen(key as u8);
+                        input_listener.start_listen(key);
                     };
                 };
 
@@ -57,17 +65,24 @@ pub fn update(
     });
 }
 
-pub fn add_controller_teardown_system(app: &mut App, controller_state: AppState) {}
+fn print_thing(layouts: Res<ControllerLayoutsRes>) {
+    println!("layouts: {:?}", layouts);
+}
+
+pub fn add_controller_teardown_system(app: &mut App, controller_state: AppState) {
+    app.add_system_set(SystemSet::on_exit(controller_state).with_system(print_thing));
+}
 
 pub fn add_controller_systems(app: &mut App, controller_state: AppState) {
     // Startup
-    app.add_system_set(SystemSet::on_enter(controller_state).with_system(startup));
+    app.add_startup_system(startup);
 
     // Update
     app.add_system_set(
         SystemSet::on_update(controller_state)
             .with_system(update)
-            .with_system(input_listener_system),
+            .with_system(input_listener_system)
+            .with_system(cleanup_input_listener_system),
     );
 
     // Teardown

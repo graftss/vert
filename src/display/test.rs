@@ -1,4 +1,7 @@
-use crate::input::input::*;
+use crate::{
+    controller::layout::{ControllerKey, Ps2Key},
+    input::input::*,
+};
 use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
 
@@ -43,11 +46,11 @@ pub fn debug_analog_stick_data() -> Vec<TaggedAtomicParams> {
         bg_display: Renderable::Circle(bg_shape),
         bg_mode,
         transform,
-        pos_x: InputSource::HidAxis(0, HidAxisId::X, AxisSign::Plus),
-        neg_x: InputSource::HidAxis(0, HidAxisId::X, AxisSign::Minus),
-        pos_y: InputSource::HidAxis(0, HidAxisId::Y, AxisSign::Plus),
-        neg_y: InputSource::HidAxis(0, HidAxisId::Y, AxisSign::Minus),
-        trigger: Some(InputSource::HidButton(0, 10)),
+        pos_x: ControllerKey::Ps2(Ps2Key::LeftPosX),
+        neg_x: ControllerKey::Ps2(Ps2Key::LeftNegX),
+        pos_y: ControllerKey::Ps2(Ps2Key::LeftPosY),
+        neg_y: ControllerKey::Ps2(Ps2Key::LeftNegY),
+        trigger: Some(ControllerKey::Ps2(Ps2Key::L3)),
         stick_radius: 20.0,
     };
 
@@ -61,11 +64,11 @@ pub fn debug_analog_stick_data() -> Vec<TaggedAtomicParams> {
             transform.translation.y,
             transform.translation.z,
         ),
-        pos_x: InputSource::HidAxis(0, HidAxisId::RZ, AxisSign::Plus),
-        neg_x: InputSource::HidAxis(0, HidAxisId::RZ, AxisSign::Minus),
-        pos_y: InputSource::HidAxis(0, HidAxisId::Z, AxisSign::Plus),
-        neg_y: InputSource::HidAxis(0, HidAxisId::Z, AxisSign::Minus),
-        trigger: Some(InputSource::HidButton(0, 11)),
+        pos_x: ControllerKey::Ps2(Ps2Key::RightPosX),
+        neg_x: ControllerKey::Ps2(Ps2Key::RightNegX),
+        pos_y: ControllerKey::Ps2(Ps2Key::RightPosY),
+        neg_y: ControllerKey::Ps2(Ps2Key::RightNegY),
+        trigger: Some(ControllerKey::Ps2(Ps2Key::R3)),
         stick_radius: 20.0,
     };
 
@@ -96,13 +99,13 @@ pub fn debug_button_data() -> Vec<TaggedAtomicParams> {
 
     for x in (std::ops::Range { start: 10, end: 15 }) {
         let z = (x * 5) as f32;
-        let input_source = InputSource::Key(KeyCode::W);
+        let button_key = ControllerKey::Ps2(Ps2Key::Circle);
         result.push(TaggedAtomicParams::Button(ButtonParams {
             on_mode,
             off_mode,
             displayable: Renderable::RegularPolygon(shape),
             transform: Transform::from_xyz(z, z, 0.0),
-            input_source,
+            button_key,
         }));
     }
 

@@ -3,7 +3,8 @@ use bevy_prototype_lyon::prelude::*;
 
 use crate::{
     app_state::AppState,
-    input::input::{InputSink, InputSource, InputValue},
+    controller::layout::ControllerKey,
+    input::input::{InputSink, InputValue},
     util::despawn_all_with,
 };
 
@@ -16,18 +17,33 @@ pub struct ButtonParams {
     pub on_mode: DrawMode,
     pub off_mode: DrawMode,
     pub transform: Transform,
-    pub input_source: InputSource,
+    pub button_key: ControllerKey,
 }
 
+// The marker for the root entity of a button display.
 #[derive(Component)]
-pub struct ButtonDisplayMarker {
+pub struct RootButtonMarker;
+
+impl RootButtonMarker {
+    pub fn build_root(transform: Transform) -> impl Bundle {
+        (GlobalTransform::identity(), transform, RootButtonMarker)
+    }
+}
+
+// The marker for a child entity of a button display.
+// The root display has two children whose visibilities are toggled
+// according to the button input.
+#[derive(Component)]
+pub struct ChildButtonMarker {
+    // The button press state for which this child entity is visible.
     pub pressed: bool,
 }
+
 pub struct ButtonAtomicDisplay;
 
 impl ButtonAtomicDisplay {
     // Update all atomic button displays.
-    fn button_update_system(mut query: Query<(&InputSink, &ButtonDisplayMarker, &mut Visibility)>) {
+    fn button_update_system(mut query: Query<(&InputSink, &ChildButtonMarker, &mut Visibility)>) {
         for (sink, marker, mut vis) in query.iter_mut() {
             match sink.values[0] {
                 Some(InputValue::Button(true)) => {
@@ -51,28 +67,34 @@ impl AtomicInputDisplay<ButtonParams> for ButtonAtomicDisplay {
             on_mode,
             off_mode,
             transform,
-            input_source,
+            button_key,
         } = *display_data;
 
-        let mut on_bundle = displayable.build_as(on_mode, transform);
+        let mut on_bundle = displayable.build_as(on_mode, Transform::identity());
         on_bundle.visibility = Visibility { is_visible: false };
 
-        let off_bundle = displayable.build_as(off_mode, transform);
+        let off_bundle = displayable.build_as(off_mode, Transform::identity());
 
         commands
-            .spawn_bundle(on_bundle)
-            .insert(ButtonDisplayMarker { pressed: true })
-            .insert(InputSink::new(vec![input_source]));
+            .spawn_bundle(RootButtonMarker::build_root(transform))
+            .with_children(|parent| {
+                parent
+                    .spawn_bundle(on_bundle)
+                    .insert(ChildButtonMarker { pressed: true })
+                    .insert(InputSink::new(vec![button_key]));
 
-        commands
-            .spawn_bundle(off_bundle)
-            .insert(ButtonDisplayMarker { pressed: false })
-            .insert(InputSink::new(vec![input_source]));
+                parent
+                    .spawn_bundle(off_bundle)
+                    .insert(ChildButtonMarker { pressed: false })
+                    .insert(InputSink::new(vec![button_key]));
+            });
     }
 
     fn add_teardown_systems(app: &mut App, display_state: AppState) {
         app.add_system_set(
-            SystemSet::on_exit(display_state).with_system(despawn_all_with::<ButtonDisplayMarker>),
+            SystemSet::on_exit(display_state)
+                .with_system(despawn_all_with::<RootButtonMarker>)
+                .with_system(despawn_all_with::<ChildButtonMarker>),
         );
     }
 

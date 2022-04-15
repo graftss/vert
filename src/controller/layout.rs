@@ -2,7 +2,7 @@ use bevy::utils::HashMap;
 
 use crate::input::input::InputSource;
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum Ps2Key {
     PadU,
     PadL,
@@ -90,6 +90,7 @@ impl Ps2Key {
 
 const NUM_PS2_KEYS: usize = Ps2Key::RightNegY as usize + 1;
 
+#[derive(Debug)]
 pub struct Ps2Layout {
     pub sources: HashMap<Ps2Key, InputSource>,
 }
@@ -117,4 +118,34 @@ pub trait ControllerLayout<K> {
     fn get_max_key(&self) -> usize;
 }
 
-pub type ControllerLayoutRes = Ps2Layout;
+#[derive(Debug)]
+pub struct ControllerLayoutsRes {
+    pub ps2: Ps2Layout,
+}
+
+impl ControllerLayoutsRes {
+    pub fn get_binding(&self, key: ControllerKey) -> Option<InputSource> {
+        match key {
+            ControllerKey::Ps2(ps2_key) => self.ps2.get_binding(ps2_key),
+        }
+    }
+
+    pub fn set_binding(&mut self, key: ControllerKey, source: &InputSource) {
+        match key {
+            ControllerKey::Ps2(ps2_key) => self.ps2.set_binding(ps2_key, source),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ControllerKey {
+    Ps2(Ps2Key),
+}
+
+impl ControllerKey {
+    pub fn to_string(&self) -> String {
+        match self {
+            ControllerKey::Ps2(ps2_key) => ps2_key.to_string(),
+        }
+    }
+}

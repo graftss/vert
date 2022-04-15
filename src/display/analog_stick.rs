@@ -3,6 +3,7 @@ use bevy_prototype_lyon::prelude::*;
 
 use crate::{
     app_state::AppState,
+    controller::layout::ControllerKey,
     input::input::{InputSink, InputSource, InputValue},
     util::despawn_all_with,
 };
@@ -18,11 +19,11 @@ pub struct AnalogStickParams {
     pub bg_display: Renderable,
     pub bg_mode: DrawMode,
     pub transform: Transform,
-    pub pos_x: InputSource,
-    pub neg_x: InputSource,
-    pub pos_y: InputSource,
-    pub neg_y: InputSource,
-    pub trigger: Option<InputSource>,
+    pub pos_x: ControllerKey,
+    pub neg_x: ControllerKey,
+    pub pos_y: ControllerKey,
+    pub neg_y: ControllerKey,
+    pub trigger: Option<ControllerKey>,
 }
 
 // An entity with this marker will have an `InputSink` with a source vector of:
@@ -30,7 +31,7 @@ pub struct AnalogStickParams {
 //   - 5 entries, if `use_trigger` is `true`.
 // These entries will be in the same order as they appear in `AnalogStickDisplayData`.
 #[derive(Component)]
-pub struct AnalogStickDisplayMarker {
+pub struct RootAnalogStickMarker {
     pub stick_radius: f32,
     pub use_trigger: bool,
 }
@@ -82,7 +83,7 @@ impl AnalogStickAtomicDisplay {
     }
 
     fn analog_stick_display_system(
-        q_parent: Query<(&InputSink, &Children, &AnalogStickDisplayMarker)>,
+        q_parent: Query<(&InputSink, &Children, &RootAnalogStickMarker)>,
         mut q_child_stick: Query<(&mut Transform, &mut DrawMode), With<ChildStickMarker>>,
     ) {
         for (sink, children, asdm) in q_parent.iter() {
@@ -148,7 +149,7 @@ impl AtomicInputDisplay<AnalogStickParams> for AnalogStickAtomicDisplay {
             .spawn()
             .insert(transform)
             .insert(GlobalTransform::identity())
-            .insert(AnalogStickDisplayMarker {
+            .insert(RootAnalogStickMarker {
                 stick_radius,
                 use_trigger,
             })
@@ -169,7 +170,7 @@ impl AtomicInputDisplay<AnalogStickParams> for AnalogStickAtomicDisplay {
     fn add_teardown_systems(app: &mut App, display_state: AppState) {
         app.add_system_set(
             SystemSet::on_exit(display_state)
-                .with_system(despawn_all_with::<AnalogStickDisplayMarker>)
+                .with_system(despawn_all_with::<RootAnalogStickMarker>)
                 .with_system(despawn_all_with::<ChildStickMarker>)
                 .with_system(despawn_all_with::<ChildBgMarker>),
         );
