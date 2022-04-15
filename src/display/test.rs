@@ -3,13 +3,13 @@ use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
 
 use super::{
-    analog_stick::AnalogStickDisplayData,
-    button::ButtonDisplayData,
-    display::{AtomicDisplay, Display, Renderable},
+    analog_stick::AnalogStickParams,
+    button::ButtonParams,
+    display::{InputDisplay, Renderable, TaggedAtomicParams},
 };
 
 // Add some analog stick components for testing
-pub fn debug_analog_stick_data() -> Vec<AtomicDisplay> {
+pub fn debug_analog_stick_data() -> Vec<TaggedAtomicParams> {
     let transform = Transform::from_xyz(-40.0, 0.0, 500.0);
 
     let stick_shape = shapes::Circle {
@@ -37,7 +37,7 @@ pub fn debug_analog_stick_data() -> Vec<AtomicDisplay> {
         outline_mode: StrokeMode::new(Color::BLACK, 3.0),
     };
 
-    let left_stick = AnalogStickDisplayData {
+    let left_stick = AnalogStickParams {
         stick_display: Renderable::Circle(stick_shape),
         stick_mode,
         bg_display: Renderable::Circle(bg_shape),
@@ -51,7 +51,7 @@ pub fn debug_analog_stick_data() -> Vec<AtomicDisplay> {
         stick_radius: 20.0,
     };
 
-    let right_stick = AnalogStickDisplayData {
+    let right_stick = AnalogStickParams {
         stick_display: Renderable::Circle(stick_shape),
         stick_mode,
         bg_display: Renderable::Circle(bg_shape),
@@ -70,12 +70,12 @@ pub fn debug_analog_stick_data() -> Vec<AtomicDisplay> {
     };
 
     vec![
-        AtomicDisplay::AnalogStick(left_stick),
-        AtomicDisplay::AnalogStick(right_stick),
+        TaggedAtomicParams::AnalogStick(left_stick),
+        TaggedAtomicParams::AnalogStick(right_stick),
     ]
 }
 
-pub fn debug_button_data() -> Vec<AtomicDisplay> {
+pub fn debug_button_data() -> Vec<TaggedAtomicParams> {
     let shape = shapes::RegularPolygon {
         sides: 6,
         feature: shapes::RegularPolygonFeature::Radius(200.0),
@@ -97,7 +97,7 @@ pub fn debug_button_data() -> Vec<AtomicDisplay> {
     for x in (std::ops::Range { start: 10, end: 15 }) {
         let z = (x * 5) as f32;
         let input_source = InputSource::Key(KeyCode::W);
-        result.push(AtomicDisplay::Button(ButtonDisplayData {
+        result.push(TaggedAtomicParams::Button(ButtonParams {
             on_mode,
             off_mode,
             displayable: Renderable::RegularPolygon(shape),
@@ -113,5 +113,5 @@ pub fn inject_debug_display(mut commands: Commands) {
     let mut atoms = debug_analog_stick_data();
     atoms.append(&mut debug_button_data());
 
-    commands.insert_resource(Display { atoms });
+    commands.insert_resource(InputDisplay { atoms });
 }

@@ -204,9 +204,7 @@ pub mod macos {
     pub struct NoopRawInput;
 
     impl RawInputReader for NoopRawInput {
-        fn update(&mut self) -> usize {
-            0
-        }
+        fn update(&mut self) {}
         fn listen(&mut self) -> Option<InputSource> {
             None
         }

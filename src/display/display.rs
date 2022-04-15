@@ -3,7 +3,7 @@ use bevy_prototype_lyon::{entity::ShapeBundle, prelude::*, shapes::Circle};
 
 use crate::app_state::AppState;
 
-use super::{analog_stick::AnalogStickDisplayData, button::ButtonDisplayData};
+use super::{analog_stick::AnalogStickParams, button::ButtonParams};
 
 #[derive(Clone, Copy)]
 pub enum Renderable {
@@ -20,11 +20,27 @@ impl Renderable {
     }
 }
 
-pub enum AtomicDisplay {
-    Button(ButtonDisplayData),
-    AnalogStick(AnalogStickDisplayData),
+pub enum TaggedAtomicParams {
+    Button(ButtonParams),
+    AnalogStick(AnalogStickParams),
 }
 
-pub struct Display {
-    pub atoms: Vec<AtomicDisplay>,
+pub trait AtomicInputDisplay<P>
+where
+    P: Clone + Copy,
+{
+    // Spawn an instance of the atomic input display from its parameters.
+    fn spawn(commands: &mut Commands, params: &P);
+
+    // Add systems to `app` which update all atomic displays of this type
+    // while the app has state `display_state`.
+    fn add_update_systems(app: &mut App, display_state: AppState);
+
+    // Add systems to `app` which teardown all atomic displays of this type
+    // when the app leaves the state `display_state`.
+    fn add_teardown_systems(app: &mut App, display_state: AppState);
+}
+
+pub struct InputDisplay {
+    pub atoms: Vec<TaggedAtomicParams>,
 }
