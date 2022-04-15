@@ -8,7 +8,7 @@ use bevy_prototype_lyon::prelude::*;
 use super::{
     analog_stick::AnalogStickParams,
     button::ButtonParams,
-    display::{InputDisplay, Renderable, TaggedAtomicParams},
+    display::{InputDisplayRes, Renderable, TaggedAtomicParams},
     serialization::{CircleDef, RegularPolygonDef, RegularPolygonFeatureDef},
 };
 
@@ -43,10 +43,10 @@ pub fn debug_analog_stick_data() -> Vec<TaggedAtomicParams> {
 
     let left_stick = AnalogStickParams {
         stick_display: Renderable::Circle(stick_shape),
-        stick_mode,
+        stick_mode: stick_mode.into(),
         bg_display: Renderable::Circle(bg_shape),
-        bg_mode,
-        transform,
+        bg_mode: bg_mode.into(),
+        transform: transform.into(),
         pos_x: ControllerKey::Ps2(Ps2Key::LeftPosX),
         neg_x: ControllerKey::Ps2(Ps2Key::LeftNegX),
         pos_y: ControllerKey::Ps2(Ps2Key::LeftPosY),
@@ -57,14 +57,15 @@ pub fn debug_analog_stick_data() -> Vec<TaggedAtomicParams> {
 
     let right_stick = AnalogStickParams {
         stick_display: Renderable::Circle(stick_shape),
-        stick_mode,
+        stick_mode: stick_mode.into(),
         bg_display: Renderable::Circle(bg_shape),
-        bg_mode,
+        bg_mode: bg_mode.into(),
         transform: Transform::from_xyz(
             transform.translation.x + 80.0,
             transform.translation.y,
             transform.translation.z,
-        ),
+        )
+        .into(),
         pos_x: ControllerKey::Ps2(Ps2Key::RightPosX),
         neg_x: ControllerKey::Ps2(Ps2Key::RightNegX),
         pos_y: ControllerKey::Ps2(Ps2Key::RightPosY),
@@ -102,10 +103,10 @@ pub fn debug_button_data() -> Vec<TaggedAtomicParams> {
         let z = (x * 5) as f32;
         let button_key = ControllerKey::Ps2(Ps2Key::Circle);
         result.push(TaggedAtomicParams::Button(ButtonParams {
-            on_mode,
-            off_mode,
+            on_mode: on_mode.into(),
+            off_mode: off_mode.into(),
             displayable: Renderable::RegularPolygon(shape),
-            transform: Transform::from_xyz(z, z, 0.0),
+            transform: Transform::from_xyz(z, z, 0.0).into(),
             button_key,
         }));
     }
@@ -117,5 +118,5 @@ pub fn inject_debug_display(mut commands: Commands) {
     let mut atoms = debug_analog_stick_data();
     atoms.append(&mut debug_button_data());
 
-    commands.insert_resource(InputDisplay { atoms });
+    commands.insert_resource(InputDisplayRes { atoms });
 }

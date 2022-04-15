@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
+use serde::{Deserialize, Serialize};
 
 use crate::{
     app_state::AppState,
@@ -8,15 +9,18 @@ use crate::{
     util::despawn_all_with,
 };
 
-use super::display::{AtomicInputDisplay, Renderable};
+use super::{
+    display::{AtomicInputDisplay, Renderable},
+    serialization::{DrawModeDef, TransformDef},
+};
 
 // The data parameterizing a button input display.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Serialize, Deserialize)]
 pub struct ButtonParams {
     pub displayable: Renderable,
-    pub on_mode: DrawMode,
-    pub off_mode: DrawMode,
-    pub transform: Transform,
+    pub on_mode: DrawModeDef,
+    pub off_mode: DrawModeDef,
+    pub transform: TransformDef,
     pub button_key: ControllerKey,
 }
 
@@ -70,13 +74,13 @@ impl AtomicInputDisplay<ButtonParams> for ButtonAtomicDisplay {
             button_key,
         } = *display_data;
 
-        let mut on_bundle = displayable.build_as(on_mode, Transform::identity());
+        let mut on_bundle = displayable.build_as(on_mode.into(), Transform::identity());
         on_bundle.visibility = Visibility { is_visible: false };
 
-        let off_bundle = displayable.build_as(off_mode, Transform::identity());
+        let off_bundle = displayable.build_as(off_mode.into(), Transform::identity());
 
         commands
-            .spawn_bundle(RootButtonMarker::build_root(transform))
+            .spawn_bundle(RootButtonMarker::build_root(transform.into()))
             .with_children(|parent| {
                 parent
                     .spawn_bundle(on_bundle)

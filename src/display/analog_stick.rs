@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
+use serde::{Deserialize, Serialize};
 
 use crate::{
     app_state::AppState,
@@ -8,17 +9,20 @@ use crate::{
     util::despawn_all_with,
 };
 
-use super::display::{AtomicInputDisplay, Renderable};
+use super::{
+    display::{AtomicInputDisplay, Renderable},
+    serialization::{DrawModeDef, TransformDef},
+};
 
 // The data parameterizing an analog stick input display.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Serialize, Deserialize)]
 pub struct AnalogStickParams {
     pub stick_display: Renderable,
-    pub stick_mode: DrawMode,
+    pub stick_mode: DrawModeDef,
     pub stick_radius: f32,
     pub bg_display: Renderable,
-    pub bg_mode: DrawMode,
-    pub transform: Transform,
+    pub bg_mode: DrawModeDef,
+    pub transform: TransformDef,
     pub pos_x: ControllerKey,
     pub neg_x: ControllerKey,
     pub pos_y: ControllerKey,
@@ -134,8 +138,9 @@ impl AtomicInputDisplay<AnalogStickParams> for AnalogStickAtomicDisplay {
             trigger,
         } = *display_data;
 
-        let stick_bundle = stick_display.build_as(stick_mode, Transform::from_xyz(30.0, 0.0, 0.0));
-        let bg_bundle = bg_display.build_as(bg_mode, Transform::identity());
+        let stick_bundle =
+            stick_display.build_as(stick_mode.into(), Transform::from_xyz(30.0, 0.0, 0.0));
+        let bg_bundle = bg_display.build_as(bg_mode.into(), Transform::identity());
 
         let mut sources = vec![pos_x, neg_x, pos_y, neg_y];
         let mut use_trigger = false;
@@ -145,9 +150,11 @@ impl AtomicInputDisplay<AnalogStickParams> for AnalogStickAtomicDisplay {
         }
         let input_sink = InputSink::new(sources);
 
+        let t: Transform = transform.into();
+
         commands
             .spawn()
-            .insert(transform)
+            .insert(t)
             .insert(GlobalTransform::identity())
             .insert(RootAnalogStickMarker {
                 stick_radius,

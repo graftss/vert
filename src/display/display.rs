@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_prototype_lyon::{entity::ShapeBundle, prelude::*, shapes::Circle};
-use serde::{ser::SerializeStructVariant, Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
 use crate::app_state::AppState;
 
@@ -31,6 +31,7 @@ impl Renderable {
     }
 }
 
+#[derive(Clone, Copy, Serialize, Deserialize)]
 pub enum TaggedAtomicParams {
     Button(ButtonParams),
     AnalogStick(AnalogStickParams),
@@ -52,6 +53,13 @@ where
     fn add_teardown_systems(app: &mut App, display_state: AppState);
 }
 
-pub struct InputDisplay {
+#[derive(Serialize, Deserialize)]
+pub struct InputDisplayRes {
     pub atoms: Vec<TaggedAtomicParams>,
+}
+
+impl Default for InputDisplayRes {
+    fn default() -> Self {
+        InputDisplayRes { atoms: vec![] }
+    }
 }

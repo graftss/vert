@@ -138,7 +138,7 @@ impl ControllerLayoutsRes {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ControllerKey {
     Ps2(Ps2Key),
 }

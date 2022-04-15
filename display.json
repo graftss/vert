@@ -1,0 +1,833 @@
+{
+  "atoms": [
+    {
+      "AnalogStick": {
+        "stick_display": {
+          "Circle": {
+            "radius": 9.0,
+            "center": [
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "stick_mode": {
+          "Outlined": {
+            "fill_mode": {
+              "options": {
+                "tolerance": 0.1,
+                "fill_rule": "EvenOdd",
+                "sweep_orientation": "Vertical",
+                "handle_intersections": true
+              },
+              "color": {
+                "Rgba": {
+                  "red": 0.0,
+                  "green": 0.0,
+                  "blue": 0.0,
+                  "alpha": 1.0
+                }
+              }
+            },
+            "outline_mode": {
+              "options": {
+                "start_cap": "Butt",
+                "end_cap": "Butt",
+                "line_join": "Miter",
+                "line_width": 1.0,
+                "miter_limit": 4.0,
+                "tolerance": 0.1
+              },
+              "color": {
+                "Rgba": {
+                  "red": 0.0,
+                  "green": 0.0,
+                  "blue": 0.0,
+                  "alpha": 1.0
+                }
+              }
+            }
+          }
+        },
+        "stick_radius": 20.0,
+        "bg_display": {
+          "Circle": {
+            "radius": 30.0,
+            "center": [
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "bg_mode": {
+          "Outlined": {
+            "fill_mode": {
+              "options": {
+                "tolerance": 0.1,
+                "fill_rule": "EvenOdd",
+                "sweep_orientation": "Vertical",
+                "handle_intersections": true
+              },
+              "color": {
+                "Rgba": {
+                  "red": 0.0,
+                  "green": 0.0,
+                  "blue": 0.0,
+                  "alpha": 0.0
+                }
+              }
+            },
+            "outline_mode": {
+              "options": {
+                "start_cap": "Butt",
+                "end_cap": "Butt",
+                "line_join": "Miter",
+                "line_width": 3.0,
+                "miter_limit": 4.0,
+                "tolerance": 0.1
+              },
+              "color": {
+                "Rgba": {
+                  "red": 0.0,
+                  "green": 0.0,
+                  "blue": 0.0,
+                  "alpha": 1.0
+                }
+              }
+            }
+          }
+        },
+        "transform": {
+          "translation": [
+            -40.0,
+            0.0,
+            500.0
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "pos_x": {
+          "Ps2": "LeftPosX"
+        },
+        "neg_x": {
+          "Ps2": "LeftNegX"
+        },
+        "pos_y": {
+          "Ps2": "LeftPosY"
+        },
+        "neg_y": {
+          "Ps2": "LeftNegY"
+        },
+        "trigger": {
+          "Ps2": "L3"
+        }
+      }
+    },
+    {
+      "AnalogStick": {
+        "stick_display": {
+          "Circle": {
+            "radius": 9.0,
+            "center": [
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "stick_mode": {
+          "Outlined": {
+            "fill_mode": {
+              "options": {
+                "tolerance": 0.1,
+                "fill_rule": "EvenOdd",
+                "sweep_orientation": "Vertical",
+                "handle_intersections": true
+              },
+              "color": {
+                "Rgba": {
+                  "red": 0.0,
+                  "green": 0.0,
+                  "blue": 0.0,
+                  "alpha": 1.0
+                }
+              }
+            },
+            "outline_mode": {
+              "options": {
+                "start_cap": "Butt",
+                "end_cap": "Butt",
+                "line_join": "Miter",
+                "line_width": 1.0,
+                "miter_limit": 4.0,
+                "tolerance": 0.1
+              },
+              "color": {
+                "Rgba": {
+                  "red": 0.0,
+                  "green": 0.0,
+                  "blue": 0.0,
+                  "alpha": 1.0
+                }
+              }
+            }
+          }
+        },
+        "stick_radius": 20.0,
+        "bg_display": {
+          "Circle": {
+            "radius": 30.0,
+            "center": [
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "bg_mode": {
+          "Outlined": {
+            "fill_mode": {
+              "options": {
+                "tolerance": 0.1,
+                "fill_rule": "EvenOdd",
+                "sweep_orientation": "Vertical",
+                "handle_intersections": true
+              },
+              "color": {
+                "Rgba": {
+                  "red": 0.0,
+                  "green": 0.0,
+                  "blue": 0.0,
+                  "alpha": 0.0
+                }
+              }
+            },
+            "outline_mode": {
+              "options": {
+                "start_cap": "Butt",
+                "end_cap": "Butt",
+                "line_join": "Miter",
+                "line_width": 3.0,
+                "miter_limit": 4.0,
+                "tolerance": 0.1
+              },
+              "color": {
+                "Rgba": {
+                  "red": 0.0,
+                  "green": 0.0,
+                  "blue": 0.0,
+                  "alpha": 1.0
+                }
+              }
+            }
+          }
+        },
+        "transform": {
+          "translation": [
+            40.0,
+            0.0,
+            500.0
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "pos_x": {
+          "Ps2": "RightPosX"
+        },
+        "neg_x": {
+          "Ps2": "RightNegX"
+        },
+        "pos_y": {
+          "Ps2": "RightPosY"
+        },
+        "neg_y": {
+          "Ps2": "RightNegY"
+        },
+        "trigger": {
+          "Ps2": "R3"
+        }
+      }
+    },
+    {
+      "Button": {
+        "displayable": {
+          "RegularPolygon": {
+            "sides": 6,
+            "center": [
+              0.0,
+              0.0
+            ],
+            "feature": {
+              "Radius": 200.0
+            }
+          }
+        },
+        "on_mode": {
+          "Outlined": {
+            "fill_mode": {
+              "options": {
+                "tolerance": 0.1,
+                "fill_rule": "EvenOdd",
+                "sweep_orientation": "Vertical",
+                "handle_intersections": true
+              },
+              "color": {
+                "Rgba": {
+                  "red": 0.0,
+                  "green": 1.0,
+                  "blue": 1.0,
+                  "alpha": 1.0
+                }
+              }
+            },
+            "outline_mode": {
+              "options": {
+                "start_cap": "Butt",
+                "end_cap": "Butt",
+                "line_join": "Miter",
+                "line_width": 10.0,
+                "miter_limit": 4.0,
+                "tolerance": 0.1
+              },
+              "color": {
+                "Rgba": {
+                  "red": 0.0,
+                  "green": 0.0,
+                  "blue": 0.0,
+                  "alpha": 1.0
+                }
+              }
+            }
+          }
+        },
+        "off_mode": {
+          "Outlined": {
+            "fill_mode": {
+              "options": {
+                "tolerance": 0.1,
+                "fill_rule": "EvenOdd",
+                "sweep_orientation": "Vertical",
+                "handle_intersections": true
+              },
+              "color": {
+                "Rgba": {
+                  "red": 1.0,
+                  "green": 0.0,
+                  "blue": 0.0,
+                  "alpha": 1.0
+                }
+              }
+            },
+            "outline_mode": {
+              "options": {
+                "start_cap": "Butt",
+                "end_cap": "Butt",
+                "line_join": "Miter",
+                "line_width": 6.0,
+                "miter_limit": 4.0,
+                "tolerance": 0.1
+              },
+              "color": {
+                "Rgba": {
+                  "red": 0.0,
+                  "green": 1.0,
+                  "blue": 0.0,
+                  "alpha": 1.0
+                }
+              }
+            }
+          }
+        },
+        "transform": {
+          "translation": [
+            50.0,
+            50.0,
+            0.0
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "button_key": {
+          "Ps2": "Circle"
+        }
+      }
+    },
+    {
+      "Button": {
+        "displayable": {
+          "RegularPolygon": {
+            "sides": 6,
+            "center": [
+              0.0,
+              0.0
+            ],
+            "feature": {
+              "Radius": 200.0
+            }
+          }
+        },
+        "on_mode": {
+          "Outlined": {
+            "fill_mode": {
+              "options": {
+                "tolerance": 0.1,
+                "fill_rule": "EvenOdd",
+                "sweep_orientation": "Vertical",
+                "handle_intersections": true
+              },
+              "color": {
+                "Rgba": {
+                  "red": 0.0,
+                  "green": 1.0,
+                  "blue": 1.0,
+                  "alpha": 1.0
+                }
+              }
+            },
+            "outline_mode": {
+              "options": {
+                "start_cap": "Butt",
+                "end_cap": "Butt",
+                "line_join": "Miter",
+                "line_width": 10.0,
+                "miter_limit": 4.0,
+                "tolerance": 0.1
+              },
+              "color": {
+                "Rgba": {
+                  "red": 0.0,
+                  "green": 0.0,
+                  "blue": 0.0,
+                  "alpha": 1.0
+                }
+              }
+            }
+          }
+        },
+        "off_mode": {
+          "Outlined": {
+            "fill_mode": {
+              "options": {
+                "tolerance": 0.1,
+                "fill_rule": "EvenOdd",
+                "sweep_orientation": "Vertical",
+                "handle_intersections": true
+              },
+              "color": {
+                "Rgba": {
+                  "red": 1.0,
+                  "green": 0.0,
+                  "blue": 0.0,
+                  "alpha": 1.0
+                }
+              }
+            },
+            "outline_mode": {
+              "options": {
+                "start_cap": "Butt",
+                "end_cap": "Butt",
+                "line_join": "Miter",
+                "line_width": 6.0,
+                "miter_limit": 4.0,
+                "tolerance": 0.1
+              },
+              "color": {
+                "Rgba": {
+                  "red": 0.0,
+                  "green": 1.0,
+                  "blue": 0.0,
+                  "alpha": 1.0
+                }
+              }
+            }
+          }
+        },
+        "transform": {
+          "translation": [
+            55.0,
+            55.0,
+            0.0
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "button_key": {
+          "Ps2": "Circle"
+        }
+      }
+    },
+    {
+      "Button": {
+        "displayable": {
+          "RegularPolygon": {
+            "sides": 6,
+            "center": [
+              0.0,
+              0.0
+            ],
+            "feature": {
+              "Radius": 200.0
+            }
+          }
+        },
+        "on_mode": {
+          "Outlined": {
+            "fill_mode": {
+              "options": {
+                "tolerance": 0.1,
+                "fill_rule": "EvenOdd",
+                "sweep_orientation": "Vertical",
+                "handle_intersections": true
+              },
+              "color": {
+                "Rgba": {
+                  "red": 0.0,
+                  "green": 1.0,
+                  "blue": 1.0,
+                  "alpha": 1.0
+                }
+              }
+            },
+            "outline_mode": {
+              "options": {
+                "start_cap": "Butt",
+                "end_cap": "Butt",
+                "line_join": "Miter",
+                "line_width": 10.0,
+                "miter_limit": 4.0,
+                "tolerance": 0.1
+              },
+              "color": {
+                "Rgba": {
+                  "red": 0.0,
+                  "green": 0.0,
+                  "blue": 0.0,
+                  "alpha": 1.0
+                }
+              }
+            }
+          }
+        },
+        "off_mode": {
+          "Outlined": {
+            "fill_mode": {
+              "options": {
+                "tolerance": 0.1,
+                "fill_rule": "EvenOdd",
+                "sweep_orientation": "Vertical",
+                "handle_intersections": true
+              },
+              "color": {
+                "Rgba": {
+                  "red": 1.0,
+                  "green": 0.0,
+                  "blue": 0.0,
+                  "alpha": 1.0
+                }
+              }
+            },
+            "outline_mode": {
+              "options": {
+                "start_cap": "Butt",
+                "end_cap": "Butt",
+                "line_join": "Miter",
+                "line_width": 6.0,
+                "miter_limit": 4.0,
+                "tolerance": 0.1
+              },
+              "color": {
+                "Rgba": {
+                  "red": 0.0,
+                  "green": 1.0,
+                  "blue": 0.0,
+                  "alpha": 1.0
+                }
+              }
+            }
+          }
+        },
+        "transform": {
+          "translation": [
+            60.0,
+            60.0,
+            0.0
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "button_key": {
+          "Ps2": "Circle"
+        }
+      }
+    },
+    {
+      "Button": {
+        "displayable": {
+          "RegularPolygon": {
+            "sides": 6,
+            "center": [
+              0.0,
+              0.0
+            ],
+            "feature": {
+              "Radius": 200.0
+            }
+          }
+        },
+        "on_mode": {
+          "Outlined": {
+            "fill_mode": {
+              "options": {
+                "tolerance": 0.1,
+                "fill_rule": "EvenOdd",
+                "sweep_orientation": "Vertical",
+                "handle_intersections": true
+              },
+              "color": {
+                "Rgba": {
+                  "red": 0.0,
+                  "green": 1.0,
+                  "blue": 1.0,
+                  "alpha": 1.0
+                }
+              }
+            },
+            "outline_mode": {
+              "options": {
+                "start_cap": "Butt",
+                "end_cap": "Butt",
+                "line_join": "Miter",
+                "line_width": 10.0,
+                "miter_limit": 4.0,
+                "tolerance": 0.1
+              },
+              "color": {
+                "Rgba": {
+                  "red": 0.0,
+                  "green": 0.0,
+                  "blue": 0.0,
+                  "alpha": 1.0
+                }
+              }
+            }
+          }
+        },
+        "off_mode": {
+          "Outlined": {
+            "fill_mode": {
+              "options": {
+                "tolerance": 0.1,
+                "fill_rule": "EvenOdd",
+                "sweep_orientation": "Vertical",
+                "handle_intersections": true
+              },
+              "color": {
+                "Rgba": {
+                  "red": 1.0,
+                  "green": 0.0,
+                  "blue": 0.0,
+                  "alpha": 1.0
+                }
+              }
+            },
+            "outline_mode": {
+              "options": {
+                "start_cap": "Butt",
+                "end_cap": "Butt",
+                "line_join": "Miter",
+                "line_width": 6.0,
+                "miter_limit": 4.0,
+                "tolerance": 0.1
+              },
+              "color": {
+                "Rgba": {
+                  "red": 0.0,
+                  "green": 1.0,
+                  "blue": 0.0,
+                  "alpha": 1.0
+                }
+              }
+            }
+          }
+        },
+        "transform": {
+          "translation": [
+            65.0,
+            65.0,
+            0.0
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "button_key": {
+          "Ps2": "Circle"
+        }
+      }
+    },
+    {
+      "Button": {
+        "displayable": {
+          "RegularPolygon": {
+            "sides": 6,
+            "center": [
+              0.0,
+              0.0
+            ],
+            "feature": {
+              "Radius": 200.0
+            }
+          }
+        },
+        "on_mode": {
+          "Outlined": {
+            "fill_mode": {
+              "options": {
+                "tolerance": 0.1,
+                "fill_rule": "EvenOdd",
+                "sweep_orientation": "Vertical",
+                "handle_intersections": true
+              },
+              "color": {
+                "Rgba": {
+                  "red": 0.0,
+                  "green": 1.0,
+                  "blue": 1.0,
+                  "alpha": 1.0
+                }
+              }
+            },
+            "outline_mode": {
+              "options": {
+                "start_cap": "Butt",
+                "end_cap": "Butt",
+                "line_join": "Miter",
+                "line_width": 10.0,
+                "miter_limit": 4.0,
+                "tolerance": 0.1
+              },
+              "color": {
+                "Rgba": {
+                  "red": 0.0,
+                  "green": 0.0,
+                  "blue": 0.0,
+                  "alpha": 1.0
+                }
+              }
+            }
+          }
+        },
+        "off_mode": {
+          "Outlined": {
+            "fill_mode": {
+              "options": {
+                "tolerance": 0.1,
+                "fill_rule": "EvenOdd",
+                "sweep_orientation": "Vertical",
+                "handle_intersections": true
+              },
+              "color": {
+                "Rgba": {
+                  "red": 1.0,
+                  "green": 0.0,
+                  "blue": 0.0,
+                  "alpha": 1.0
+                }
+              }
+            },
+            "outline_mode": {
+              "options": {
+                "start_cap": "Butt",
+                "end_cap": "Butt",
+                "line_join": "Miter",
+                "line_width": 6.0,
+                "miter_limit": 4.0,
+                "tolerance": 0.1
+              },
+              "color": {
+                "Rgba": {
+                  "red": 0.0,
+                  "green": 1.0,
+                  "blue": 0.0,
+                  "alpha": 1.0
+                }
+              }
+            }
+          }
+        },
+        "transform": {
+          "translation": [
+            70.0,
+            70.0,
+            0.0
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "button_key": {
+          "Ps2": "Circle"
+        }
+      }
+    }
+  ]
+}

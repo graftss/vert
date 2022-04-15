@@ -1384,6 +1384,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b52c2ef4a78da0ba68fbe1fd920627411096d2ac478f7f4c9f3a54ba6705bade"
 dependencies = [
  "num-traits",
+ "serde",
 ]
 
 [[package]]
@@ -1971,6 +1972,7 @@ dependencies = [
  "arrayvec 0.5.2",
  "euclid",
  "num-traits",
+ "serde",
 ]
 
 [[package]]
@@ -1980,6 +1982,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5b0a59fdf767ca0d887aa61d1b48d4bbf6a124c1a45503593f7d38ab945bfbc0"
 dependencies = [
  "lyon_geom",
+ "serde",
 ]
 
 [[package]]
@@ -1990,6 +1993,7 @@ checksum = "7230e08dd0638048e46f387f255dbe7a7344a3e6705beab53242b5af25635760"
 dependencies = [
  "float_next_after",
  "lyon_path",
+ "serde",
 ]
 
 [[package]]
@@ -3220,6 +3224,7 @@ dependencies = [
  "bevy-inspector-egui",
  "bevy_egui",
  "bevy_prototype_lyon",
+ "lyon_tessellation",
  "multiinput",
  "serde",
  "serde_json",

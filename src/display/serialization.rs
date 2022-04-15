@@ -105,3 +105,130 @@ impl Default for CircleDef {
         }
     }
 }
+
+// Serialization type for `DrawMode`
+#[derive(Serialize, Deserialize, Clone, Copy)]
+pub struct FillModeDef {
+    pub options: FillOptions,
+    pub color: Color,
+}
+
+impl Into<FillMode> for FillModeDef {
+    fn into(self) -> FillMode {
+        let FillModeDef { options, color } = self;
+        FillMode { options, color }
+    }
+}
+
+impl From<FillMode> for FillModeDef {
+    fn from(other: FillMode) -> Self {
+        let FillMode { options, color } = other;
+        FillModeDef { options, color }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, Copy)]
+pub struct StrokeModeDef {
+    pub options: StrokeOptions,
+    pub color: Color,
+}
+
+impl Into<StrokeMode> for StrokeModeDef {
+    fn into(self) -> StrokeMode {
+        let StrokeModeDef { options, color } = self;
+        StrokeMode { options, color }
+    }
+}
+
+impl From<StrokeMode> for StrokeModeDef {
+    fn from(other: StrokeMode) -> Self {
+        let StrokeMode { options, color } = other;
+        StrokeModeDef { options, color }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, Copy)]
+pub enum DrawModeDef {
+    /// The shape will be filled using the provided [`FillMode`].
+    Fill(FillModeDef),
+    /// The shape will be stroked using the provided [`StrokeMode`].
+    Stroke(StrokeModeDef),
+    /// The shape will be filled with an outline.
+    Outlined {
+        /// Properties about the filling.
+        fill_mode: FillModeDef,
+        /// Properties about the outline.
+        outline_mode: StrokeModeDef,
+    },
+}
+
+impl Into<DrawMode> for DrawModeDef {
+    fn into(self) -> DrawMode {
+        match self {
+            Self::Fill(f) => DrawMode::Fill(f.into()),
+            Self::Stroke(s) => DrawMode::Stroke(s.into()),
+            Self::Outlined {
+                fill_mode,
+                outline_mode,
+            } => DrawMode::Outlined {
+                fill_mode: fill_mode.into(),
+                outline_mode: outline_mode.into(),
+            },
+        }
+    }
+}
+
+impl From<DrawMode> for DrawModeDef {
+    fn from(other: DrawMode) -> Self {
+        match other {
+            DrawMode::Fill(f) => Self::Fill(f.into()),
+            DrawMode::Stroke(s) => Self::Stroke(s.into()),
+            DrawMode::Outlined {
+                fill_mode,
+                outline_mode,
+            } => Self::Outlined {
+                fill_mode: fill_mode.into(),
+                outline_mode: outline_mode.into(),
+            },
+        }
+    }
+}
+
+// Serialization for `Transform`
+
+#[derive(Serialize, Deserialize, Clone, Copy)]
+pub struct TransformDef {
+    pub translation: Vec3,
+    pub rotation: Quat,
+    pub scale: Vec3,
+}
+
+impl Into<Transform> for TransformDef {
+    fn into(self) -> Transform {
+        let TransformDef {
+            translation,
+            rotation,
+            scale,
+        } = self;
+        Transform {
+            translation,
+            rotation,
+            scale,
+        }
+    }
+}
+
+impl From<Transform> for TransformDef {
+    fn from(other: Transform) -> Self {
+        let Transform {
+            translation,
+            rotation,
+            scale,
+        } = other;
+        TransformDef {
+            translation,
+            rotation,
+            scale,
+        }
+    }
+}

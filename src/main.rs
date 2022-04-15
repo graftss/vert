@@ -56,5 +56,5 @@ fn add_debug_tools(app: &mut App) {
     // app.add_plugin(FrameTimeDiagnosticsPlugin::default());
 
     // Add some fixed input displays for testing
-    app.add_startup_system(inject_debug_display);
+    // app.add_startup_system(inject_debug_display);
 }
