@@ -1,12 +1,14 @@
 use app_state::{state_hotkey_system, AppState};
 use bevy::prelude::*;
 
+use bevy_egui::EguiPlugin;
 use bevy_prototype_lyon::prelude::*;
+use controller::system::add_controller_systems;
 use display::{system::add_display_systems, test::inject_debug_display};
-
 use input::input::add_input_systems;
 
 mod app_state;
+mod controller;
 mod display;
 mod input;
 mod util;
@@ -17,9 +19,10 @@ fn main() {
     // Add plugins.
     app.add_plugins(DefaultPlugins);
     app.add_plugin(ShapePlugin);
+    app.add_plugin(EguiPlugin);
 
     // Set initial value of `AppState`.
-    app.add_state(AppState::Display);
+    app.add_state(AppState::ConfigureController);
 
     #[cfg(debug_assertions)]
     add_debug_tools(&mut app);
@@ -28,6 +31,7 @@ fn main() {
     app.add_system(state_hotkey_system);
     add_input_systems(&mut app);
     add_display_systems(&mut app, AppState::Display);
+    add_controller_systems(&mut app, AppState::ConfigureController);
 
     app.insert_resource(WindowDescriptor {
         title: "vert".to_string(),

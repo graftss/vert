@@ -1,7 +1,14 @@
-use super::input::{AxisSign, HidAxisId, HidButtonId, HidHatSwitchId, HidId, InputValue};
+use super::input::{
+    AxisSign, HidAxisId, HidButtonId, HidHatSwitchId, HidId, InputSource, InputValue,
+    MIN_LISTENABLE_AXIS_MAG,
+};
 
 pub trait RawInputReader {
-    fn update(&mut self) -> usize;
+    fn update(&mut self);
+
+    // Returns the `InputSource` of the first joystick event captured by the update, if such an event exists.
+    fn listen(&mut self) -> Option<InputSource>;
+
     fn num_joysticks(&self) -> usize;
     fn poll_hid_button(&mut self, id: &HidId, button_id: &HidButtonId) -> Option<InputValue>;
     fn poll_hid_axis(
@@ -64,20 +71,61 @@ pub mod windows {
 
     impl super::RawInputReader for RawInput {
         // Syncs the state of the `RawInputManager` based on pending rawinput events.
-        fn update(&mut self) -> usize {
-            let mut i = 0;
-
+        fn update(&mut self) {
             loop {
                 // Reading the events one by one like this has the effect of also updating
                 // the internal joystick state of `RawInputManager`.
                 if let Some(_) = self.manager.get_event() {
-                    i += 1;
                 } else {
                     break;
                 }
             }
             self.joystick_state = self.manager.get_joystick_state(0);
-            i
+        }
+
+        fn listen(&mut self) -> Option<InputSource> {
+            use multiinput::RawEvent::*;
+            use multiinput::State;
+            loop {
+                if let Some(e) = self.manager.get_event() {
+                    match e {
+                        JoystickButtonEvent(id, button_id, State::Pressed) => {
+                            return Some(InputSource::HidButton(id, button_id));
+                        }
+                        JoystickAxisEvent(id, axis_id, value) => {
+                            if value > MIN_LISTENABLE_AXIS_MAG {
+                                return Some(InputSource::HidAxis(
+                                    id,
+                                    HidAxisId::from_multiinput_axis(axis_id),
+                                    AxisSign::Plus,
+                                ));
+                            } else if value < -MIN_LISTENABLE_AXIS_MAG {
+                                return Some(InputSource::HidAxis(
+                                    id,
+                                    HidAxisId::from_multiinput_axis(axis_id),
+                                    AxisSign::Minus,
+                                ));
+                            } else {
+                                continue;
+                            }
+                        }
+                        JoystickHatSwitchEvent(id, mi_hatswitch) => {
+                            if let Some(hatswitch) =
+                                HidHatSwitchId::from_multiinput_hatswitch(mi_hatswitch)
+                            {
+                                return Some(InputSource::HidHatSwitch(id, hatswitch));
+                            } else {
+                                continue;
+                            }
+                        }
+                        _ => continue,
+                    }
+                } else {
+                    break;
+                }
+            }
+
+            None
         }
 
         // Returns the number of joysticks in the device list.
@@ -158,6 +206,9 @@ pub mod macos {
     impl RawInputReader for NoopRawInput {
         fn update(&mut self) -> usize {
             0
+        }
+        fn listen(&mut self) -> Option<InputSource> {
+            None
         }
         fn num_joysticks(&self) -> usize {
             0

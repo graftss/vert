@@ -4,6 +4,9 @@ use bevy::prelude::*;
 use super::raw_input_reader::*;
 use super::RawInputReader;
 
+// The smallest axis magnitude that isn't ignored when listening for axis input.
+pub const MIN_LISTENABLE_AXIS_MAG: f64 = 0.4;
+
 #[derive(Debug, Clone, Copy)]
 pub enum InputValue {
     Axis(f32),
@@ -22,6 +25,20 @@ pub enum HidHatSwitchId {
     Left,
 }
 
+impl HidHatSwitchId {
+    // Map d-pad hatswitch rawinputs to corresponding `HidHatSwitchId` values.
+    #[cfg(target_family = "windows")]
+    pub fn from_multiinput_hatswitch(hatswitch: multiinput::HatSwitch) -> Option<HidHatSwitchId> {
+        match hatswitch {
+            multiinput::HatSwitch::Up => Some(HidHatSwitchId::Up),
+            multiinput::HatSwitch::Right => Some(HidHatSwitchId::Right),
+            multiinput::HatSwitch::Down => Some(HidHatSwitchId::Down),
+            multiinput::HatSwitch::Left => Some(HidHatSwitchId::Left),
+            _ => None,
+        }
+    }
+}
+
 // Duplicate of multiinput::Axis
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum HidAxisId {
@@ -32,6 +49,21 @@ pub enum HidAxisId {
     RY,
     RZ,
     SLIDER,
+}
+
+impl HidAxisId {
+    #[cfg(target_family = "windows")]
+    pub fn from_multiinput_axis(axis: multiinput::Axis) -> HidAxisId {
+        match axis {
+            multiinput::Axis::X => HidAxisId::X,
+            multiinput::Axis::Y => HidAxisId::Y,
+            multiinput::Axis::Z => HidAxisId::Z,
+            multiinput::Axis::RX => HidAxisId::RX,
+            multiinput::Axis::RY => HidAxisId::RY,
+            multiinput::Axis::RZ => HidAxisId::RZ,
+            multiinput::Axis::SLIDER => HidAxisId::SLIDER,
+        }
+    }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
@@ -65,6 +97,23 @@ pub enum InputSource {
     HidAxis(HidId, HidAxisId, AxisSign),
     HidHatSwitch(HidId, HidHatSwitchId),
 }
+
+impl InputSource {
+    pub fn to_string(self) -> String {
+        format!("{:?}", self)
+    }
+}
+
+pub const GAMEPAD_AXES: [GamepadAxisType; 8] = [
+    GamepadAxisType::LeftStickX,
+    GamepadAxisType::LeftStickY,
+    GamepadAxisType::LeftZ,
+    GamepadAxisType::RightStickX,
+    GamepadAxisType::RightStickY,
+    GamepadAxisType::RightZ,
+    GamepadAxisType::DPadX,
+    GamepadAxisType::DPadY,
+];
 
 // Poll each `InputSource` in `sources`, storing the results as a vector of `Option<InputValue>`.
 pub fn poll_input_sources(

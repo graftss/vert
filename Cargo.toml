@@ -9,12 +9,13 @@ edition = "2021"
 bevy = "0.6"
 bevy_prototype_lyon = "0.4.0"
 bevy-inspector-egui = "0.9"
+bevy_egui = "0.12"
 
 [target.'cfg(windows)'.dependencies]
 multiinput = "0.1.0"
 
 [profile.dev]
-opt-level = 1
+opt-level = 0
 
 [profile.dev.package."*"]
 opt-level = 3
