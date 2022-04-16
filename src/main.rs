@@ -75,8 +75,7 @@ fn add_debug_tools(app: &mut App) {
     //     highlight_changes: true,
     //     ..Default::default()
     // });
-    // app.add_plugin(WorldInspectorPlugin::new().filter::<With<RootAtomicDisplayMarker>>());
-    app.add_plugin(WorldInspectorPlugin::new());
+    app.add_plugin(WorldInspectorPlugin::new().filter::<With<RootAtomicDisplayMarker>>());
 
     // add console-based FPS logging
     // app.add_plugin(LogDiagnosticsPlugin::default());
