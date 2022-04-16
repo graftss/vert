@@ -44,7 +44,7 @@ impl Renderable {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum TaggedAtomicParams {
     Button(ButtonParams),
     AnalogStick(AnalogStickParams),
@@ -67,7 +67,7 @@ where
     fn add_teardown_systems(app: &mut App);
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct InputDisplayRes {
     pub atoms: Vec<TaggedAtomicParams>,
 }
@@ -78,6 +78,7 @@ impl Default for InputDisplayRes {
     }
 }
 
+#[derive(Clone)]
 pub struct QueuedInputDisplayRes {
     pub display: InputDisplayRes,
 }

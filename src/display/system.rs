@@ -46,15 +46,18 @@ pub fn spawn_atomic_display(mut commands: &mut Commands, atom: &TaggedAtomicPara
     }
 }
 
+// Spawn the `QueuedInputDisplayRes` resource as an input display,
+// then move it to the `InputDisplayRes` resource.
 pub fn spawn_queued_display_system(
     mut commands: Commands,
-    queued_display: Option<Res<QueuedInputDisplayRes>>,
+    queued_display_res: Option<Res<QueuedInputDisplayRes>>,
 ) {
-    if let Some(queued_display) = queued_display {
+    if let Some(queued_display) = queued_display_res {
         for atom in queued_display.display.atoms.iter() {
             spawn_atomic_display(&mut commands, &atom);
         }
 
+        commands.insert_resource(queued_display.display.to_owned());
         commands.remove_resource::<QueuedInputDisplayRes>();
     }
 }

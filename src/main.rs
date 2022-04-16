@@ -10,11 +10,13 @@ use display::{
     system::add_display_systems,
     test::{inject_debug_display, reinject_debug_display},
 };
+use editor::system::add_editor_systems;
 use input::input::add_input_systems;
 
 mod app_state;
 mod controller;
 mod display;
+mod editor;
 mod input;
 mod util;
 
@@ -45,6 +47,7 @@ fn main() {
     add_display_systems(&mut app);
     add_present_systems(&mut app, AppState::Present);
     add_controller_systems(&mut app, AppState::ConfigureController);
+    add_editor_systems(&mut app, AppState::Editor);
 
     app.run();
 }
