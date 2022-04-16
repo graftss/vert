@@ -356,8 +356,8 @@
         },
         "transform": {
           "translation": [
-            50.0,
-            50.0,
+            300.0,
+            300.0,
             0.0
           ],
           "rotation": [
@@ -469,8 +469,8 @@
         },
         "transform": {
           "translation": [
-            55.0,
-            55.0,
+            330.0,
+            330.0,
             0.0
           ],
           "rotation": [
@@ -582,8 +582,8 @@
         },
         "transform": {
           "translation": [
-            60.0,
-            60.0,
+            360.0,
+            360.0,
             0.0
           ],
           "rotation": [
@@ -695,8 +695,8 @@
         },
         "transform": {
           "translation": [
-            65.0,
-            65.0,
+            390.0,
+            390.0,
             0.0
           ],
           "rotation": [
@@ -808,8 +808,8 @@
         },
         "transform": {
           "translation": [
-            70.0,
-            70.0,
+            420.0,
+            420.0,
             0.0
           ],
           "rotation": [
@@ -827,6 +827,15 @@
         "button_key": {
           "Ps2": "Circle"
         }
+      }
+    },
+    {
+      "Frame": {
+        "left": 0.0,
+        "bottom": 0.0,
+        "height": 60.0,
+        "width": 120.0,
+        "thickness": 1000.0
       }
     }
   ]

@@ -1,6 +1,9 @@
 use bevy::prelude::*;
-use bevy_prototype_lyon::{prelude::*, shapes::Circle};
-use serde::{Deserialize, Serialize};
+use bevy_prototype_lyon::{
+    prelude::*,
+    shapes::{Circle, Rectangle},
+};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 // Serialization type for `RegularPolygon`
 
@@ -229,6 +232,32 @@ impl From<Transform> for TransformDef {
             translation,
             rotation,
             scale,
+        }
+    }
+}
+
+// Serialization for `bevy_prototype_lyon::shapes::Rectangle`.
+// Note that this only works for the origin type `RectangleOrigin::BottomLeft`.
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub struct RectangleDef {
+    pub extents: Vec2,
+}
+
+impl Into<Rectangle> for RectangleDef {
+    fn into(self) -> Rectangle {
+        let Self { extents } = self;
+        Rectangle {
+            extents,
+            origin: RectangleOrigin::BottomLeft,
+        }
+    }
+}
+
+impl From<Rectangle> for RectangleDef {
+    fn from(other: Rectangle) -> Self {
+        Self {
+            extents: other.extents,
         }
     }
 }

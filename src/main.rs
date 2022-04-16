@@ -2,6 +2,7 @@ use app_state::{state_hotkey_system, AppState};
 use bevy::prelude::*;
 
 use bevy_egui::EguiPlugin;
+use bevy_inspector_egui::WorldInspectorPlugin;
 use bevy_prototype_lyon::prelude::*;
 use controller::system::add_controller_systems;
 use display::{system::add_display_systems, test::inject_debug_display};
@@ -49,12 +50,12 @@ fn root_startup_system(mut commands: Commands) {
 }
 
 fn add_debug_tools(app: &mut App) {
-    // app.add_plugin(WorldInspectorPlugin::new());
+    app.add_plugin(WorldInspectorPlugin::new());
 
     // add console-based FPS logging
     // app.add_plugin(LogDiagnosticsPlugin::default());
     // app.add_plugin(FrameTimeDiagnosticsPlugin::default());
 
     // Add some fixed input displays for testing
-    // app.add_startup_system(inject_debug_display);
+    app.add_startup_system(inject_debug_display);
 }

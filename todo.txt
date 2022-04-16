@@ -1,1 +1,3 @@
 - test gamepad button/axis listener
+- need a way of extracting the atomic display `Params` data from entities
+    - put this in `AtomicInputDisplay`

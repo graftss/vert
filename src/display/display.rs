@@ -1,5 +1,9 @@
 use bevy::prelude::*;
-use bevy_prototype_lyon::{entity::ShapeBundle, prelude::*, shapes::Circle};
+use bevy_prototype_lyon::{
+    entity::ShapeBundle,
+    prelude::*,
+    shapes::{Circle, Rectangle},
+};
 use serde::{Deserialize, Serialize};
 
 use crate::app_state::AppState;
@@ -7,13 +11,15 @@ use crate::app_state::AppState;
 use super::{
     analog_stick::AnalogStickParams,
     button::ButtonParams,
-    serialization::{CircleDef, RegularPolygonDef},
+    frame::FrameParams,
+    serialization::{CircleDef, RectangleDef, RegularPolygonDef},
 };
 
 #[derive(Clone, Copy, Serialize, Deserialize)]
 pub enum Renderable {
     RegularPolygon(RegularPolygonDef),
     Circle(CircleDef),
+    Rectangle(RectangleDef),
 }
 
 impl Renderable {
@@ -27,14 +33,19 @@ impl Renderable {
                 let tc: Circle = c.into();
                 GeometryBuilder::build_as(&tc, mode, transform)
             }
+            Renderable::Rectangle(r) => {
+                let r: Rectangle = r.into();
+                GeometryBuilder::build_as(&r, mode, transform)
+            }
         }
     }
 }
 
-#[derive(Clone, Copy, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum TaggedAtomicParams {
     Button(ButtonParams),
     AnalogStick(AnalogStickParams),
+    Frame(FrameParams),
 }
 
 pub trait AtomicInputDisplay<P>

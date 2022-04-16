@@ -10,6 +10,7 @@ use super::{
     analog_stick::AnalogStickAtomicDisplay,
     button::ButtonAtomicDisplay,
     display::{AtomicInputDisplay, InputDisplayRes, TaggedAtomicParams},
+    frame::FrameAtomicDisplay,
 };
 
 // Call the update and teardown systems for a list of atomic types.
@@ -33,21 +34,26 @@ pub fn enter_display_system(mut commands: Commands, display: Res<InputDisplayRes
             TaggedAtomicParams::AnalogStick(params) => {
                 AnalogStickAtomicDisplay::spawn(&mut commands, params)
             }
+            TaggedAtomicParams::Frame(params) => FrameAtomicDisplay::spawn(&mut commands, params),
+        }
+    }
+}
+
+pub fn insert_display_from_file(mut commands: Commands, path: &str) {
+    // Attempt to inject an input display from a file, and inject an empty display if that fails.
+    match read_from_file::<InputDisplayRes>(path) {
+        Ok(display) => {
+            commands.insert_resource(display);
+        }
+        Err(e) => {
+            println!("Error reading input display from file '{}': {:?}", path, e);
+            commands.insert_resource(InputDisplayRes::default());
         }
     }
 }
 
 pub fn startup_display_system(mut commands: Commands) {
-    // Attempt to inject an input display from a file, and inject an empty display if that fails.
-    match read_from_file::<InputDisplayRes>("display.json") {
-        Ok(display) => {
-            commands.insert_resource(display);
-        }
-        Err(e) => {
-            println!("Error reading input display from file: {:?}", e);
-            commands.insert_resource(InputDisplayRes::default());
-        }
-    }
+    // insert_display_from_file(commands, "display.json");
 }
 
 pub fn save_display_to_file(mut commands: Commands, display: Res<InputDisplayRes>) {
@@ -69,6 +75,7 @@ pub fn add_display_systems(app: &mut App, display_state: AppState) {
         app,
         display_state,
         ButtonAtomicDisplay,
-        AnalogStickAtomicDisplay
+        AnalogStickAtomicDisplay,
+        FrameAtomicDisplay
     );
 }

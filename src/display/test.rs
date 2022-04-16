@@ -9,8 +9,24 @@ use super::{
     analog_stick::AnalogStickParams,
     button::ButtonParams,
     display::{InputDisplayRes, Renderable, TaggedAtomicParams},
-    serialization::{CircleDef, RegularPolygonDef, RegularPolygonFeatureDef},
+    frame::FrameParams,
+    serialization::{CircleDef, RectangleDef, RegularPolygonDef, RegularPolygonFeatureDef},
 };
+
+pub fn debug_frame_data() -> Vec<TaggedAtomicParams> {
+    const left: f32 = -120.0;
+    const bottom: f32 = -70.0;
+
+    let frame_params = FrameParams {
+        left,
+        bottom,
+        height: bottom * -2.0,
+        width: left * -2.0,
+        thickness: 3.0,
+    };
+
+    vec![TaggedAtomicParams::Frame(frame_params)]
+}
 
 // Add some analog stick components for testing
 pub fn debug_analog_stick_data() -> Vec<TaggedAtomicParams> {
@@ -100,7 +116,7 @@ pub fn debug_button_data() -> Vec<TaggedAtomicParams> {
     let mut result = vec![];
 
     for x in (std::ops::Range { start: 10, end: 15 }) {
-        let z = (x * 5) as f32;
+        let z = (x * 30) as f32;
         let button_key = ControllerKey::Ps2(Ps2Key::Circle);
         result.push(TaggedAtomicParams::Button(ButtonParams {
             on_mode: on_mode.into(),
@@ -115,8 +131,10 @@ pub fn debug_button_data() -> Vec<TaggedAtomicParams> {
 }
 
 pub fn inject_debug_display(mut commands: Commands) {
-    let mut atoms = debug_analog_stick_data();
+    let mut atoms = vec![];
+    atoms.append(&mut debug_analog_stick_data());
     atoms.append(&mut debug_button_data());
+    atoms.append(&mut debug_frame_data());
 
     commands.insert_resource(InputDisplayRes { atoms });
 }
