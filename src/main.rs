@@ -71,12 +71,13 @@ fn root_startup_system(mut commands: Commands) {
 }
 
 fn add_debug_tools(app: &mut App) {
-    app.insert_resource(WorldInspectorParams {
-        despawnable_entities: true,
-        highlight_changes: true,
-        ..Default::default()
-    });
-    app.add_plugin(WorldInspectorPlugin::new().filter::<With<RootAtomicDisplayMarker>>());
+    // app.insert_resource(WorldInspectorParams {
+    //     despawnable_entities: true,
+    //     highlight_changes: true,
+    //     ..Default::default()
+    // });
+    // app.add_plugin(WorldInspectorPlugin::new().filter::<With<RootAtomicDisplayMarker>>());
+    app.add_plugin(WorldInspectorPlugin::new());
 
     // add console-based FPS logging
     // app.add_plugin(LogDiagnosticsPlugin::default());

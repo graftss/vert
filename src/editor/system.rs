@@ -10,10 +10,10 @@ use crate::{app_state::AppState, MainCameraMarker};
 const FIXED_SCROLL_SPEED: f32 = 0.1;
 const FIXED_DRAG_SPEED: f32 = 0.8;
 
-// A record of the screen position when it was frozen and hidden during an editor drag.
+// A record of the world position when the cursor was frozen and hidden during an editor drag.
 #[derive(Debug)]
 pub struct FrozenCursorPos {
-    pos: Vec2,
+    world_pos: Vec2,
 }
 
 pub fn editor_mouse_scroll_system(
@@ -35,46 +35,76 @@ pub fn editor_mouse_scroll_system(
     }
 }
 
+fn div_vec2(a: &Vec2, b: &Vec2) -> Vec2 {
+    Vec2::new(a.x / b.x, a.y / b.y)
+}
+
+fn screen_to_world(
+    transform: &GlobalTransform,
+    camera: &Camera,
+    window: &Window,
+    screen_point: &Vec2,
+) -> Vec2 {
+    let screen_size = Vec2::from([window.width(), window.height()]);
+    let screen_ndc = div_vec2(screen_point, &screen_size) * 2.0 - Vec2::from([1.0, 1.0]);
+    let camera_matrix = transform.compute_matrix();
+    let ndc_to_world: Mat4 = camera_matrix * camera.projection_matrix.inverse();
+    ndc_to_world
+        .transform_point3(screen_ndc.extend(1.0))
+        .truncate()
+}
+
 pub fn editor_mouse_drag_system(
     mouse_buttons: Res<Input<MouseButton>>,
-    frozen_pos: Option<Res<FrozenCursorPos>>,
+    mut frozen_pos: Option<Res<FrozenCursorPos>>,
     mut commands: Commands,
     mut windows: ResMut<Windows>,
     mut evr_motion: EventReader<MouseMotion>,
     mut query: Query<
-        (
-            &mut Transform,
-            &OrthographicProjection,
-            &GlobalTransform,
-            &Camera,
-        ),
+        (&mut GlobalTransform, &OrthographicProjection, &Camera),
         With<MainCameraMarker>,
     >,
 ) {
     if mouse_buttons.pressed(MouseButton::Left) {
-        let (mut transform, orth_proj, _, _) = query.single_mut();
+        // Mouse is held down
+        let (mut transform, orth_proj, camera) = query.single_mut();
 
         if mouse_buttons.just_pressed(MouseButton::Left) {
+            // If the mouse was just pressed, hide and lock the cursor while recording its world position.
             let window = windows.get_primary_mut().unwrap();
             window.set_cursor_lock_mode(true);
             window.set_cursor_visibility(false);
-            if let Some(pos) = window.cursor_position() {
-                commands.insert_resource(FrozenCursorPos { pos });
+            if let Some(mut screen_pos) = window.cursor_position() {
+                let world_pos = screen_to_world(&transform, &camera, &window, &screen_pos);
+                commands.insert_resource(FrozenCursorPos { world_pos });
             }
         } else {
+            // If the mouse was already pressed, translate the camera according to mouse movement.
             for ev in evr_motion.iter() {
                 transform.translation.x -= ev.delta.x * FIXED_DRAG_SPEED * orth_proj.scale;
                 transform.translation.y += ev.delta.y * FIXED_DRAG_SPEED * orth_proj.scale;
             }
         }
     } else if mouse_buttons.just_released(MouseButton::Left) {
-        let (mut transform, orth_proj, gt, camera) = query.single_mut();
+        // Mouse is released.
+        // If we have recorded a world position of the cursor, restore it (by moving the cursor there).
+        let new_cursor_pos = frozen_pos.map(|frozen| {
+            let (transform, _, camera) = query.single_mut();
+            camera
+                .world_to_screen(&windows, &transform, frozen.world_pos.extend(1.0))
+                .unwrap()
+        });
+
         if let Some(window) = windows.get_primary_mut() {
+            // Restore the world position of the cursor if one exists.
+            if let Some(pos) = new_cursor_pos {
+                window.set_cursor_position(pos);
+                commands.remove_resource::<FrozenCursorPos>();
+            }
+
+            // Restore normal movement/visibility of the cursor.
             window.set_cursor_lock_mode(false);
             window.set_cursor_visibility(true);
-            if let Some(frozen_pos) = frozen_pos {
-                window.set_cursor_position(frozen_pos.pos);
-            }
         }
     }
 }
