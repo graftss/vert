@@ -1,3 +1,16 @@
 - test gamepad button/axis listener
 - need a way of extracting the atomic display `Params` data from entities
     - put this in `AtomicInputDisplay`
+    - is this actually necessary?
+
+
+- editor mode:
+    - actually make editor mode (extract input display rendering components)
+    - just make `AppState` a stack of height 2, where:
+        - input display state is on the bottom
+        - the top state is ConfigController/Editor/present
+        - this way the input display is always rendered, which is probably desirable
+    - move by dragging mouse
+    - zoom in/out with scroll wheel
+    - clickable atomic displays
+    - list of all atomic displays

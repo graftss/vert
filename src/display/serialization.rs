@@ -110,7 +110,7 @@ impl Default for CircleDef {
 }
 
 // Serialization type for `DrawMode`
-#[derive(Serialize, Deserialize, Clone, Copy)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
 pub struct FillModeDef {
     pub options: FillOptions,
     pub color: Color,
@@ -130,7 +130,7 @@ impl From<FillMode> for FillModeDef {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Copy)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
 pub struct StrokeModeDef {
     pub options: StrokeOptions,
     pub color: Color,
@@ -150,7 +150,7 @@ impl From<StrokeMode> for StrokeModeDef {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Copy)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
 pub enum DrawModeDef {
     /// The shape will be filled using the provided [`FillMode`].
     Fill(FillModeDef),
@@ -199,7 +199,7 @@ impl From<DrawMode> for DrawModeDef {
 
 // Serialization for `Transform`
 
-#[derive(Serialize, Deserialize, Clone, Copy)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
 pub struct TransformDef {
     pub translation: Vec3,
     pub rotation: Quat,

@@ -831,11 +831,11 @@
     },
     {
       "Frame": {
-        "left": 0.0,
-        "bottom": 0.0,
-        "height": 60.0,
-        "width": 120.0,
-        "thickness": 1000.0
+        "left": -130.0,
+        "bottom": -60.0,
+        "height": 140.0,
+        "width": 240.0,
+        "thickness": 3.0
       }
     }
   ]

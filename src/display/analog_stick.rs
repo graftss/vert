@@ -15,7 +15,7 @@ use super::{
 };
 
 // The data parameterizing an analog stick input display.
-#[derive(Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct AnalogStickParams {
     pub stick_display: Renderable,
     pub stick_mode: DrawModeDef,

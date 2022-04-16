@@ -18,8 +18,8 @@ pub fn debug_frame_data() -> Vec<TaggedAtomicParams> {
     const bottom: f32 = -70.0;
 
     let frame_params = FrameParams {
-        left,
-        bottom,
+        left: left - 10.0,
+        bottom: bottom + 10.0,
         height: bottom * -2.0,
         width: left * -2.0,
         thickness: 3.0,

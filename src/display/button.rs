@@ -15,7 +15,7 @@ use super::{
 };
 
 // The data parameterizing a button input display.
-#[derive(Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct ButtonParams {
     pub displayable: Renderable,
     pub on_mode: DrawModeDef,

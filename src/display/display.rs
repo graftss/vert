@@ -15,7 +15,7 @@ use super::{
     serialization::{CircleDef, RectangleDef, RegularPolygonDef},
 };
 
-#[derive(Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum Renderable {
     RegularPolygon(RegularPolygonDef),
     Circle(CircleDef),
@@ -41,7 +41,7 @@ impl Renderable {
     }
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum TaggedAtomicParams {
     Button(ButtonParams),
     AnalogStick(AnalogStickParams),

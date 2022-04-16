@@ -4,6 +4,7 @@ use bevy::prelude::*;
 pub enum AppState {
     Display,
     ConfigureController,
+    Present,
 }
 
 struct AppStateHotkey {
@@ -11,7 +12,7 @@ struct AppStateHotkey {
     pub state: AppState,
 }
 
-const STATE_HOTKEYS: [AppStateHotkey; 2] = [
+const STATE_HOTKEYS: [AppStateHotkey; 3] = [
     AppStateHotkey {
         key: KeyCode::F2,
         state: AppState::Display,
@@ -19,6 +20,10 @@ const STATE_HOTKEYS: [AppStateHotkey; 2] = [
     AppStateHotkey {
         key: KeyCode::F3,
         state: AppState::ConfigureController,
+    },
+    AppStateHotkey {
+        key: KeyCode::F4,
+        state: AppState::Present,
     },
 ];
 

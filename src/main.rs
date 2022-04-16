@@ -5,7 +5,9 @@ use bevy_egui::EguiPlugin;
 use bevy_inspector_egui::WorldInspectorPlugin;
 use bevy_prototype_lyon::prelude::*;
 use controller::system::add_controller_systems;
-use display::{system::add_display_systems, test::inject_debug_display};
+use display::{
+    present::add_present_systems, system::add_display_systems, test::inject_debug_display,
+};
 use input::input::add_input_systems;
 
 mod app_state;
@@ -16,6 +18,13 @@ mod util;
 
 fn main() {
     let mut app = App::new();
+
+    app.insert_resource(WindowDescriptor {
+        title: "vert".to_string(),
+        width: 800.,
+        height: 600.,
+        ..WindowDescriptor::default()
+    });
 
     // Add plugins.
     app.add_plugins(DefaultPlugins);
@@ -32,14 +41,8 @@ fn main() {
     app.add_system(state_hotkey_system);
     add_input_systems(&mut app);
     add_display_systems(&mut app, AppState::Display);
+    add_present_systems(&mut app, AppState::Present);
     add_controller_systems(&mut app, AppState::ConfigureController);
-
-    app.insert_resource(WindowDescriptor {
-        title: "vert".to_string(),
-        width: 800.,
-        height: 600.,
-        ..WindowDescriptor::default()
-    });
 
     app.run();
 }

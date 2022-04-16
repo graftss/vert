@@ -9,7 +9,7 @@ use super::{
     serialization::{RectangleDef, RegularPolygonDef},
 };
 
-#[derive(Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct FrameParams {
     pub left: f32,
     pub bottom: f32,
