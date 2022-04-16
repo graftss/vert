@@ -45,3 +45,22 @@ where
     let data = serde_json::from_reader(reader)?;
     Ok(data)
 }
+
+pub fn div_vec2(a: &Vec2, b: &Vec2) -> Vec2 {
+    Vec2::new(a.x / b.x, a.y / b.y)
+}
+
+pub fn screen_to_world(
+    transform: &GlobalTransform,
+    camera: &Camera,
+    window: &Window,
+    screen_point: &Vec2,
+) -> Vec2 {
+    let screen_size = Vec2::from([window.width(), window.height()]);
+    let screen_ndc = div_vec2(screen_point, &screen_size) * 2.0 - Vec2::from([1.0, 1.0]);
+    let camera_matrix = transform.compute_matrix();
+    let ndc_to_world: Mat4 = camera_matrix * camera.projection_matrix.inverse();
+    ndc_to_world
+        .transform_point3(screen_ndc.extend(1.0))
+        .truncate()
+}

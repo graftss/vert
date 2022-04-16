@@ -1,6 +1,6 @@
 use bevy::{pbr::VisiblePointLights, prelude::*};
 
-use crate::{app_state::AppState, MainCameraMarker};
+use crate::{state::AppState, MainCameraMarker};
 
 use super::{
     display::{InputDisplayRes, TaggedAtomicParams},

@@ -3,9 +3,9 @@ use bevy_prototype_lyon::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    app_state::AppState,
     controller::layout::ControllerKey,
     input::input::{InputSink, InputValue},
+    state::AppState,
     util::despawn_all_with,
 };
 

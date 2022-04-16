@@ -3,8 +3,8 @@ use bevy_egui::EguiContext;
 use bevy_inspector_egui::egui;
 
 use crate::{
-    app_state::AppState,
     input::{input::InputSource, raw_input_reader::RawInputRes, RawInputReader},
+    state::AppState,
     util::{despawn_all_with, read_from_file, write_to_file},
 };
 

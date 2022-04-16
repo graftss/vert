@@ -6,7 +6,7 @@ use bevy_prototype_lyon::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::app_state::AppState;
+use crate::state::AppState;
 
 use super::{
     analog_stick::AnalogStickParams,

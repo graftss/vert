@@ -1,5 +1,5 @@
-use app_state::{state_hotkey_system, AppState};
 use bevy::prelude::*;
+use state::{add_state_systems, state_hotkey_system, AppState};
 
 use bevy_egui::EguiPlugin;
 use bevy_inspector_egui::{
@@ -16,12 +16,14 @@ use display::{
 use editor::system::add_editor_systems;
 use input::input::add_input_systems;
 
-mod app_state;
 mod controller;
 mod display;
 mod editor;
 mod input;
+mod state;
 mod util;
+
+pub const VERSION: &'static str = "0.1";
 
 fn main() {
     let mut app = App::new();
@@ -38,14 +40,11 @@ fn main() {
     app.add_plugin(ShapePlugin);
     app.add_plugin(EguiPlugin);
 
-    // Set initial value of `AppState`.
-    app.add_state(AppState::ConfigureController);
-
     #[cfg(debug_assertions)]
     add_debug_tools(&mut app);
 
     app.add_startup_system(root_startup_system);
-    app.add_system(state_hotkey_system);
+    add_state_systems(&mut app);
     add_input_systems(&mut app);
     add_display_systems(&mut app);
     add_present_systems(&mut app, AppState::Present);

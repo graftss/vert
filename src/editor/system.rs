@@ -5,7 +5,7 @@ use bevy::{
     render::camera::CameraProjection,
 };
 
-use crate::{app_state::AppState, MainCameraMarker};
+use crate::{state::AppState, util::screen_to_world, MainCameraMarker};
 
 const FIXED_SCROLL_SPEED: f32 = 0.1;
 const FIXED_DRAG_SPEED: f32 = 0.8;
@@ -33,25 +33,6 @@ pub fn editor_mouse_scroll_system(
             }
         }
     }
-}
-
-fn div_vec2(a: &Vec2, b: &Vec2) -> Vec2 {
-    Vec2::new(a.x / b.x, a.y / b.y)
-}
-
-fn screen_to_world(
-    transform: &GlobalTransform,
-    camera: &Camera,
-    window: &Window,
-    screen_point: &Vec2,
-) -> Vec2 {
-    let screen_size = Vec2::from([window.width(), window.height()]);
-    let screen_ndc = div_vec2(screen_point, &screen_size) * 2.0 - Vec2::from([1.0, 1.0]);
-    let camera_matrix = transform.compute_matrix();
-    let ndc_to_world: Mat4 = camera_matrix * camera.projection_matrix.inverse();
-    ndc_to_world
-        .transform_point3(screen_ndc.extend(1.0))
-        .truncate()
 }
 
 pub fn editor_mouse_drag_system(
