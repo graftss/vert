@@ -8,7 +8,7 @@ use bevy_prototype_lyon::prelude::*;
 use super::{
     analog_stick::AnalogStickParams,
     button::ButtonParams,
-    display::{InputDisplayRes, Renderable, TaggedAtomicParams},
+    display::{InputDisplayRes, QueuedInputDisplayRes, Renderable, TaggedAtomicParams},
     frame::FrameParams,
     serialization::{CircleDef, RectangleDef, RegularPolygonDef, RegularPolygonFeatureDef},
 };
@@ -136,5 +136,14 @@ pub fn inject_debug_display(mut commands: Commands) {
     atoms.append(&mut debug_button_data());
     atoms.append(&mut debug_frame_data());
 
-    commands.insert_resource(InputDisplayRes { atoms });
+    let display = InputDisplayRes { atoms };
+
+    commands.insert_resource(QueuedInputDisplayRes { display });
+}
+
+pub fn reinject_debug_display(mut commands: Commands, keyboard_input: Res<Input<KeyCode>>) {
+    if keyboard_input.just_pressed(KeyCode::F8) {
+        println!("injecting display");
+        inject_debug_display(commands);
+    }
 }

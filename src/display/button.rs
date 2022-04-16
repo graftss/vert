@@ -10,8 +10,9 @@ use crate::{
 };
 
 use super::{
-    display::{AtomicInputDisplay, Renderable},
+    display::{AtomicInputDisplay, Renderable, RootAtomicDisplayMarker},
     serialization::{DrawModeDef, TransformDef},
+    system::on_queued_display,
 };
 
 // The data parameterizing a button input display.
@@ -30,7 +31,12 @@ pub struct RootButtonMarker;
 
 impl RootButtonMarker {
     pub fn build_root(transform: Transform) -> impl Bundle {
-        (GlobalTransform::identity(), transform, RootButtonMarker)
+        (
+            GlobalTransform::identity(),
+            transform,
+            RootButtonMarker,
+            RootAtomicDisplayMarker,
+        )
     }
 }
 
@@ -94,17 +100,17 @@ impl AtomicInputDisplay<ButtonParams> for ButtonAtomicDisplay {
             });
     }
 
-    fn add_teardown_systems(app: &mut App, display_state: AppState) {
+    fn add_teardown_systems(app: &mut App) {
         app.add_system_set(
-            SystemSet::on_exit(display_state)
+            SystemSet::new()
+                .with_run_criteria(on_queued_display)
                 .with_system(despawn_all_with::<RootButtonMarker>)
-                .with_system(despawn_all_with::<ChildButtonMarker>),
+                .with_system(despawn_all_with::<ChildButtonMarker>)
+                .label("teardown"),
         );
     }
 
-    fn add_update_systems(app: &mut App, display_state: AppState) {
-        app.add_system_set(
-            SystemSet::on_update(display_state).with_system(Self::button_update_system),
-        );
+    fn add_update_systems(app: &mut App) {
+        app.add_system_set(SystemSet::new().with_system(Self::button_update_system));
     }
 }

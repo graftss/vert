@@ -5,8 +5,9 @@ use serde::{Deserialize, Serialize};
 use crate::util::despawn_all_with;
 
 use super::{
-    display::{AtomicInputDisplay, Renderable},
+    display::{AtomicInputDisplay, Renderable, RootAtomicDisplayMarker},
     serialization::{RectangleDef, RegularPolygonDef},
+    system::on_queued_display,
 };
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
@@ -43,14 +44,20 @@ impl AtomicInputDisplay<FrameParams> for FrameAtomicDisplay {
         let frame_bundle =
             Renderable::Rectangle(RectangleDef { extents }).build_as(draw_mode, transform);
 
-        commands.spawn_bundle(frame_bundle).insert(FrameMarker);
+        commands
+            .spawn_bundle(frame_bundle)
+            .insert(FrameMarker)
+            .insert(RootAtomicDisplayMarker);
     }
 
-    fn add_update_systems(app: &mut App, display_state: crate::app_state::AppState) {}
+    fn add_update_systems(app: &mut App) {}
 
-    fn add_teardown_systems(app: &mut App, display_state: crate::app_state::AppState) {
+    fn add_teardown_systems(app: &mut App) {
         app.add_system_set(
-            SystemSet::on_exit(display_state).with_system(despawn_all_with::<FrameMarker>),
+            SystemSet::new()
+                .with_run_criteria(on_queued_display)
+                .with_system(despawn_all_with::<FrameMarker>)
+                .label("teardown"),
         );
     }
 }

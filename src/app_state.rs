@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 #[derive(PartialEq, Eq, Clone, Copy, Debug, Hash)]
 pub enum AppState {
-    Display,
+    Editor,
     ConfigureController,
     Present,
 }
@@ -15,7 +15,7 @@ struct AppStateHotkey {
 const STATE_HOTKEYS: [AppStateHotkey; 3] = [
     AppStateHotkey {
         key: KeyCode::F2,
-        state: AppState::Display,
+        state: AppState::Editor,
     },
     AppStateHotkey {
         key: KeyCode::F3,

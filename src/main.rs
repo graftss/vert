@@ -6,7 +6,9 @@ use bevy_inspector_egui::WorldInspectorPlugin;
 use bevy_prototype_lyon::prelude::*;
 use controller::system::add_controller_systems;
 use display::{
-    present::add_present_systems, system::add_display_systems, test::inject_debug_display,
+    present::add_present_systems,
+    system::add_display_systems,
+    test::{inject_debug_display, reinject_debug_display},
 };
 use input::input::add_input_systems;
 
@@ -40,7 +42,7 @@ fn main() {
     app.add_startup_system(root_startup_system);
     app.add_system(state_hotkey_system);
     add_input_systems(&mut app);
-    add_display_systems(&mut app, AppState::Display);
+    add_display_systems(&mut app);
     add_present_systems(&mut app, AppState::Present);
     add_controller_systems(&mut app, AppState::ConfigureController);
 
@@ -60,5 +62,5 @@ fn add_debug_tools(app: &mut App) {
     // app.add_plugin(FrameTimeDiagnosticsPlugin::default());
 
     // Add some fixed input displays for testing
-    app.add_startup_system(inject_debug_display);
+    app.add_system(reinject_debug_display);
 }

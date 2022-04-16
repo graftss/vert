@@ -15,6 +15,9 @@ use super::{
     serialization::{CircleDef, RectangleDef, RegularPolygonDef},
 };
 
+#[derive(Component)]
+pub struct RootAtomicDisplayMarker;
+
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum Renderable {
     RegularPolygon(RegularPolygonDef),
@@ -57,11 +60,11 @@ where
 
     // Add systems to `app` which update all atomic displays of this type
     // while the app has state `display_state`.
-    fn add_update_systems(app: &mut App, display_state: AppState);
+    fn add_update_systems(app: &mut App);
 
     // Add systems to `app` which teardown all atomic displays of this type
     // when the app leaves the state `display_state`.
-    fn add_teardown_systems(app: &mut App, display_state: AppState);
+    fn add_teardown_systems(app: &mut App);
 }
 
 #[derive(Serialize, Deserialize)]
@@ -73,4 +76,8 @@ impl Default for InputDisplayRes {
     fn default() -> Self {
         InputDisplayRes { atoms: vec![] }
     }
+}
+
+pub struct QueuedInputDisplayRes {
+    pub display: InputDisplayRes,
 }

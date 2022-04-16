@@ -10,8 +10,9 @@ use crate::{
 };
 
 use super::{
-    display::{AtomicInputDisplay, Renderable},
+    display::{AtomicInputDisplay, Renderable, RootAtomicDisplayMarker},
     serialization::{DrawModeDef, TransformDef},
+    system::on_queued_display,
 };
 
 // The data parameterizing an analog stick input display.
@@ -139,7 +140,7 @@ impl AtomicInputDisplay<AnalogStickParams> for AnalogStickAtomicDisplay {
         } = *display_data;
 
         let stick_bundle =
-            stick_display.build_as(stick_mode.into(), Transform::from_xyz(30.0, 0.0, 0.0));
+            stick_display.build_as(stick_mode.into(), Transform::from_xyz(0.0, 0.0, 0.0));
         let bg_bundle = bg_display.build_as(bg_mode.into(), Transform::identity());
 
         let mut sources = vec![pos_x, neg_x, pos_y, neg_y];
@@ -156,6 +157,7 @@ impl AtomicInputDisplay<AnalogStickParams> for AnalogStickAtomicDisplay {
             .spawn()
             .insert(t)
             .insert(GlobalTransform::identity())
+            .insert(RootAtomicDisplayMarker)
             .insert(RootAnalogStickMarker {
                 stick_radius,
                 use_trigger,
@@ -168,18 +170,18 @@ impl AtomicInputDisplay<AnalogStickParams> for AnalogStickAtomicDisplay {
             });
     }
 
-    fn add_update_systems(app: &mut App, display_state: AppState) {
-        app.add_system_set(
-            SystemSet::on_update(display_state).with_system(Self::analog_stick_display_system),
-        );
+    fn add_update_systems(app: &mut App) {
+        app.add_system_set(SystemSet::new().with_system(Self::analog_stick_display_system));
     }
 
-    fn add_teardown_systems(app: &mut App, display_state: AppState) {
+    fn add_teardown_systems(app: &mut App) {
         app.add_system_set(
-            SystemSet::on_exit(display_state)
+            SystemSet::new()
+                .with_run_criteria(on_queued_display)
                 .with_system(despawn_all_with::<RootAnalogStickMarker>)
                 .with_system(despawn_all_with::<ChildStickMarker>)
-                .with_system(despawn_all_with::<ChildBgMarker>),
+                .with_system(despawn_all_with::<ChildBgMarker>)
+                .label("teardown"),
         );
     }
 }

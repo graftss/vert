@@ -60,9 +60,6 @@ pub fn exit_present_system(mut windows: ResMut<Windows>, mut window_desc: Res<Wi
 }
 
 pub fn add_present_systems(app: &mut App, present_state: AppState) {
-    // Add all systems to render the input display
-    add_display_systems(app, present_state);
-
     // Enter present state
     app.add_system_set(SystemSet::on_enter(present_state).with_system(enter_present_system));
 
