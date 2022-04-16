@@ -20,7 +20,7 @@ pub struct FrameParams {
 }
 
 #[derive(Component)]
-pub struct FrameMarker;
+pub struct RootFrameMarker;
 
 pub struct FrameAtomicDisplay;
 
@@ -46,8 +46,9 @@ impl AtomicInputDisplay<FrameParams> for FrameAtomicDisplay {
 
         commands
             .spawn_bundle(frame_bundle)
-            .insert(FrameMarker)
-            .insert(RootAtomicDisplayMarker);
+            .insert(RootFrameMarker)
+            .insert(RootAtomicDisplayMarker)
+            .insert(Name::new("Frame"));
     }
 
     fn add_update_systems(app: &mut App) {}
@@ -56,7 +57,7 @@ impl AtomicInputDisplay<FrameParams> for FrameAtomicDisplay {
         app.add_system_set(
             SystemSet::new()
                 .with_run_criteria(on_queued_display)
-                .with_system(despawn_all_with::<FrameMarker>)
+                .with_system(despawn_all_with::<RootFrameMarker>)
                 .label("teardown"),
         );
     }

@@ -37,7 +37,7 @@ const NO_BINDING: &'static str = "-";
 const LISTEN_FOR_BINDING: &'static str = "Listening...";
 const CONTROLLER_WINDOW_TITLE: &'static str = "Controller";
 
-pub fn update(
+pub fn ui_system(
     mut egui_ctx: ResMut<EguiContext>,
     mut layout: ResMut<ControllerLayoutsRes>,
     mut input_listener: ResMut<InputListener>,
@@ -88,7 +88,7 @@ pub fn add_controller_systems(app: &mut App, controller_state: AppState) {
     // Update
     app.add_system_set(
         SystemSet::on_update(controller_state)
-            .with_system(update)
+            .with_system(ui_system)
             .with_system(input_listener_system)
             .with_system(cleanup_input_listener_system),
     );

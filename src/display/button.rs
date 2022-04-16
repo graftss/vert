@@ -36,6 +36,7 @@ impl RootButtonMarker {
             transform,
             RootButtonMarker,
             RootAtomicDisplayMarker,
+            Name::new("Button".to_string()),
         )
     }
 }

@@ -9,3 +9,5 @@
     - list of all atomic displays
     - ui widget for each component type
     - ideally, drag-resizable frame
+    - stop drag/scroll events when hovering over inspector ui
+    - hotkey to hide/show the worldinspector

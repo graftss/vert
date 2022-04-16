@@ -41,6 +41,18 @@ pub struct RootAnalogStickMarker {
     pub use_trigger: bool,
 }
 
+impl RootAnalogStickMarker {
+    pub fn build_root(transform: Transform, marker: RootAnalogStickMarker) -> impl Bundle {
+        (
+            GlobalTransform::identity(),
+            transform,
+            marker,
+            RootAtomicDisplayMarker,
+            Name::new("Analog Stick"),
+        )
+    }
+}
+
 #[derive(Component)]
 pub struct ChildStickMarker;
 
@@ -150,18 +162,13 @@ impl AtomicInputDisplay<AnalogStickParams> for AnalogStickAtomicDisplay {
             use_trigger = true;
         }
         let input_sink = InputSink::new(sources);
-
-        let t: Transform = transform.into();
+        let marker = RootAnalogStickMarker {
+            stick_radius,
+            use_trigger,
+        };
 
         commands
-            .spawn()
-            .insert(t)
-            .insert(GlobalTransform::identity())
-            .insert(RootAtomicDisplayMarker)
-            .insert(RootAnalogStickMarker {
-                stick_radius,
-                use_trigger,
-            })
+            .spawn_bundle(RootAnalogStickMarker::build_root(transform.into(), marker))
             .insert(input_sink)
             .with_children(|parent| {
                 parent.spawn_bundle(stick_bundle).insert(ChildStickMarker);
