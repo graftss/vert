@@ -52,9 +52,19 @@ fn main() {
     app.run();
 }
 
+#[derive(Component)]
+pub struct MainCameraMarker;
+
+#[derive(Component)]
+pub struct UiCameraMarker;
+
 fn root_startup_system(mut commands: Commands) {
-    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
-    commands.spawn_bundle(UiCameraBundle::default());
+    commands
+        .spawn_bundle(OrthographicCameraBundle::new_2d())
+        .insert(MainCameraMarker);
+    commands
+        .spawn_bundle(UiCameraBundle::default())
+        .insert(UiCameraMarker);
 }
 
 fn add_debug_tools(app: &mut App) {

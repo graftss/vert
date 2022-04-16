@@ -1,6 +1,6 @@
 use bevy::{pbr::VisiblePointLights, prelude::*};
 
-use crate::app_state::AppState;
+use crate::{app_state::AppState, MainCameraMarker};
 
 use super::{
     display::{InputDisplayRes, TaggedAtomicParams},
@@ -16,7 +16,7 @@ pub struct StateBeforePresent {
 pub fn enter_present_system(
     mut windows: ResMut<Windows>,
     mut display: Res<InputDisplayRes>,
-    mut query: Query<(&mut OrthographicProjection, &mut Transform), With<VisiblePointLights>>,
+    mut query: Query<(&mut OrthographicProjection, &mut Transform), With<MainCameraMarker>>,
 ) {
     if let Some(window) = windows.get_primary_mut() {
         // Set the window size equal to the frame size
