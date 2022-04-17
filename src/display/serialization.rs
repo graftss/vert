@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_inspector_egui::Inspectable;
 use bevy_prototype_lyon::{
     prelude::*,
     shapes::{Circle, Rectangle},
@@ -199,7 +200,7 @@ impl From<DrawMode> for DrawModeDef {
 
 // Serialization for `Transform`
 
-#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, Inspectable)]
 pub struct TransformDef {
     pub translation: Vec3,
     pub rotation: Quat,

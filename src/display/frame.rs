@@ -30,7 +30,7 @@ pub struct FrameParams {
 }
 
 impl FrameParams {
-    pub fn bundle(self) -> impl Bundle {
+    fn bundle(self) -> impl Bundle {
         let FrameParams {
             thickness,
             left,
@@ -67,15 +67,14 @@ pub struct RootFrameMarker;
 
 pub struct FrameAtomicDisplay;
 
-fn regenerate_system(
-    mut commands: Commands,
-    mut query: Query<
-        (Entity, &FrameParams, &DrawMode, &mut Transform, &mut Shape),
-        Changed<FrameParams>,
-    >,
-) {
-    for (entity, params, draw_mode, mut transform, mut shape) in query.iter_mut() {
-        commands.entity(entity).insert_bundle(params.bundle());
+impl FrameAtomicDisplay {
+    fn regenerate_system(
+        mut commands: Commands,
+        mut query: Query<(Entity, &FrameParams), Changed<FrameParams>>,
+    ) {
+        for (entity, params) in query.iter_mut() {
+            commands.entity(entity).insert_bundle(params.bundle());
+        }
     }
 }
 
@@ -95,6 +94,6 @@ impl AtomicInputDisplay<FrameParams> for FrameAtomicDisplay {
 
     fn add_update_systems(app: &mut App) {
         app.register_inspectable::<FrameParams>();
-        app.add_system(regenerate_system);
+        app.add_system(FrameAtomicDisplay::regenerate_system);
     }
 }

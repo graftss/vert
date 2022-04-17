@@ -116,7 +116,7 @@ pub fn debug_button_data() -> Vec<Box<TaggedAtomicParams>> {
 
     let mut result = vec![];
 
-    for x in (std::ops::Range { start: 10, end: 15 }) {
+    for x in (std::ops::Range { start: 10, end: 11 }) {
         let z = (x * 30) as f32;
         let button_key = ControllerKey::Ps2(Ps2Key::Circle);
         result.push(Box::new(TaggedAtomicParams::Button(ButtonParams {

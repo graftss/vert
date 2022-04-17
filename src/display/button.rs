@@ -1,4 +1,5 @@
-use bevy::prelude::*;
+use bevy::{ecs::system::EntityCommands, prelude::*};
+use bevy_inspector_egui::{Inspectable, RegisterInspectable};
 use bevy_prototype_lyon::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -15,30 +16,57 @@ use super::{
 };
 
 // The data parameterizing a button input display.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Component, Inspectable)]
 pub struct ButtonParams {
+    #[inspectable(ignore)]
     pub displayable: Renderable,
+    #[inspectable(ignore)]
     pub on_mode: DrawModeDef,
+    #[inspectable(ignore)]
     pub off_mode: DrawModeDef,
     pub transform: TransformDef,
+    #[inspectable(ignore)]
     pub button_key: ControllerKey,
+}
+
+impl ButtonParams {
+    pub fn root_bundle(self) -> impl Bundle {
+        let name = format!("Button ({:?})", self.button_key);
+        (
+            GlobalTransform::identity(),
+            Into::<Transform>::into(self.transform),
+            RootButtonMarker,
+            RootAtomicDisplayMarker,
+            Name::new(name),
+        )
+    }
+
+    pub fn insert_on_bundle(&self, mut commands: EntityCommands) {
+        let mut on_bundle = self
+            .displayable
+            .build_as(self.on_mode.into(), Transform::identity());
+        on_bundle.visibility = Visibility { is_visible: false };
+        commands
+            .insert_bundle(on_bundle)
+            .insert(ChildButtonMarker { pressed: true })
+            .insert(InputSink::new(vec![self.button_key]));
+    }
+
+    fn insert_off_bundle(&self, mut commands: EntityCommands) {
+        let mut off_bundle = self
+            .displayable
+            .build_as(self.off_mode.into(), Transform::identity());
+
+        commands
+            .insert_bundle(off_bundle)
+            .insert(ChildButtonMarker { pressed: false })
+            .insert(InputSink::new(vec![self.button_key]));
+    }
 }
 
 // The marker for the root entity of a button display.
 #[derive(Component)]
 pub struct RootButtonMarker;
-
-impl RootButtonMarker {
-    pub fn build_root(transform: Transform) -> impl Bundle {
-        (
-            GlobalTransform::identity(),
-            transform,
-            RootButtonMarker,
-            RootAtomicDisplayMarker,
-            Name::new("Button".to_string()),
-        )
-    }
-}
 
 // The marker for a child entity of a button display.
 // The root display has two children whose visibilities are toggled
@@ -68,40 +96,53 @@ impl ButtonAtomicDisplay {
             }
         }
     }
+
+    fn regenerate_system(
+        mut commands: Commands,
+        parent_query: Query<(Entity, &ButtonParams, &Children), Changed<ButtonParams>>,
+        child_query: Query<&ChildButtonMarker>,
+    ) {
+        for (root_entity, params, children) in parent_query.iter() {
+            // Regenerate the root entity
+            commands
+                .entity(root_entity)
+                .insert_bundle(params.root_bundle());
+
+            // Rengenerate the child entities
+            for &child_entity in children.iter() {
+                let marker_result = child_query.get(child_entity);
+                match marker_result {
+                    Ok(marker) => {
+                        if marker.pressed {
+                            params.insert_on_bundle(commands.entity(child_entity));
+                        } else {
+                            params.insert_off_bundle(commands.entity(child_entity));
+                        }
+                    }
+                    _ => {
+                        panic!("weird thing happened when regenerating a button");
+                    }
+                }
+            }
+        }
+    }
 }
 
 impl AtomicInputDisplay<ButtonParams> for ButtonAtomicDisplay {
-    fn spawn(commands: &mut Commands, display_data: &ButtonParams) -> Entity {
-        let ButtonParams {
-            displayable,
-            on_mode,
-            off_mode,
-            transform,
-            button_key,
-        } = *display_data;
-
-        let mut on_bundle = displayable.build_as(on_mode.into(), Transform::identity());
-        on_bundle.visibility = Visibility { is_visible: false };
-
-        let off_bundle = displayable.build_as(off_mode.into(), Transform::identity());
-
+    fn spawn(commands: &mut Commands, params: &ButtonParams) -> Entity {
         commands
-            .spawn_bundle(RootButtonMarker::build_root(transform.into()))
+            .spawn_bundle(params.root_bundle())
+            .insert(*params)
             .with_children(|parent| {
-                parent
-                    .spawn_bundle(on_bundle)
-                    .insert(ChildButtonMarker { pressed: true })
-                    .insert(InputSink::new(vec![button_key]));
-
-                parent
-                    .spawn_bundle(off_bundle)
-                    .insert(ChildButtonMarker { pressed: false })
-                    .insert(InputSink::new(vec![button_key]));
+                params.insert_on_bundle(parent.spawn());
+                params.insert_off_bundle(parent.spawn());
             })
             .id()
     }
 
     fn add_update_systems(app: &mut App) {
-        app.add_system_set(SystemSet::new().with_system(Self::button_update_system));
+        app.add_system(Self::button_update_system);
+        app.add_system(Self::regenerate_system);
+        app.register_inspectable::<ButtonParams>();
     }
 }
