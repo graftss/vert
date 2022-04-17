@@ -66,6 +66,24 @@ pub fn spawn_queued_display_system(
     }
 }
 
+pub struct RequestDespawnAtom(pub usize);
+
+fn handle_request_despawn_atom_system(
+    mut event_reader: EventReader<RequestDespawnAtom>,
+    mut commands: Commands,
+    mut display_res: Option<ResMut<InputDisplay>>,
+) {
+    if let Some(mut display) = display_res {
+        for &RequestDespawnAtom(atom_idx) in event_reader.iter() {
+            let atom = display.atoms[atom_idx];
+            if let Some(entity) = atom.entity {
+                commands.entity(entity).despawn_recursive();
+                display.atoms.remove(atom_idx);
+            }
+        }
+    }
+}
+
 pub fn insert_display_from_file(mut commands: Commands, path: &str) {
     // Attempt to inject an input display from a file, and inject an empty display if that fails.
     match read_from_file::<InputDisplay>(path) {
@@ -83,7 +101,10 @@ pub fn save_display_to_file(mut commands: Commands, display: Res<InputDisplay>) 
 }
 
 pub fn add_display_systems(app: &mut App) {
+    app.add_event::<RequestDespawnAtom>();
     app.add_system(spawn_queued_display_system.after("teardown"));
+
+    app.add_system(handle_request_despawn_atom_system);
 
     // Atomic display-specific systems
     add_atomic_display_systems!(

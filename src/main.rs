@@ -70,6 +70,12 @@ fn root_startup_system(mut commands: Commands) {
         .insert(UiCameraMarker);
 }
 
+fn print_display_res(display: Option<Res<InputDisplay>>, kb_input: Res<Input<KeyCode>>) {
+    if kb_input.just_pressed(KeyCode::F6) {
+        println!("display: {:?}", display);
+    }
+}
+
 fn add_debug_tools(app: &mut App) {
     // app.insert_resource(WorldInspectorParams {
     //     despawnable_entities: true,
@@ -84,5 +90,6 @@ fn add_debug_tools(app: &mut App) {
     // app.add_plugin(FrameTimeDiagnosticsPlugin::default());
 
     // Add some fixed input displays for testing
+    app.add_system(print_display_res);
     app.add_system(reinject_debug_display);
 }
