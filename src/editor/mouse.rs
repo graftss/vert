@@ -82,7 +82,7 @@ pub fn editor_mouse_drag_system(
         With<MainCameraMarker>,
     >,
 ) {
-    if  mouse_buttons.just_released(MouseButton::Left) {
+    if mouse_buttons.just_released(MouseButton::Left) {
         // Mouse was just released: exit drag mode.
         // If we have recorded a world position of the cursor, restore it (by moving the cursor there).
         let new_cursor_pos = frozen_pos.map(|frozen| {

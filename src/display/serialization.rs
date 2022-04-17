@@ -8,7 +8,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 // Serialization type for `RegularPolygon`
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Inspectable)]
 pub enum RegularPolygonFeatureDef {
     /// The radius of the polygon's circumcircle.
     Radius(f32),
@@ -38,7 +38,7 @@ impl From<RegularPolygonFeature> for RegularPolygonFeatureDef {
     }
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Inspectable)]
 pub struct RegularPolygonDef {
     pub sides: usize,
     pub center: Vec2,
@@ -77,17 +77,16 @@ impl Default for RegularPolygonDef {
 
 // Serialization type for `Circle`
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Inspectable)]
 pub struct CircleDef {
     pub radius: f32,
-    pub center: Vec2,
 }
 
 impl Into<Circle> for CircleDef {
     fn into(self) -> Circle {
         Circle {
             radius: self.radius,
-            center: self.center,
+            center: Vec2::ZERO,
         }
     }
 }
@@ -96,17 +95,13 @@ impl From<Circle> for CircleDef {
     fn from(other: Circle) -> Self {
         CircleDef {
             radius: other.radius,
-            center: other.center,
         }
     }
 }
 
 impl Default for CircleDef {
     fn default() -> Self {
-        Self {
-            radius: 1.0,
-            center: Vec2::ZERO,
-        }
+        Self { radius: 40.0 }
     }
 }
 
@@ -115,6 +110,7 @@ impl Default for CircleDef {
 pub struct FillModeDef {
     #[inspectable(ignore)]
     pub options: FillOptions,
+    #[inspectable(label = "Color", alpha = true)]
     pub color: Color,
 }
 
@@ -176,7 +172,7 @@ impl Default for StrokeOptionsDef {
 pub struct StrokeModeDef {
     #[inspectable(label = "Options")]
     pub options: StrokeOptionsDef,
-    #[inspectable(label = "Color")]
+    #[inspectable(label = "Color", alpha = true)]
     pub color: Color,
 }
 
@@ -300,7 +296,7 @@ impl From<Transform> for TransformDef {
 // Serialization for `bevy_prototype_lyon::shapes::Rectangle`.
 // Note that this only works for the origin type `RectangleOrigin::BottomLeft`.
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Inspectable)]
 pub struct RectangleDef {
     pub extents: Vec2,
 }
@@ -319,6 +315,14 @@ impl From<Rectangle> for RectangleDef {
     fn from(other: Rectangle) -> Self {
         Self {
             extents: other.extents,
+        }
+    }
+}
+
+impl Default for RectangleDef {
+    fn default() -> Self {
+        Self {
+            extents: Vec2::new(40.0, 30.0),
         }
     }
 }

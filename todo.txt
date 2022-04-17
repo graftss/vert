@@ -12,7 +12,6 @@
 - reset `InputListener` when appstate changes
 - layout.json isn't updating anymore
 
-- impl inspectable for remaining params fields
 - create new atom
     - spawn in center of screen
 - delete atom

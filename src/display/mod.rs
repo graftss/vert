@@ -1,5 +1,6 @@
 pub mod display;
 pub mod present;
+pub mod renderable;
 pub mod serialization;
 pub mod system;
 

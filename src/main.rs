@@ -33,9 +33,8 @@ fn main() {
     let mut app = App::new();
 
     app.insert_resource(WindowDescriptor {
-        title: "vert".to_string(),
-        width: 800.,
-        height: 600.,
+        width: 1200.,
+        height: 900.,
         ..WindowDescriptor::default()
     });
 

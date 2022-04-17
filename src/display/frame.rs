@@ -10,7 +10,8 @@ use serde::{Deserialize, Serialize};
 use crate::util::despawn_all_with;
 
 use super::{
-    display::{AtomicInputDisplay, Renderable, RootAtomicDisplayMarker},
+    display::{AtomicInputDisplay, RootAtomicDisplayMarker},
+    renderable::Renderable,
     serialization::{RectangleDef, RegularPolygonDef},
 };
 

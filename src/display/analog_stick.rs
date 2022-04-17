@@ -12,23 +12,15 @@ use crate::{
 };
 
 use super::{
-    display::{AtomicInputDisplay, Renderable, RootAtomicDisplayMarker},
+    display::{AtomicInputDisplay, RootAtomicDisplayMarker},
+    renderable::Renderable,
     serialization::{DrawModeDef, TransformDef},
 };
 
 // The data parameterizing an analog stick input display.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, Component, Inspectable)]
 pub struct AnalogStickParams {
-    #[inspectable(ignore)]
-    pub stick_display: Renderable,
-    #[inspectable(label = "Stick texture")]
-    pub stick_mode: DrawModeDef,
-    #[inspectable(min = 0.0, suffix = "px")]
-    pub stick_radius: f32,
-    #[inspectable(ignore)]
-    pub bg_display: Renderable,
-    #[inspectable(label = "BG texture")]
-    pub bg_mode: DrawModeDef,
+    #[inspectable(label = "Transform")]
     pub transform: TransformDef,
     #[inspectable(label = "X+ axis")]
     pub pos_x: BoundControllerKey,
@@ -40,6 +32,16 @@ pub struct AnalogStickParams {
     pub neg_y: BoundControllerKey,
     #[inspectable(label = "Trigger")]
     pub trigger: BoundControllerKey,
+    #[inspectable(min = 0.0, suffix = "px", label = "Stick radius")]
+    pub stick_radius: f32,
+    #[inspectable(label = "Stick model")]
+    pub stick_display: Renderable,
+    #[inspectable(label = "Stick texture")]
+    pub stick_mode: DrawModeDef,
+    #[inspectable(label = "BG model")]
+    pub bg_display: Renderable,
+    #[inspectable(label = "BG texture")]
+    pub bg_mode: DrawModeDef,
 }
 
 impl AnalogStickParams {

@@ -12,23 +12,24 @@ use crate::{
 };
 
 use super::{
-    display::{AtomicInputDisplay, Renderable, RootAtomicDisplayMarker},
+    display::{AtomicInputDisplay, RootAtomicDisplayMarker},
+    renderable::Renderable,
     serialization::{DrawModeDef, TransformDef},
 };
 
 // The data parameterizing a button input display.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, Component, Inspectable)]
 pub struct ButtonParams {
-    #[inspectable(ignore)]
-    pub displayable: Renderable,
-    #[inspectable(label = "Pressed style")]
-    pub on_mode: DrawModeDef,
-    #[inspectable(label = "Released style")]
-    pub off_mode: DrawModeDef,
     #[inspectable(label = "Transform")]
     pub transform: TransformDef,
     #[inspectable(label = "Button")]
     pub button_key: BoundControllerKey,
+    #[inspectable(label = "Model")]
+    pub displayable: Renderable,
+    #[inspectable(label = "On texture")]
+    pub on_mode: DrawModeDef,
+    #[inspectable(label = "Off texture")]
+    pub off_mode: DrawModeDef,
 }
 
 impl ButtonParams {

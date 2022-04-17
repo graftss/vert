@@ -8,8 +8,9 @@ use bevy_prototype_lyon::prelude::*;
 use super::{
     analog_stick::AnalogStickParams,
     button::ButtonParams,
-    display::{AtomicDisplay, InputDisplay, Renderable, TaggedAtomicParams},
+    display::{AtomicDisplay, InputDisplay, TaggedAtomicParams},
     frame::FrameParams,
+    renderable::Renderable,
     serialization::{CircleDef, RectangleDef, RegularPolygonDef, RegularPolygonFeatureDef},
     system::{RequestDespawnAll, RequestSaveDisplay, RequestSpawnAtom},
 };

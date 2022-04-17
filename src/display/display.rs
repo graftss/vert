@@ -21,32 +21,6 @@ use super::{
 #[derive(Component)]
 pub struct RootAtomicDisplayMarker;
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
-pub enum Renderable {
-    RegularPolygon(RegularPolygonDef),
-    Circle(CircleDef),
-    Rectangle(RectangleDef),
-}
-
-impl Renderable {
-    pub fn build_as(&self, mode: DrawMode, transform: bevy::prelude::Transform) -> ShapeBundle {
-        match *self {
-            Renderable::RegularPolygon(rp) => {
-                let trp: RegularPolygon = rp.into();
-                GeometryBuilder::build_as(&trp, mode, transform)
-            }
-            Renderable::Circle(c) => {
-                let tc: Circle = c.into();
-                GeometryBuilder::build_as(&tc, mode, transform)
-            }
-            Renderable::Rectangle(r) => {
-                let r: Rectangle = r.into();
-                GeometryBuilder::build_as(&r, mode, transform)
-            }
-        }
-    }
-}
-
 pub trait AtomicInputDisplay<P>
 where
     P: Clone + Copy,
