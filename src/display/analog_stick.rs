@@ -75,9 +75,9 @@ impl AnalogStickParams {
             stick_mode,
             ..
         } = self;
-        commands
-            .insert_bundle(stick_display.build_as(stick_mode.into(), Transform::identity()))
-            .insert(ChildStickMarker);
+
+        stick_display.insert_bundle(&mut commands, stick_mode.into(), Transform::identity());
+        commands.insert(ChildStickMarker);
     }
 
     fn insert_bg_bundle(self, mut commands: EntityCommands) {
@@ -87,9 +87,8 @@ impl AnalogStickParams {
             ..
         } = self;
 
-        commands
-            .insert_bundle(bg_display.build_as(bg_mode.into(), Transform::identity()))
-            .insert(ChildBgMarker);
+        bg_display.insert_bundle(&mut commands, bg_mode.into(), Transform::identity());
+        commands.insert(ChildBgMarker);
     }
 }
 

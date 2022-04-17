@@ -44,24 +44,22 @@ impl ButtonParams {
         )
     }
 
-    pub fn insert_on_bundle(&self, mut commands: EntityCommands) {
-        let mut on_bundle = self
-            .displayable
-            .build_as(self.on_mode.into(), Transform::identity());
-        on_bundle.visibility = Visibility { is_visible: false };
+    pub fn insert_on_bundle(&self, mut commands: &mut EntityCommands) {
+        // Insert the model and texture bundles
+        self.displayable
+            .insert_bundle(commands, self.on_mode.into(), Transform::identity());
+
         commands
-            .insert_bundle(on_bundle)
+            .insert(Visibility { is_visible: false })
             .insert(ChildButtonMarker { pressed: true })
             .insert(InputSink::new(vec![self.button_key.key]));
     }
 
-    fn insert_off_bundle(&self, mut commands: EntityCommands) {
-        let mut off_bundle = self
-            .displayable
-            .build_as(self.off_mode.into(), Transform::identity());
+    fn insert_off_bundle(&self, mut commands: &mut EntityCommands) {
+        self.displayable
+            .insert_bundle(commands, self.off_mode.into(), Transform::identity());
 
         commands
-            .insert_bundle(off_bundle)
             .insert(ChildButtonMarker { pressed: false })
             .insert(InputSink::new(vec![self.button_key.key]));
     }
@@ -117,9 +115,9 @@ impl ButtonAtomicDisplay {
                 match marker_result {
                     Ok(marker) => {
                         if marker.pressed {
-                            params.insert_on_bundle(commands.entity(child_entity));
+                            params.insert_on_bundle(&mut commands.entity(child_entity));
                         } else {
-                            params.insert_off_bundle(commands.entity(child_entity));
+                            params.insert_off_bundle(&mut commands.entity(child_entity));
                         }
                     }
                     _ => {
@@ -140,8 +138,8 @@ impl AtomicInputDisplay<ButtonParams> for ButtonAtomicDisplay {
 
         root.insert(my_params)
             .with_children(|parent| {
-                params.insert_on_bundle(parent.spawn());
-                params.insert_off_bundle(parent.spawn());
+                params.insert_on_bundle(&mut parent.spawn());
+                params.insert_off_bundle(&mut parent.spawn());
             })
             .id()
     }

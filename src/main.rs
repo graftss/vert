@@ -48,7 +48,7 @@ fn main() {
         ..Default::default()
     });
     // https://github.com/jakobhellermann/bevy-inspector-egui/blob/5592441465fe627736de7c245f1e23e00304867b/src/world_inspector/mod.rs#L68
-    app.add_plugin(WorldInspectorPlugin::new());
+    app.add_plugin(WorldInspectorPlugin::new().filter::<With<RootAtomicDisplayMarker>>());
 
     #[cfg(debug_assertions)]
     add_debug_tools(&mut app);

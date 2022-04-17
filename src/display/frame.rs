@@ -1,4 +1,4 @@
-use bevy::{prelude::*, sprite::Mesh2dHandle};
+use bevy::{ecs::system::EntityCommands, prelude::*, sprite::Mesh2dHandle};
 use bevy_inspector_egui::{Inspectable, RegisterInspectable};
 use bevy_prototype_lyon::{
     prelude::{DrawMode, FillMode, StrokeMode},
@@ -14,6 +14,8 @@ use super::{
     renderable::Renderable,
     serialization::{RectangleDef, RegularPolygonDef},
 };
+
+const FRAME_Z_POS: f32 = 100.0;
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, Component, Inspectable)]
 pub struct FrameParams {
@@ -31,7 +33,7 @@ pub struct FrameParams {
 }
 
 impl FrameParams {
-    fn bundle(self) -> impl Bundle {
+    fn insert_bundle(self, mut commands: EntityCommands) -> impl Bundle {
         let FrameParams {
             thickness,
             position,
@@ -44,9 +46,13 @@ impl FrameParams {
             fill_mode: FillMode::color(Color::NONE),
             outline_mode: StrokeMode::new(Color::GREEN, thickness),
         };
-        let transform = Transform::from_xyz(position.x, position.y, 100.0);
+        let transform = Transform::from_xyz(position.x, position.y, FRAME_Z_POS);
 
-        Renderable::Rectangle(RectangleDef { extents }).build_as(draw_mode, transform)
+        Renderable::Rectangle(RectangleDef { extents }).insert_bundle(
+            &mut commands,
+            draw_mode,
+            transform,
+        );
     }
 }
 
@@ -72,23 +78,25 @@ impl FrameAtomicDisplay {
         mut query: Query<(Entity, &FrameParams), Changed<FrameParams>>,
     ) {
         for (entity, params) in query.iter_mut() {
-            commands.entity(entity).insert_bundle(params.bundle());
+            params.insert_bundle(commands.entity(entity));
         }
     }
 }
 
 impl AtomicInputDisplay<FrameParams> for FrameAtomicDisplay {
     fn spawn(commands: &mut Commands, params: &FrameParams) -> Entity {
+        let mut root_entity = commands.spawn();
         let my_params = params.clone();
-        let frame_bundle = params.bundle();
 
-        commands
-            .spawn_bundle(frame_bundle)
+        let id = root_entity
             .insert(RootFrameMarker)
             .insert(RootAtomicDisplayMarker)
             .insert(Name::new("Frame"))
             .insert(my_params)
-            .id()
+            .id();
+        params.insert_bundle(root_entity);
+
+        id
     }
 
     fn add_update_systems(app: &mut App) {
