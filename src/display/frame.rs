@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use crate::util::despawn_all_with;
 
 use super::{
-    display::{AtomicInputDisplay, RootAtomicDisplayMarker},
+    display::{AtomicInputDisplay, RootAtomicDisplayMarker, TaggedAtomicParams},
     renderable::Renderable,
     serialization::{RectangleDef, RegularPolygonDef},
 };
@@ -33,7 +33,18 @@ pub struct FrameParams {
 }
 
 impl FrameParams {
-    fn insert_bundle(self, mut commands: EntityCommands) -> impl Bundle {
+    fn root_bundle(self) -> impl Bundle {
+        let name = "** Frame".to_string();
+        (
+            RootFrameMarker,
+            RootAtomicDisplayMarker,
+            GlobalTransform::identity(),
+            Transform::from_xyz(self.position.x, self.position.y, FRAME_Z_POS),
+            Name::new(name),
+        )
+    }
+
+    fn insert_child_bundle(self, mut commands: EntityCommands) -> impl Bundle {
         let FrameParams {
             thickness,
             position,
@@ -46,8 +57,9 @@ impl FrameParams {
             fill_mode: FillMode::color(Color::NONE),
             outline_mode: StrokeMode::new(Color::GREEN, thickness),
         };
-        let transform = Transform::from_xyz(position.x, position.y, FRAME_Z_POS);
+        let transform = Transform::identity();
 
+        commands.insert(ChildFrameMarker);
         Renderable::Rectangle(RectangleDef { extents }).insert_bundle(
             &mut commands,
             draw_mode,
@@ -70,15 +82,34 @@ impl Default for FrameParams {
 #[derive(Component)]
 pub struct RootFrameMarker;
 
+#[derive(Component)]
+pub struct ChildFrameMarker;
+
 pub struct FrameAtomicDisplay;
 
 impl FrameAtomicDisplay {
     fn regenerate_system(
         mut commands: Commands,
-        mut query: Query<(Entity, &FrameParams), Changed<FrameParams>>,
+        mut parent_query: Query<(Entity, &FrameParams, &Children), Changed<FrameParams>>,
+        mut child_query: Query<&ChildFrameMarker>,
     ) {
-        for (entity, params) in query.iter_mut() {
-            params.insert_bundle(commands.entity(entity));
+        for (root_entity, params, children) in parent_query.iter_mut() {
+            // Regenerate the root entity
+            commands
+                .entity(root_entity)
+                .insert_bundle(params.root_bundle());
+
+            for &child_entity in children.iter() {
+                match child_query.get(child_entity) {
+                    Ok(_) => {
+                        params.insert_child_bundle(commands.entity(child_entity));
+                    }
+                    Err(_) => {
+                        panic!("failed to regenerate frame");
+                    }
+                }
+            }
+            // params.insert_child_bundle(commands.entity(entity));
         }
     }
 }
@@ -91,10 +122,13 @@ impl AtomicInputDisplay<FrameParams> for FrameAtomicDisplay {
         let id = root_entity
             .insert(RootFrameMarker)
             .insert(RootAtomicDisplayMarker)
-            .insert(Name::new("Frame"))
+            .insert(Name::new("** Frame"))
             .insert(my_params)
             .id();
-        params.insert_bundle(root_entity);
+
+        root_entity.with_children(|parent| {
+            params.insert_child_bundle(parent.spawn());
+        });
 
         id
     }

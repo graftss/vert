@@ -14,14 +14,12 @@ use crate::{
 use super::{
     display::{AtomicInputDisplay, RootAtomicDisplayMarker},
     renderable::Renderable,
-    serialization::{DrawModeDef, TransformDef},
+    serialization::{CircleDef, DrawModeDef, TransformDef},
 };
 
 // The data parameterizing an analog stick input display.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, Component, Inspectable)]
 pub struct AnalogStickParams {
-    #[inspectable(label = "Transform")]
-    pub transform: TransformDef,
     #[inspectable(label = "X+ axis")]
     pub pos_x: BoundControllerKey,
     #[inspectable(label = "X- axis")]
@@ -32,6 +30,8 @@ pub struct AnalogStickParams {
     pub neg_y: BoundControllerKey,
     #[inspectable(label = "Trigger")]
     pub trigger: BoundControllerKey,
+    #[inspectable(label = "Transform")]
+    pub transform: TransformDef,
     #[inspectable(min = 0.0, suffix = "px", label = "Stick radius")]
     pub stick_radius: f32,
     #[inspectable(label = "Stick model")]
@@ -42,6 +42,51 @@ pub struct AnalogStickParams {
     pub bg_display: Renderable,
     #[inspectable(label = "BG texture")]
     pub bg_mode: DrawModeDef,
+}
+
+impl Default for AnalogStickParams {
+    fn default() -> Self {
+        let stick_display = CircleDef {
+            radius: 9.0,
+            ..CircleDef::default()
+        };
+
+        let stick_mode = DrawMode::Outlined {
+            fill_mode: FillMode::color(Color::BLACK),
+            outline_mode: StrokeMode::new(Color::BLACK, 1.0),
+        }
+        .into();
+
+        let bg_display = CircleDef {
+            radius: 30.0,
+            ..CircleDef::default()
+        };
+
+        let bg_mode = DrawMode::Outlined {
+            fill_mode: FillMode::color(Color::Rgba {
+                red: 0.0,
+                green: 0.0,
+                blue: 0.0,
+                alpha: 0.0,
+            }),
+            outline_mode: StrokeMode::new(Color::BLACK, 3.0),
+        }
+        .into();
+
+        Self {
+            pos_x: Default::default(),
+            neg_x: Default::default(),
+            pos_y: Default::default(),
+            neg_y: Default::default(),
+            trigger: Default::default(),
+            transform: Default::default(),
+            stick_radius: 30.0,
+            stick_display: Renderable::Circle(stick_display),
+            stick_mode,
+            bg_display: Renderable::Circle(bg_display),
+            bg_mode,
+        }
+    }
 }
 
 impl AnalogStickParams {
@@ -64,7 +109,7 @@ impl AnalogStickParams {
             Into::<Transform>::into(self.transform),
             RootAnalogStickMarker,
             RootAtomicDisplayMarker,
-            Name::new("Analog Stick"),
+            Name::new("** Analog Stick"),
             input_sink,
         )
     }

@@ -18,12 +18,12 @@ use super::{
 };
 
 // The data parameterizing a button input display.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, Component, Inspectable)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Component, Inspectable, Default)]
 pub struct ButtonParams {
-    #[inspectable(label = "Transform")]
-    pub transform: TransformDef,
     #[inspectable(label = "Button")]
     pub button_key: BoundControllerKey,
+    #[inspectable(label = "Transform")]
+    pub transform: TransformDef,
     #[inspectable(label = "Model")]
     pub displayable: Renderable,
     #[inspectable(label = "On texture")]
@@ -34,7 +34,7 @@ pub struct ButtonParams {
 
 impl ButtonParams {
     pub fn root_bundle(self) -> impl Bundle {
-        let name = "Button".to_string();
+        let name = "** Button".to_string();
         (
             GlobalTransform::identity(),
             Into::<Transform>::into(self.transform),
@@ -111,8 +111,7 @@ impl ButtonAtomicDisplay {
 
             // Rengenerate the child entities
             for &child_entity in children.iter() {
-                let marker_result = child_query.get(child_entity);
-                match marker_result {
+                match child_query.get(child_entity) {
                     Ok(marker) => {
                         if marker.pressed {
                             params.insert_on_bundle(&mut commands.entity(child_entity));

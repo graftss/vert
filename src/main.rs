@@ -1,3 +1,5 @@
+use std::any::TypeId;
+
 use bevy::prelude::*;
 use state::{add_state_systems, state_hotkey_system, AppState};
 
@@ -9,7 +11,10 @@ use bevy_inspector_egui::{
 use bevy_prototype_lyon::prelude::*;
 use controller::system::add_controller_systems;
 use display::{
+    analog_stick::RootAnalogStickMarker,
+    button::RootButtonMarker,
     display::{InputDisplay, RootAtomicDisplayMarker},
+    frame::RootFrameMarker,
     present::add_present_systems,
     system::add_display_systems,
     test::{
@@ -18,7 +23,7 @@ use display::{
     },
 };
 use editor::system::add_editor_systems;
-use input::input::add_input_systems;
+use input::input::{add_input_systems, InputSink};
 
 mod controller;
 mod display;
@@ -45,9 +50,26 @@ fn main() {
     app.insert_resource(WorldInspectorParams {
         enabled: false,
         despawnable_entities: true,
+        ignore_components: [
+            TypeId::of::<GlobalTransform>(),
+            TypeId::of::<Children>(),
+            TypeId::of::<InputSink>(),
+            TypeId::of::<Name>(),
+            TypeId::of::<RootAnalogStickMarker>(),
+            TypeId::of::<RootAtomicDisplayMarker>(),
+            TypeId::of::<Transform>(),
+            TypeId::of::<Entity>(),
+            TypeId::of::<RootButtonMarker>(),
+            TypeId::of::<ComputedVisibility>(),
+            TypeId::of::<DrawMode>(),
+            TypeId::of::<RootButtonMarker>(),
+            TypeId::of::<RootFrameMarker>(),
+        ]
+        .iter()
+        .copied()
+        .collect(),
         ..Default::default()
     });
-    // https://github.com/jakobhellermann/bevy-inspector-egui/blob/5592441465fe627736de7c245f1e23e00304867b/src/world_inspector/mod.rs#L68
     app.add_plugin(WorldInspectorPlugin::new().filter::<With<RootAtomicDisplayMarker>>());
 
     #[cfg(debug_assertions)]
@@ -86,12 +108,6 @@ fn print_display_res(display: Option<Res<InputDisplay>>, kb_input: Res<Input<Key
 }
 
 fn add_debug_tools(app: &mut App) {
-    // app.insert_resource(WorldInspectorParams {
-    //     despawnable_entities: true,
-    //     highlight_changes: true,
-    //     ..Default::default()
-    // });
-
     // app.register_inspectable::<InputDisplayRes>();
     // add console-based FPS logging
     // app.add_plugin(LogDiagnosticsPlugin::default());

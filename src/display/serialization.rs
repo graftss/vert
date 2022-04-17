@@ -40,6 +40,7 @@ impl From<RegularPolygonFeature> for RegularPolygonFeatureDef {
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, Inspectable)]
 pub struct RegularPolygonDef {
+    #[inspectable(min = 3, max = 10)]
     pub sides: usize,
     pub center: Vec2,
     pub feature: RegularPolygonFeatureDef,
@@ -68,9 +69,9 @@ impl From<RegularPolygon> for RegularPolygonDef {
 impl Default for RegularPolygonDef {
     fn default() -> Self {
         Self {
-            sides: 3,
+            sides: 4,
             center: Vec2::ZERO,
-            feature: RegularPolygonFeatureDef::Radius(1.0),
+            feature: RegularPolygonFeatureDef::Radius(40.0),
         }
     }
 }
@@ -223,6 +224,12 @@ impl From<DrawMode> for DrawModeDef {
     }
 }
 
+impl Default for DrawModeDef {
+    fn default() -> Self {
+        DrawModeDef::Fill(Default::default())
+    }
+}
+
 // Serialization for `Transform`
 
 #[derive(Debug, Serialize, Deserialize, Clone, Copy, Inspectable)]
@@ -259,6 +266,12 @@ impl From<Transform> for TransformDef {
             rotation,
             scale,
         }
+    }
+}
+
+impl Default for TransformDef {
+    fn default() -> Self {
+        Transform::identity().into()
     }
 }
 

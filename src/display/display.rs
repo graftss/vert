@@ -33,7 +33,7 @@ where
     fn add_update_systems(app: &mut App);
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, Component)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum TaggedAtomicParams {
     Button(ButtonParams),
     AnalogStick(AnalogStickParams),

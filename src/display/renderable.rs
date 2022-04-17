@@ -1,5 +1,5 @@
 use super::serialization::*;
-use bevy::{ecs::system::EntityCommands, prelude::Bundle};
+use bevy::{ecs::system::EntityCommands, math::Vec2, prelude::Bundle};
 use bevy_inspector_egui::Inspectable;
 use bevy_prototype_lyon::{entity::ShapeBundle, prelude::*};
 use serde::{Deserialize, Serialize};
@@ -12,6 +12,12 @@ pub enum Renderable {
     Rectangle(RectangleDef),
 }
 
+impl Default for Renderable {
+    fn default() -> Self {
+        Renderable::None
+    }
+}
+
 impl Renderable {
     pub fn insert_bundle(
         &self,
@@ -22,7 +28,13 @@ impl Renderable {
         use bevy_prototype_lyon::shapes::*;
 
         match *self {
-            Renderable::None => {}
+            Renderable::None => {
+                let shape: Rectangle = Rectangle {
+                    extents: Vec2::ZERO,
+                    origin: RectangleOrigin::Center,
+                };
+                commands.insert_bundle(GeometryBuilder::build_as(&shape, mode, transform));
+            }
             Renderable::RegularPolygon(rp) => {
                 let trp: RegularPolygon = rp.into();
                 commands.insert_bundle(GeometryBuilder::build_as(&trp, mode, transform));
