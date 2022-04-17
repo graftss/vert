@@ -8,12 +8,13 @@ use bevy_prototype_lyon::prelude::*;
 use super::{
     analog_stick::AnalogStickParams,
     button::ButtonParams,
-    display::{AtomicDisplay, InputDisplay, QueuedInputDisplay, Renderable, TaggedAtomicParams},
+    display::{AtomicDisplay, InputDisplay, Renderable, TaggedAtomicParams},
     frame::FrameParams,
     serialization::{CircleDef, RectangleDef, RegularPolygonDef, RegularPolygonFeatureDef},
+    system::{RequestDespawnAll, RequestSaveDisplay, RequestSpawnAtom},
 };
 
-pub fn debug_frame_data() -> Vec<TaggedAtomicParams> {
+pub fn debug_frame_data() -> Vec<Box<TaggedAtomicParams>> {
     const left: f32 = -120.0;
     const bottom: f32 = -70.0;
 
@@ -25,11 +26,11 @@ pub fn debug_frame_data() -> Vec<TaggedAtomicParams> {
         thickness: 3.0,
     };
 
-    vec![TaggedAtomicParams::Frame(frame_params)]
+    vec![Box::new(TaggedAtomicParams::Frame(frame_params))]
 }
 
 // Add some analog stick components for testing
-pub fn debug_analog_stick_data() -> Vec<TaggedAtomicParams> {
+pub fn debug_analog_stick_data() -> Vec<Box<TaggedAtomicParams>> {
     let transform = Transform::from_xyz(-40.0, 0.0, 500.0);
 
     let stick_shape = CircleDef {
@@ -91,12 +92,12 @@ pub fn debug_analog_stick_data() -> Vec<TaggedAtomicParams> {
     };
 
     vec![
-        TaggedAtomicParams::AnalogStick(left_stick),
-        TaggedAtomicParams::AnalogStick(right_stick),
+        Box::new(TaggedAtomicParams::AnalogStick(left_stick)),
+        Box::new(TaggedAtomicParams::AnalogStick(right_stick)),
     ]
 }
 
-pub fn debug_button_data() -> Vec<TaggedAtomicParams> {
+pub fn debug_button_data() -> Vec<Box<TaggedAtomicParams>> {
     let shape = RegularPolygonDef {
         sides: 6,
         feature: RegularPolygonFeatureDef::Radius(200.0),
@@ -118,40 +119,68 @@ pub fn debug_button_data() -> Vec<TaggedAtomicParams> {
     for x in (std::ops::Range { start: 10, end: 15 }) {
         let z = (x * 30) as f32;
         let button_key = ControllerKey::Ps2(Ps2Key::Circle);
-        result.push(TaggedAtomicParams::Button(ButtonParams {
+        result.push(Box::new(TaggedAtomicParams::Button(ButtonParams {
             on_mode: on_mode.into(),
             off_mode: off_mode.into(),
             displayable: Renderable::RegularPolygon(shape),
             transform: Transform::from_xyz(z, z, 0.0).into(),
             button_key,
-        }));
+        })));
     }
 
     result
 }
 
-pub fn inject_debug_display(mut commands: Commands) {
+pub fn inject_debug_display(
+    mut commands: Commands,
+    mut event_writer: EventWriter<RequestSpawnAtom>,
+) {
     let mut atom_params = vec![];
     atom_params.append(&mut debug_analog_stick_data());
     atom_params.append(&mut debug_button_data());
     atom_params.append(&mut debug_frame_data());
 
-    let atoms = atom_params
-        .iter()
-        .map(|params| AtomicDisplay {
-            params: params.clone(),
+    let mut atoms = vec![];
+    for params in atom_params {
+        atoms.push(AtomicDisplay {
+            params,
             entity: None,
-        })
-        .collect();
+        });
+    }
 
-    let display = InputDisplay { atoms };
-
-    commands.insert_resource(QueuedInputDisplay { display });
+    for atom in atoms {
+        event_writer.send(RequestSpawnAtom(atom));
+    }
 }
 
-pub fn reinject_debug_display(mut commands: Commands, keyboard_input: Res<Input<KeyCode>>) {
+pub fn save_display_hotkey(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut event_writer: EventWriter<RequestSaveDisplay>,
+) {
+    if keyboard_input.just_pressed(KeyCode::F6) {
+        println!("saving display");
+        event_writer.send(RequestSaveDisplay("display.json".to_string()));
+    }
+}
+
+pub fn clear_display_hotkey(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut event_writer: EventWriter<RequestDespawnAll>,
+) {
+    if keyboard_input.just_pressed(KeyCode::F7) {
+        println!("clearing display");
+        event_writer.send(RequestDespawnAll);
+    }
+}
+
+pub fn inject_debug_display_hotkey(
+    mut commands: Commands,
+    keyboard_input: Res<Input<KeyCode>>,
+    mut event_writer: EventWriter<RequestSpawnAtom>,
+) {
     if keyboard_input.just_pressed(KeyCode::F8) {
         println!("injecting display");
-        inject_debug_display(commands);
+
+        inject_debug_display(commands, event_writer);
     }
 }

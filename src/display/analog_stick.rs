@@ -12,7 +12,6 @@ use crate::{
 use super::{
     display::{AtomicInputDisplay, Renderable, RootAtomicDisplayMarker},
     serialization::{DrawModeDef, TransformDef},
-    system::on_queued_display,
 };
 
 // The data parameterizing an analog stick input display.
@@ -180,16 +179,5 @@ impl AtomicInputDisplay<AnalogStickParams> for AnalogStickAtomicDisplay {
 
     fn add_update_systems(app: &mut App) {
         app.add_system_set(SystemSet::new().with_system(Self::analog_stick_display_system));
-    }
-
-    fn add_teardown_systems(app: &mut App) {
-        app.add_system_set(
-            SystemSet::new()
-                .with_run_criteria(on_queued_display)
-                .with_system(despawn_all_with::<RootAnalogStickMarker>)
-                .with_system(despawn_all_with::<ChildStickMarker>)
-                .with_system(despawn_all_with::<ChildBgMarker>)
-                .label("teardown"),
-        );
     }
 }

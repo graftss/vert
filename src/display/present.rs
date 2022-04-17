@@ -23,10 +23,10 @@ pub fn enter_present_system(
         let tagged_frame = display
             .atoms
             .iter()
-            .find(|&atom| matches!(&atom.params, TaggedAtomicParams::Frame(_)));
+            .find(|&atom| matches!(*atom.params, TaggedAtomicParams::Frame(_)));
 
         for atom in display.atoms.iter() {
-            if let TaggedAtomicParams::Frame(fp) = atom.params {
+            if let TaggedAtomicParams::Frame(fp) = *atom.params {
                 let FrameParams {
                     width,
                     height,

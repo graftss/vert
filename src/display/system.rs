@@ -10,35 +10,15 @@ use super::{
     analog_stick::AnalogStickAtomicDisplay,
     button::ButtonAtomicDisplay,
     display::{
-        AtomicDisplay, AtomicInputDisplay, InputDisplay, QueuedInputDisplay,
-        RootAtomicDisplayMarker, TaggedAtomicParams,
+        AtomicDisplay, AtomicInputDisplay, InputDisplay, RootAtomicDisplayMarker,
+        SerialInputDisplay, TaggedAtomicParams,
     },
     frame::FrameAtomicDisplay,
 };
 
-// Call the update and teardown systems for a list of atomic types.
-macro_rules! add_atomic_display_systems {
-    ($app:ident, $atomic_type:ty) => {
-        <$atomic_type>::add_update_systems($app);
-        <$atomic_type>::add_teardown_systems($app);
-    };
-
-    ($app:ident, $atomic_type:ty $(, $rest:ty)+) => {{
-        add_atomic_display_systems!($app, $atomic_type);
-        add_atomic_display_systems!($app $(, $rest)+);
-    }};
-}
-
-pub fn on_queued_display(queued_event: Option<Res<QueuedInputDisplay>>) -> ShouldRun {
-    match queued_event {
-        Some(_) => ShouldRun::Yes,
-        None => ShouldRun::No,
-    }
-}
-
 pub fn spawn_atomic_display(mut commands: &mut Commands, mut atom: &mut AtomicDisplay) {
     // Spawn entities for the parameters of `atom` and save a reference to the root spawned `Entity`.
-    let entity = match atom.params {
+    let entity = match *atom.params {
         TaggedAtomicParams::Button(b) => ButtonAtomicDisplay::spawn(&mut commands, &b),
         TaggedAtomicParams::AnalogStick(asp) => {
             AnalogStickAtomicDisplay::spawn(&mut commands, &asp)
@@ -50,67 +30,101 @@ pub fn spawn_atomic_display(mut commands: &mut Commands, mut atom: &mut AtomicDi
     atom.entity = Some(entity);
 }
 
-// Spawn the `QueuedInputDisplayRes` resource as an input display,
-// then move it to the `InputDisplayRes` resource.
-pub fn spawn_queued_display_system(
-    mut commands: Commands,
-    mut queued_display_res: Option<ResMut<QueuedInputDisplay>>,
-) {
-    if let Some(mut queued) = queued_display_res {
-        for mut atom in queued.display.atoms.iter_mut() {
-            spawn_atomic_display(&mut commands, &mut atom);
-        }
+pub struct RequestSpawnAtom(pub AtomicDisplay);
 
-        commands.insert_resource(queued.display.to_owned());
-        commands.remove_resource::<QueuedInputDisplay>();
+fn handle_request_spawn_atom_system(
+    mut event_reader: EventReader<RequestSpawnAtom>,
+    mut commands: Commands,
+) {
+    for RequestSpawnAtom(atom) in event_reader.iter() {
+        spawn_atomic_display(&mut commands, &mut atom.clone());
     }
 }
 
-pub struct RequestDespawnAtom(pub usize);
+pub struct RequestDespawnAtom(pub Entity);
 
 fn handle_request_despawn_atom_system(
     mut event_reader: EventReader<RequestDespawnAtom>,
     mut commands: Commands,
-    mut display_res: Option<ResMut<InputDisplay>>,
 ) {
-    if let Some(mut display) = display_res {
-        for &RequestDespawnAtom(atom_idx) in event_reader.iter() {
-            let atom = display.atoms[atom_idx];
-            if let Some(entity) = atom.entity {
-                commands.entity(entity).despawn_recursive();
-                display.atoms.remove(atom_idx);
-            }
-        }
+    for &RequestDespawnAtom(entity) in event_reader.iter() {
+        commands.entity(entity).despawn_recursive();
     }
 }
 
-pub fn insert_display_from_file(mut commands: Commands, path: &str) {
-    // Attempt to inject an input display from a file, and inject an empty display if that fails.
-    match read_from_file::<InputDisplay>(path) {
-        Ok(display) => {
-            commands.insert_resource(QueuedInputDisplay { display });
+pub struct RequestDespawnAll;
+
+fn handle_request_despawn_all_system(
+    mut event_reader: EventReader<RequestDespawnAll>,
+    mut commands: Commands,
+    query: Query<Entity, With<RootAtomicDisplayMarker>>,
+) {
+    for _ in event_reader.iter() {
+        // clear the `InputDisplay` resource
+        commands.insert_resource(InputDisplay::default());
+
+        // delete entities belonging to atomic displays
+        for entity in query.iter() {
+            commands.entity(entity).despawn_recursive();
         }
-        Err(e) => {
-            println!("Error reading input display from file '{}': {:?}", path, e);
-        }
+
+        break;
     }
 }
 
-pub fn save_display_to_file(mut commands: Commands, display: Res<InputDisplay>) {
-    write_to_file(display.into_inner(), "display.json");
+pub struct RequestSaveDisplay(pub String);
+
+pub fn handle_request_save_display(
+    mut event_reader: EventReader<RequestSaveDisplay>,
+    display: Res<InputDisplay>,
+) {
+    for e in event_reader.iter() {
+        let mut atoms = vec![];
+        for atom in display.atoms.iter() {
+            let x = *atom.params;
+            println!("atom: {:?}", x);
+            atoms.push(x);
+        }
+
+        let serial_display = SerialInputDisplay { atoms };
+        write_to_file(&serial_display, &e.0);
+    }
 }
+// pub fn insert_display_from_file(mut commands: Commands, path: &str) {
+//     // Attempt to inject an input display from a file, and inject an empty display if that fails.
+//     match read_from_file::<InputDisplay>(path) {
+//         Ok(display) => {
+//             commands.insert_resource(QueuedInputDisplay { display });
+//         }
+//         Err(e) => {
+//             println!("Error reading input display from file '{}': {:?}", path, e);
+//         }
+//     }
+// }
+
+// pub fn save_display_to_file(mut commands: Commands, display: Res<InputDisplay>) {
+//     write_to_file(display.into_inner(), "display.json");
+// }
 
 pub fn add_display_systems(app: &mut App) {
-    app.add_event::<RequestDespawnAtom>();
-    app.add_system(spawn_queued_display_system.after("teardown"));
+    // app.add_system(spawn_queued_display_system.after("teardown"));
 
+    app.add_event::<RequestDespawnAtom>();
     app.add_system(handle_request_despawn_atom_system);
 
+    app.add_event::<RequestSpawnAtom>();
+    app.add_system(handle_request_spawn_atom_system);
+
+    app.add_event::<RequestDespawnAll>();
+    app.add_system(handle_request_despawn_all_system);
+
+    app.add_event::<RequestSaveDisplay>();
+    app.add_system(handle_request_save_display);
+
+    app.insert_resource(InputDisplay::default());
+
     // Atomic display-specific systems
-    add_atomic_display_systems!(
-        app,
-        ButtonAtomicDisplay,
-        AnalogStickAtomicDisplay,
-        FrameAtomicDisplay
-    );
+    ButtonAtomicDisplay::add_update_systems(app);
+    AnalogStickAtomicDisplay::add_update_systems(app);
+    FrameAtomicDisplay::add_update_systems(app);
 }

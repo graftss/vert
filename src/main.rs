@@ -12,7 +12,10 @@ use display::{
     display::{InputDisplay, RootAtomicDisplayMarker},
     present::add_present_systems,
     system::add_display_systems,
-    test::{inject_debug_display, reinject_debug_display},
+    test::{
+        clear_display_hotkey, inject_debug_display, inject_debug_display_hotkey,
+        save_display_hotkey,
+    },
 };
 use editor::system::add_editor_systems;
 use input::input::add_input_systems;
@@ -83,13 +86,15 @@ fn add_debug_tools(app: &mut App) {
     //     ..Default::default()
     // });
 
-    // app.add_plugin(WorldInspectorPlugin::new().filter::<With<RootAtomicDisplayMarker>>());
+    app.add_plugin(WorldInspectorPlugin::new());
     // app.register_inspectable::<InputDisplayRes>();
     // add console-based FPS logging
     // app.add_plugin(LogDiagnosticsPlugin::default());
     // app.add_plugin(FrameTimeDiagnosticsPlugin::default());
 
     // Add some fixed input displays for testing
+    app.add_system(save_display_hotkey);
     app.add_system(print_display_res);
-    app.add_system(reinject_debug_display);
+    app.add_system(inject_debug_display_hotkey);
+    app.add_system(clear_display_hotkey);
 }

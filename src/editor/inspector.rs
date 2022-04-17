@@ -1,3 +1,5 @@
+use std::ops::RangeInclusive;
+
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContext};
 
@@ -6,6 +8,8 @@ use crate::display::{
     system::RequestDespawnAtom,
 };
 
+use super::system::TestState;
+
 pub trait Inspectable {}
 
 pub fn display_inspector_system(
@@ -13,20 +17,9 @@ pub fn display_inspector_system(
     mut egui_ctx: ResMut<EguiContext>,
     mut display_res: Option<ResMut<InputDisplay>>,
     mut event_writer: EventWriter<RequestDespawnAtom>,
+    mut test: ResMut<TestState>,
 ) {
-    if let None = display_res {
-        return;
+    if let Some(mut display) = display_res {
+        egui::Window::new("Editor").show(egui_ctx.ctx_mut(), |ui| {});
     }
-    let mut display = display_res.unwrap();
-
-    egui::Window::new("Editor").show(egui_ctx.ctx_mut(), |ui| {
-        for (i, mut atom) in display.atoms.iter_mut().enumerate() {
-            ui.label(format!("hi {:?}", atom.entity));
-
-            // delete atom button
-            if ui.button("delete").clicked() {
-                event_writer.send(RequestDespawnAtom(i))
-            }
-        }
-    });
 }

@@ -12,7 +12,6 @@ use crate::{
 use super::{
     display::{AtomicInputDisplay, Renderable, RootAtomicDisplayMarker},
     serialization::{DrawModeDef, TransformDef},
-    system::on_queued_display,
 };
 
 // The data parameterizing a button input display.
@@ -100,16 +99,6 @@ impl AtomicInputDisplay<ButtonParams> for ButtonAtomicDisplay {
                     .insert(InputSink::new(vec![button_key]));
             })
             .id()
-    }
-
-    fn add_teardown_systems(app: &mut App) {
-        app.add_system_set(
-            SystemSet::new()
-                .with_run_criteria(on_queued_display)
-                .with_system(despawn_all_with::<RootButtonMarker>)
-                .with_system(despawn_all_with::<ChildButtonMarker>)
-                .label("teardown"),
-        );
     }
 
     fn add_update_systems(app: &mut App) {
