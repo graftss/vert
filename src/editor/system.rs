@@ -7,7 +7,7 @@ use bevy_inspector_egui::{
 use crate::{display::display::InputDisplay, state::AppState};
 
 use super::mouse::{
-    editor_mouse_drag_system, editor_mouse_run_criteria, editor_mouse_scroll_system,
+    editor_mouse_drag_system, editor_mouse_run_criteria, editor_mouse_scroll_system, release_mouse_when_unfocused_system,
 };
 
 fn enter_editor_system(mut inspector_windows: Option<ResMut<WorldInspectorParams>>) {
@@ -30,6 +30,8 @@ pub fn add_editor_systems(app: &mut App, editor_state: AppState) {
 
     // Exit editor state
     app.add_system_set(SystemSet::on_exit(AppState::Editor).with_system(exit_editor_system));
+
+    app.add_system(release_mouse_when_unfocused_system);
 
     app.add_system_set(
         SystemSet::new()

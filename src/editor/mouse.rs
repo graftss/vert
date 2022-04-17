@@ -35,6 +35,22 @@ pub fn editor_mouse_run_criteria(
     ShouldRun::No
 }
 
+// A system to release the mouse when the game window loses focus.
+pub fn release_mouse_when_unfocused_system(
+    mut mouse_buttons: ResMut<Input<MouseButton>>,
+    windows: Res<Windows>,
+) {
+    if let Some(window) = windows.get_primary() {
+        if !window.is_focused() {
+            // Release the mouse
+            if mouse_buttons.pressed(MouseButton::Left) {
+                mouse_buttons.release(MouseButton::Left);
+            }
+        }
+    }
+}
+
+// A system to zoom the main camera in response to mouse scrolling.
 pub fn editor_mouse_scroll_system(
     mut evr_scroll: EventReader<MouseWheel>,
     mut query: Query<(&mut OrthographicProjection), With<MainCameraMarker>>,
@@ -54,8 +70,9 @@ pub fn editor_mouse_scroll_system(
     }
 }
 
+// A system to move the main camera in response to mouse dragging.
 pub fn editor_mouse_drag_system(
-    mouse_buttons: Res<Input<MouseButton>>,
+    mut mouse_buttons: ResMut<Input<MouseButton>>,
     mut frozen_pos: Option<Res<FrozenCursorPos>>,
     mut commands: Commands,
     mut windows: ResMut<Windows>,
@@ -65,12 +82,34 @@ pub fn editor_mouse_drag_system(
         With<MainCameraMarker>,
     >,
 ) {
-    if mouse_buttons.pressed(MouseButton::Left) {
-        // Enter drag mode.
+    if  mouse_buttons.just_released(MouseButton::Left) {
+        // Mouse was just released: exit drag mode.
+        // If we have recorded a world position of the cursor, restore it (by moving the cursor there).
+        let new_cursor_pos = frozen_pos.map(|frozen| {
+            let (transform, _, camera) = query.single_mut();
+            camera
+                .world_to_screen(&windows, &transform, frozen.world_pos.extend(1.0))
+                .unwrap()
+        });
+
+        if let Some(window) = windows.get_primary_mut() {
+            // Restore the world position of the cursor if one exists.
+            if let Some(pos) = new_cursor_pos {
+                window.set_cursor_position(pos);
+                commands.remove_resource::<FrozenCursorPos>();
+            }
+
+            // Restore normal movement/visibility of the cursor.
+            window.set_cursor_lock_mode(false);
+            window.set_cursor_visibility(true);
+        }
+    } else if mouse_buttons.pressed(MouseButton::Left) {
+        // Mouse is held down: update drag mode.
         let (mut transform, orth_proj, camera) = query.single_mut();
 
         if mouse_buttons.just_pressed(MouseButton::Left) {
-            // If the mouse was just pressed, hide and lock the cursor while recording its world position.
+            // Mouse was just pressed: enter drag mode.
+            // Hide and lock the cursor while recording its world position.
             let window = windows.get_primary_mut().unwrap();
             window.set_cursor_lock_mode(true);
             window.set_cursor_visibility(false);
@@ -86,33 +125,5 @@ pub fn editor_mouse_drag_system(
             }
         }
     } else {
-        // Check if drag mode should be stopped.
-        let mut should_exit_drag = mouse_buttons.just_released(MouseButton::Left);
-        if let Some(window) = windows.get_primary() {
-            should_exit_drag |= !window.is_focused()
-        }
-
-        if should_exit_drag {
-            // Mouse was just released.
-            // If we have recorded a world position of the cursor, restore it (by moving the cursor there).
-            let new_cursor_pos = frozen_pos.map(|frozen| {
-                let (transform, _, camera) = query.single_mut();
-                camera
-                    .world_to_screen(&windows, &transform, frozen.world_pos.extend(1.0))
-                    .unwrap()
-            });
-
-            if let Some(window) = windows.get_primary_mut() {
-                // Restore the world position of the cursor if one exists.
-                if let Some(pos) = new_cursor_pos {
-                    window.set_cursor_position(pos);
-                    commands.remove_resource::<FrozenCursorPos>();
-                }
-
-                // Restore normal movement/visibility of the cursor.
-                window.set_cursor_lock_mode(false);
-                window.set_cursor_visibility(true);
-            }
-        }
     }
 }
