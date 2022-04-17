@@ -19,10 +19,10 @@ pub struct FrameParams {
     pub left: f32,
     pub bottom: f32,
 
-    #[inspectable(min = 10.0, max = 600.0, suffix = "px")]
+    #[inspectable(min = 100.0, max = 600.0, suffix = "px")]
     pub height: f32,
 
-    #[inspectable(min = 10.0, max = 800.0, suffix = "px")]
+    #[inspectable(min = 100.0, max = 800.0, suffix = "px")]
     pub width: f32,
 
     #[inspectable(min = 1.0, max = 10.0, suffix = "px")]

@@ -43,6 +43,7 @@ fn main() {
     app.add_plugins(DefaultPlugins);
     app.add_plugin(ShapePlugin);
     app.add_plugin(EguiPlugin);
+    app.add_plugin(WorldInspectorPlugin::new());
 
     #[cfg(debug_assertions)]
     add_debug_tools(&mut app);
@@ -86,7 +87,6 @@ fn add_debug_tools(app: &mut App) {
     //     ..Default::default()
     // });
 
-    app.add_plugin(WorldInspectorPlugin::new());
     // app.register_inspectable::<InputDisplayRes>();
     // add console-based FPS logging
     // app.add_plugin(LogDiagnosticsPlugin::default());

@@ -15,36 +15,28 @@ pub struct StateBeforePresent {
 
 pub fn enter_present_system(
     mut windows: ResMut<Windows>,
-    mut display: Res<InputDisplay>,
-    mut query: Query<(&mut OrthographicProjection, &mut Transform), With<MainCameraMarker>>,
+    mut camera_query: Query<(&mut OrthographicProjection, &mut Transform), With<MainCameraMarker>>,
+    mut frame_query: Query<(&FrameParams)>,
 ) {
     if let Some(window) = windows.get_primary_mut() {
         // Set the window size equal to the frame size
-        let tagged_frame = display
-            .atoms
-            .iter()
-            .find(|&atom| matches!(*atom.params, TaggedAtomicParams::Frame(_)));
+        if let Ok(fp) = frame_query.get_single() {
+            let FrameParams {
+                width,
+                height,
+                left,
+                bottom,
+                thickness,
+            } = *fp;
 
-        for atom in display.atoms.iter() {
-            if let TaggedAtomicParams::Frame(fp) = *atom.params {
-                let FrameParams {
-                    width,
-                    height,
-                    left,
-                    bottom,
-                    thickness,
-                } = fp;
+            // Update the window size
+            window.set_resolution(width - thickness * 2.0, height - thickness * 2.0);
+            window.set_resizable(false);
 
-                // Update the window size
-                window.set_resolution(width - thickness * 2.0, height - thickness * 2.0);
-                window.set_resizable(false);
-
-                let (mut orth_proj, mut transform) = query.single_mut();
-                orth_proj.scale = 1.0;
-                transform.translation.x = left + width / 2.0;
-                transform.translation.y = bottom + height / 2.0;
-                break;
-            }
+            let (mut orth_proj, mut transform) = camera_query.single_mut();
+            orth_proj.scale = 1.0;
+            transform.translation.x = left + width / 2.0;
+            transform.translation.y = bottom + height / 2.0;
         }
     } else {
         println!("Error finding primary window (entering present mode)");
