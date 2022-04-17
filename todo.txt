@@ -16,9 +16,7 @@
     - spawn in center of screen
 - delete atom
     - add button in inspector ui
-- filter out all non-params components from inspector
 - fs stuff
     - list of all displays in a folder
     - drag display file into editor to load into
     - load display file from url??
-- add editable background color to frame

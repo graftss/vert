@@ -24,6 +24,12 @@ pub fn debug_frame_data() -> Vec<Box<TaggedAtomicParams>> {
         height: bottom * -2.0,
         width: left * -2.0,
         thickness: 3.0,
+        color: Color::Rgba {
+            red: 0.0,
+            green: 1.0,
+            blue: 0.0,
+            alpha: 1.0,
+        },
     };
 
     vec![Box::new(TaggedAtomicParams::Frame(frame_params))]

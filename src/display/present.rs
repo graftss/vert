@@ -26,6 +26,7 @@ pub fn enter_present_system(
                 height,
                 position,
                 thickness,
+                ..
             } = *fp;
 
             // Update the window size

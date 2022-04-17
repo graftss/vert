@@ -9,6 +9,23 @@ pub fn despawn_all_with<C: Component>(mut commands: Commands, query: Query<Entit
     }
 }
 
+pub fn invert_color(color: Color) -> Color {
+    match color.as_rgba() {
+        Color::Rgba {
+            red,
+            green,
+            blue,
+            alpha,
+        } => Color::Rgba {
+            red: 1.0 - red,
+            green: 1.0 - green,
+            blue: 1.0 - blue,
+            alpha: 1.0,
+        },
+        _ => Color::NONE,
+    }
+}
+
 // Write a struct of type `T` to the file at `path`.
 pub fn write_to_file<T>(data: &T, path: &str)
 where

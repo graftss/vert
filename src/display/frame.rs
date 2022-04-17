@@ -7,7 +7,7 @@ use bevy_prototype_lyon::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::util::despawn_all_with;
+use crate::util::{despawn_all_with, invert_color};
 
 use super::{
     display::{AtomicInputDisplay, RootAtomicDisplayMarker, TaggedAtomicParams},
@@ -15,7 +15,7 @@ use super::{
     serialization::{RectangleDef, RegularPolygonDef},
 };
 
-const FRAME_Z_POS: f32 = 100.0;
+const FRAME_Z_POS: f32 = 0.0;
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, Component, Inspectable)]
 pub struct FrameParams {
@@ -27,6 +27,9 @@ pub struct FrameParams {
 
     #[inspectable(label = "Width", min = 100.0, max = 800.0, suffix = "px")]
     pub width: f32,
+
+    #[inspectable(label = "Background", alpha = true)]
+    pub color: Color,
 
     #[inspectable(label = "Thickness", min = 1.0, max = 10.0, suffix = "px")]
     pub thickness: f32,
@@ -50,12 +53,13 @@ impl FrameParams {
             position,
             height,
             width,
+            color,
         } = self;
 
         let extents = Vec2::new(width, height);
         let draw_mode = DrawMode::Outlined {
-            fill_mode: FillMode::color(Color::NONE),
-            outline_mode: StrokeMode::new(Color::GREEN, thickness),
+            fill_mode: FillMode::color(color),
+            outline_mode: StrokeMode::new(invert_color(color), thickness),
         };
         let transform = Transform::identity();
 
@@ -75,6 +79,7 @@ impl Default for FrameParams {
             height: 160.0,
             width: 200.0,
             thickness: 3.0,
+            color: Color::NONE,
         }
     }
 }
