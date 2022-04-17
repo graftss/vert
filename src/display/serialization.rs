@@ -111,10 +111,25 @@ impl Default for CircleDef {
 }
 
 // Serialization type for `DrawMode`
-#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, Inspectable)]
 pub struct FillModeDef {
+    #[inspectable(ignore)]
     pub options: FillOptions,
     pub color: Color,
+}
+
+impl Default for FillModeDef {
+    fn default() -> Self {
+        Self {
+            options: Default::default(),
+            color: Color::Rgba {
+                red: 1.0,
+                green: 1.0,
+                blue: 1.0,
+                alpha: 1.0,
+            },
+        }
+    }
 }
 
 impl Into<FillMode> for FillModeDef {
@@ -131,37 +146,82 @@ impl From<FillMode> for FillModeDef {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, Inspectable)]
+pub struct StrokeOptionsDef {
+    #[inspectable(min = 1.0, max = 20.0, suffix = "px", label = "Thickness")]
+    pub line_width: f32,
+}
+
+impl Into<StrokeOptions> for StrokeOptionsDef {
+    fn into(self) -> StrokeOptions {
+        let StrokeOptionsDef { line_width } = self;
+        StrokeOptions::default().with_line_width(line_width)
+    }
+}
+
+impl From<StrokeOptions> for StrokeOptionsDef {
+    fn from(other: StrokeOptions) -> Self {
+        let StrokeOptions { line_width, .. } = other;
+        StrokeOptionsDef { line_width }
+    }
+}
+
+impl Default for StrokeOptionsDef {
+    fn default() -> Self {
+        Self { line_width: 1.0 }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, Inspectable)]
 pub struct StrokeModeDef {
-    pub options: StrokeOptions,
+    #[inspectable(label = "Options")]
+    pub options: StrokeOptionsDef,
+    #[inspectable(label = "Color")]
     pub color: Color,
 }
 
 impl Into<StrokeMode> for StrokeModeDef {
     fn into(self) -> StrokeMode {
         let StrokeModeDef { options, color } = self;
-        StrokeMode { options, color }
+        StrokeMode {
+            options: options.into(),
+            color,
+        }
     }
 }
 
 impl From<StrokeMode> for StrokeModeDef {
     fn from(other: StrokeMode) -> Self {
         let StrokeMode { options, color } = other;
-        StrokeModeDef { options, color }
+        Self {
+            options: options.into(),
+            color,
+        }
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
+impl Default for StrokeModeDef {
+    fn default() -> Self {
+        Self {
+            options: Default::default(),
+            color: Color::Rgba {
+                red: 1.0,
+                green: 1.0,
+                blue: 1.0,
+                alpha: 1.0,
+            },
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, Inspectable)]
 pub enum DrawModeDef {
-    /// The shape will be filled using the provided [`FillMode`].
     Fill(FillModeDef),
-    /// The shape will be stroked using the provided [`StrokeMode`].
     Stroke(StrokeModeDef),
-    /// The shape will be filled with an outline.
     Outlined {
-        /// Properties about the filling.
+        #[inspectable(label = "Fill")]
         fill_mode: FillModeDef,
-        /// Properties about the outline.
+        #[inspectable(label = "Outline")]
         outline_mode: StrokeModeDef,
     },
 }

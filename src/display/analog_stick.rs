@@ -21,19 +21,24 @@ use super::{
 pub struct AnalogStickParams {
     #[inspectable(ignore)]
     pub stick_display: Renderable,
-    #[inspectable(ignore)]
+    #[inspectable(label = "Stick texture")]
     pub stick_mode: DrawModeDef,
     #[inspectable(min = 0.0, suffix = "px")]
     pub stick_radius: f32,
     #[inspectable(ignore)]
     pub bg_display: Renderable,
-    #[inspectable(ignore)]
+    #[inspectable(label = "BG texture")]
     pub bg_mode: DrawModeDef,
     pub transform: TransformDef,
+    #[inspectable(label = "X+ axis")]
     pub pos_x: BoundControllerKey,
+    #[inspectable(label = "X- axis")]
     pub neg_x: BoundControllerKey,
+    #[inspectable(label = "Y+ axis")]
     pub pos_y: BoundControllerKey,
+    #[inspectable(label = "Y- axis")]
     pub neg_y: BoundControllerKey,
+    #[inspectable(label = "Trigger")]
     pub trigger: BoundControllerKey,
 }
 

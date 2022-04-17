@@ -21,11 +21,13 @@ use super::{
 pub struct ButtonParams {
     #[inspectable(ignore)]
     pub displayable: Renderable,
-    #[inspectable(ignore)]
+    #[inspectable(label = "Pressed style")]
     pub on_mode: DrawModeDef,
-    #[inspectable(ignore)]
+    #[inspectable(label = "Released style")]
     pub off_mode: DrawModeDef,
+    #[inspectable(label = "Transform")]
     pub transform: TransformDef,
+    #[inspectable(label = "Button")]
     pub button_key: BoundControllerKey,
 }
 
