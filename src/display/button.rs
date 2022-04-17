@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     controller::layout::ControllerKey,
+    editor::inspector::{BoundControllerKey, InputSinkId},
     input::input::{InputSink, InputValue},
     state::AppState,
     util::despawn_all_with,
@@ -25,13 +26,12 @@ pub struct ButtonParams {
     #[inspectable(ignore)]
     pub off_mode: DrawModeDef,
     pub transform: TransformDef,
-    #[inspectable(ignore)]
-    pub button_key: ControllerKey,
+    pub button_key: BoundControllerKey,
 }
 
 impl ButtonParams {
     pub fn root_bundle(self) -> impl Bundle {
-        let name = format!("Button ({:?})", self.button_key);
+        let name = format!("Button ({})", self.button_key.key.to_string());
         (
             GlobalTransform::identity(),
             Into::<Transform>::into(self.transform),
@@ -49,7 +49,7 @@ impl ButtonParams {
         commands
             .insert_bundle(on_bundle)
             .insert(ChildButtonMarker { pressed: true })
-            .insert(InputSink::new(vec![self.button_key]));
+            .insert(InputSink::new(vec![self.button_key.key]));
     }
 
     fn insert_off_bundle(&self, mut commands: EntityCommands) {
@@ -60,7 +60,7 @@ impl ButtonParams {
         commands
             .insert_bundle(off_bundle)
             .insert(ChildButtonMarker { pressed: false })
-            .insert(InputSink::new(vec![self.button_key]));
+            .insert(InputSink::new(vec![self.button_key.key]));
     }
 }
 
@@ -130,9 +130,15 @@ impl ButtonAtomicDisplay {
 
 impl AtomicInputDisplay<ButtonParams> for ButtonAtomicDisplay {
     fn spawn(commands: &mut Commands, params: &ButtonParams) -> Entity {
-        commands
-            .spawn_bundle(params.root_bundle())
-            .insert(*params)
+        let mut root = commands.spawn_bundle(params.root_bundle());
+
+        let mut my_params = *params;
+        my_params.button_key.id = Some(InputSinkId {
+            entity: Some(root.id()),
+            idx: 0,
+        });
+
+        root.insert(my_params)
             .with_children(|parent| {
                 params.insert_on_bundle(parent.spawn());
                 params.insert_off_bundle(parent.spawn());

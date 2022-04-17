@@ -5,11 +5,9 @@
 
 
 - editor mode:
-    - clickable atomic displays
-    - list of all atomic displays
-    - ui widget for each component type
-    - ideally, drag-resizable frame
     - hotkey to hide/show the worldinspector
 - statistics?
     - total presses for each button
     - analog stick distance moved??
+- reset `InputListener` when appstate changes
+- layout.json isn't updating anymore

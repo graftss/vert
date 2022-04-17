@@ -124,7 +124,7 @@ pub fn debug_button_data() -> Vec<Box<TaggedAtomicParams>> {
             off_mode: off_mode.into(),
             displayable: Renderable::RegularPolygon(shape),
             transform: Transform::from_xyz(z, z, 0.0).into(),
-            button_key,
+            button_key: button_key.into(),
         })));
     }
 

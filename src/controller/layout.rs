@@ -1,4 +1,5 @@
 use bevy::utils::HashMap;
+use bevy_inspector_egui::Inspectable;
 use serde::{Deserialize, Serialize};
 
 use crate::input::input::InputSource;
@@ -97,15 +98,22 @@ pub struct Ps2Layout {
 }
 
 impl ControllerLayout<Ps2Key> for Ps2Layout {
-    fn get_binding(&self, key: Ps2Key) -> Option<InputSource> {
-        match self.sources.get(&key) {
-            Some(source) => Some(*source),
-            _ => None,
-        }
+    fn get_binding(&self, key: Ps2Key) -> Option<&InputSource> {
+        self.sources.get(&key)
     }
 
     fn set_binding(&mut self, key: Ps2Key, source: &InputSource) {
         self.sources.insert(key, *source);
+    }
+
+    fn is_source_bound(&self, source: &InputSource) -> Option<ControllerKey> {
+        for key in self.sources.keys() {
+            if self.sources.get(key) == Some(source) {
+                return Some(ControllerKey::Ps2(*key));
+            }
+        }
+
+        None
     }
 
     fn get_max_key(&self) -> usize {
@@ -114,8 +122,9 @@ impl ControllerLayout<Ps2Key> for Ps2Layout {
 }
 
 pub trait ControllerLayout<K> {
-    fn get_binding(&self, key: K) -> Option<InputSource>;
+    fn get_binding(&self, key: K) -> Option<&InputSource>;
     fn set_binding(&mut self, key: K, source: &InputSource);
+    fn is_source_bound(&self, source: &InputSource) -> Option<ControllerKey>;
     fn get_max_key(&self) -> usize;
 }
 
@@ -125,7 +134,7 @@ pub struct ControllerLayoutsRes {
 }
 
 impl ControllerLayoutsRes {
-    pub fn get_binding(&self, key: ControllerKey) -> Option<InputSource> {
+    pub fn get_binding(&self, key: ControllerKey) -> Option<&InputSource> {
         match key {
             ControllerKey::Ps2(ps2_key) => self.ps2.get_binding(ps2_key),
         }
@@ -135,6 +144,10 @@ impl ControllerLayoutsRes {
         match key {
             ControllerKey::Ps2(ps2_key) => self.ps2.set_binding(ps2_key, source),
         }
+    }
+
+    pub fn is_source_bound(&self, source: &InputSource) -> Option<ControllerKey> {
+        self.ps2.is_source_bound(source)
     }
 }
 

@@ -3,16 +3,20 @@ use bevy_egui::EguiContext;
 use bevy_inspector_egui::egui;
 
 use crate::{
-    input::{input::InputSource, raw_input_reader::RawInputRes, RawInputReader},
+    input::{
+        input::InputSource,
+        listener::{
+            cleanup_input_listener_system, input_listener_system, InputListener, ListenerResult,
+        },
+        raw_input_reader::RawInputRes,
+        RawInputReader,
+    },
     state::AppState,
     util::{despawn_all_with, read_from_file, write_to_file},
 };
 
-use super::{
-    layout::{
-        ControllerKey, ControllerLayout, ControllerLayoutsRes, Ps2Key, Ps2Layout, PS2_KEY_ORDER,
-    },
-    listener::{cleanup_input_listener_system, input_listener_system, InputListener},
+use super::layout::{
+    ControllerKey, ControllerLayout, ControllerLayoutsRes, Ps2Key, Ps2Layout, PS2_KEY_ORDER,
 };
 
 pub const LAYOUTS_FILE_PATH: &'static str = "layouts.json";
@@ -41,6 +45,7 @@ pub fn ui_system(
     mut egui_ctx: ResMut<EguiContext>,
     mut layout: ResMut<ControllerLayoutsRes>,
     mut input_listener: ResMut<InputListener>,
+    mut event_reader: EventReader<ListenerResult>,
 ) {
     egui::Window::new(CONTROLLER_WINDOW_TITLE).show(egui_ctx.ctx_mut(), |ui| {
         egui::Grid::new(69).show(ui, |ui| {
@@ -50,12 +55,16 @@ pub fn ui_system(
                 ui.label(key.to_string());
 
                 // Button with the current binding name/listening prompt
-                let listening = input_listener.is_listening()
-                    && input_listener.key == Some(ControllerKey::Ps2(ps2_key));
+                let listening = input_listener.listening_for_input_source()
+                    && input_listener.has_key_consumer(ControllerKey::Ps2(ps2_key));
 
                 if listening {
-                    if ui.button(LISTEN_FOR_BINDING.to_string()).clicked() {
-                        input_listener.end_listen();
+                    ui.button(LISTEN_FOR_BINDING.to_string());
+                    for ev in event_reader.iter() {
+                        if let ListenerResult::SourceToKey(source, key) = ev {
+                            layout.set_binding(*key, source);
+                            input_listener.stop_listening();
+                        }
                     }
                 } else {
                     let binding_str = &layout
@@ -63,7 +72,7 @@ pub fn ui_system(
                         .map_or(NO_BINDING.to_string(), |key| key.to_string());
 
                     if ui.button(binding_str).clicked() {
-                        input_listener.start_listen(key);
+                        input_listener.listen_input_source(key);
                     };
                 };
 
@@ -86,12 +95,7 @@ pub fn add_controller_systems(app: &mut App, controller_state: AppState) {
     app.add_startup_system(startup);
 
     // Update
-    app.add_system_set(
-        SystemSet::on_update(controller_state)
-            .with_system(ui_system)
-            .with_system(input_listener_system)
-            .with_system(cleanup_input_listener_system),
-    );
+    app.add_system_set(SystemSet::on_update(controller_state).with_system(ui_system));
 
     // Teardown
     add_controller_teardown_system(app, controller_state);

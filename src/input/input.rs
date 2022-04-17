@@ -5,8 +5,10 @@ use serde::Serialize;
 
 use crate::controller::layout::ControllerKey;
 use crate::controller::layout::ControllerLayoutsRes;
-use crate::controller::listener::InputListener;
 
+use super::listener::cleanup_input_listener_system;
+use super::listener::input_listener_system;
+use super::listener::ListenerResult;
 use super::raw_input_reader::*;
 use super::RawInputReader;
 
@@ -204,8 +206,8 @@ pub fn resolve_dirty_sources_system(
         }
 
         // Write those bindings to the `InputSink`.
-        for (i, key) in bindings.iter().enumerate() {
-            sink.sources[i] = *key;
+        for (i, &key) in bindings.iter().enumerate() {
+            sink.sources[i] = key.map(|source| *source);
         }
 
         sink.sources_dirty = false;
@@ -283,4 +285,9 @@ pub fn add_input_systems(app: &mut App) {
                     .after(InputSystemLabel::ResolveDirtySources),
             ),
     );
+
+    // Add the input listener system and events
+    app.add_event::<ListenerResult>();
+    app.add_system(input_listener_system);
+    app.add_system(cleanup_input_listener_system);
 }
