@@ -24,8 +24,7 @@ pub fn enter_present_system(
             let FrameParams {
                 width,
                 height,
-                left,
-                bottom,
+                position,
                 thickness,
             } = *fp;
 
@@ -35,8 +34,8 @@ pub fn enter_present_system(
 
             let (mut orth_proj, mut transform) = camera_query.single_mut();
             orth_proj.scale = 1.0;
-            transform.translation.x = left + width / 2.0;
-            transform.translation.y = bottom + height / 2.0;
+            transform.translation.x = position.x + width / 2.0;
+            transform.translation.y = position.y + height / 2.0;
         }
     } else {
         println!("Error finding primary window (entering present mode)");

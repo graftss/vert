@@ -143,44 +143,18 @@ impl From<FillMode> for FillModeDef {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Copy, Inspectable)]
-pub struct StrokeOptionsDef {
-    #[inspectable(min = 1.0, max = 20.0, suffix = "px", label = "Thickness")]
-    pub line_width: f32,
-}
-
-impl Into<StrokeOptions> for StrokeOptionsDef {
-    fn into(self) -> StrokeOptions {
-        let StrokeOptionsDef { line_width } = self;
-        StrokeOptions::default().with_line_width(line_width)
-    }
-}
-
-impl From<StrokeOptions> for StrokeOptionsDef {
-    fn from(other: StrokeOptions) -> Self {
-        let StrokeOptions { line_width, .. } = other;
-        StrokeOptionsDef { line_width }
-    }
-}
-
-impl Default for StrokeOptionsDef {
-    fn default() -> Self {
-        Self { line_width: 1.0 }
-    }
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone, Copy, Inspectable)]
 pub struct StrokeModeDef {
-    #[inspectable(label = "Options")]
-    pub options: StrokeOptionsDef,
+    #[inspectable(label = "Thickness")]
+    pub thickness: f32,
     #[inspectable(label = "Color", alpha = true)]
     pub color: Color,
 }
 
 impl Into<StrokeMode> for StrokeModeDef {
     fn into(self) -> StrokeMode {
-        let StrokeModeDef { options, color } = self;
+        let StrokeModeDef { thickness, color } = self;
         StrokeMode {
-            options: options.into(),
+            options: StrokeOptions::default().with_line_width(thickness),
             color,
         }
     }
@@ -190,7 +164,7 @@ impl From<StrokeMode> for StrokeModeDef {
     fn from(other: StrokeMode) -> Self {
         let StrokeMode { options, color } = other;
         Self {
-            options: options.into(),
+            thickness: options.line_width,
             color,
         }
     }
@@ -199,7 +173,7 @@ impl From<StrokeMode> for StrokeModeDef {
 impl Default for StrokeModeDef {
     fn default() -> Self {
         Self {
-            options: Default::default(),
+            thickness: 1.0,
             color: Color::Rgba {
                 red: 1.0,
                 green: 1.0,
@@ -215,10 +189,8 @@ pub enum DrawModeDef {
     Fill(FillModeDef),
     Stroke(StrokeModeDef),
     Outlined {
-        #[inspectable(label = "Fill")]
-        fill_mode: FillModeDef,
-        #[inspectable(label = "Outline")]
-        outline_mode: StrokeModeDef,
+        Fill: FillModeDef,
+        Border: StrokeModeDef,
     },
 }
 
@@ -227,12 +199,9 @@ impl Into<DrawMode> for DrawModeDef {
         match self {
             Self::Fill(f) => DrawMode::Fill(f.into()),
             Self::Stroke(s) => DrawMode::Stroke(s.into()),
-            Self::Outlined {
-                fill_mode,
-                outline_mode,
-            } => DrawMode::Outlined {
-                fill_mode: fill_mode.into(),
-                outline_mode: outline_mode.into(),
+            Self::Outlined { Fill, Border } => DrawMode::Outlined {
+                fill_mode: Fill.into(),
+                outline_mode: Border.into(),
             },
         }
     }
@@ -247,8 +216,8 @@ impl From<DrawMode> for DrawModeDef {
                 fill_mode,
                 outline_mode,
             } => Self::Outlined {
-                fill_mode: fill_mode.into(),
-                outline_mode: outline_mode.into(),
+                Fill: fill_mode.into(),
+                Border: outline_mode.into(),
             },
         }
     }

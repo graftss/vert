@@ -20,8 +20,7 @@ pub fn debug_frame_data() -> Vec<Box<TaggedAtomicParams>> {
     const bottom: f32 = -70.0;
 
     let frame_params = FrameParams {
-        left: left - 10.0,
-        bottom: bottom + 10.0,
+        position: Vec2::new(left - 10.0, bottom + 10.0),
         height: bottom * -2.0,
         width: left * -2.0,
         thickness: 3.0,

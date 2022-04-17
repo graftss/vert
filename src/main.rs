@@ -42,6 +42,12 @@ fn main() {
     app.add_plugins(DefaultPlugins);
     app.add_plugin(ShapePlugin);
     app.add_plugin(EguiPlugin);
+    app.insert_resource(WorldInspectorParams {
+        enabled: false,
+        despawnable_entities: true,
+        ..Default::default()
+    });
+    // https://github.com/jakobhellermann/bevy-inspector-egui/blob/5592441465fe627736de7c245f1e23e00304867b/src/world_inspector/mod.rs#L68
     app.add_plugin(WorldInspectorPlugin::new());
 
     #[cfg(debug_assertions)]

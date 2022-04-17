@@ -17,16 +17,16 @@ use super::{
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, Component, Inspectable)]
 pub struct FrameParams {
-    pub left: f32,
-    pub bottom: f32,
+    #[inspectable(label = "Position")]
+    pub position: Vec2,
 
-    #[inspectable(min = 100.0, max = 600.0, suffix = "px")]
+    #[inspectable(label = "Height", min = 100.0, max = 600.0, suffix = "px")]
     pub height: f32,
 
-    #[inspectable(min = 100.0, max = 800.0, suffix = "px")]
+    #[inspectable(label = "Width", min = 100.0, max = 800.0, suffix = "px")]
     pub width: f32,
 
-    #[inspectable(min = 1.0, max = 10.0, suffix = "px")]
+    #[inspectable(label = "Thickness", min = 1.0, max = 10.0, suffix = "px")]
     pub thickness: f32,
 }
 
@@ -34,8 +34,7 @@ impl FrameParams {
     fn bundle(self) -> impl Bundle {
         let FrameParams {
             thickness,
-            left,
-            bottom,
+            position,
             height,
             width,
         } = self;
@@ -45,7 +44,7 @@ impl FrameParams {
             fill_mode: FillMode::color(Color::NONE),
             outline_mode: StrokeMode::new(Color::GREEN, thickness),
         };
-        let transform = Transform::from_xyz(left, bottom, 100.0);
+        let transform = Transform::from_xyz(position.x, position.y, 100.0);
 
         Renderable::Rectangle(RectangleDef { extents }).build_as(draw_mode, transform)
     }
@@ -54,8 +53,7 @@ impl FrameParams {
 impl Default for FrameParams {
     fn default() -> Self {
         Self {
-            left: -100.0,
-            bottom: -80.0,
+            position: Vec2::new(-100.0, -80.0),
             height: 160.0,
             width: 200.0,
             thickness: 3.0,
