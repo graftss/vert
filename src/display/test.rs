@@ -8,7 +8,7 @@ use bevy_prototype_lyon::prelude::*;
 use super::{
     analog_stick::AnalogStickParams,
     button::ButtonParams,
-    display::{InputDisplayRes, QueuedInputDisplayRes, Renderable, TaggedAtomicParams},
+    display::{AtomicDisplay, InputDisplay, QueuedInputDisplay, Renderable, TaggedAtomicParams},
     frame::FrameParams,
     serialization::{CircleDef, RectangleDef, RegularPolygonDef, RegularPolygonFeatureDef},
 };
@@ -131,14 +131,22 @@ pub fn debug_button_data() -> Vec<TaggedAtomicParams> {
 }
 
 pub fn inject_debug_display(mut commands: Commands) {
-    let mut atoms = vec![];
-    atoms.append(&mut debug_analog_stick_data());
-    atoms.append(&mut debug_button_data());
-    atoms.append(&mut debug_frame_data());
+    let mut atom_params = vec![];
+    atom_params.append(&mut debug_analog_stick_data());
+    atom_params.append(&mut debug_button_data());
+    atom_params.append(&mut debug_frame_data());
 
-    let display = InputDisplayRes { atoms };
+    let atoms = atom_params
+        .iter()
+        .map(|params| AtomicDisplay {
+            params: params.clone(),
+            entity: None,
+        })
+        .collect();
 
-    commands.insert_resource(QueuedInputDisplayRes { display });
+    let display = InputDisplay { atoms };
+
+    commands.insert_resource(QueuedInputDisplay { display });
 }
 
 pub fn reinject_debug_display(mut commands: Commands, keyboard_input: Res<Input<KeyCode>>) {

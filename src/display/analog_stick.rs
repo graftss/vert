@@ -136,7 +136,7 @@ impl AnalogStickAtomicDisplay {
 }
 
 impl AtomicInputDisplay<AnalogStickParams> for AnalogStickAtomicDisplay {
-    fn spawn(commands: &mut Commands, display_data: &AnalogStickParams) {
+    fn spawn(commands: &mut Commands, display_data: &AnalogStickParams) -> Entity {
         let AnalogStickParams {
             stick_display,
             stick_mode,
@@ -174,7 +174,8 @@ impl AtomicInputDisplay<AnalogStickParams> for AnalogStickAtomicDisplay {
                 parent.spawn_bundle(stick_bundle).insert(ChildStickMarker);
 
                 parent.spawn_bundle(bg_bundle).insert(ChildBgMarker);
-            });
+            })
+            .id()
     }
 
     fn add_update_systems(app: &mut App) {

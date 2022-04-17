@@ -3,7 +3,7 @@ use bevy::{pbr::VisiblePointLights, prelude::*};
 use crate::{state::AppState, MainCameraMarker};
 
 use super::{
-    display::{InputDisplayRes, TaggedAtomicParams},
+    display::{InputDisplay, TaggedAtomicParams},
     frame::FrameParams,
     system::add_display_systems,
 };
@@ -15,7 +15,7 @@ pub struct StateBeforePresent {
 
 pub fn enter_present_system(
     mut windows: ResMut<Windows>,
-    mut display: Res<InputDisplayRes>,
+    mut display: Res<InputDisplay>,
     mut query: Query<(&mut OrthographicProjection, &mut Transform), With<MainCameraMarker>>,
 ) {
     if let Some(window) = windows.get_primary_mut() {
@@ -23,27 +23,28 @@ pub fn enter_present_system(
         let tagged_frame = display
             .atoms
             .iter()
-            .find(|&atom| matches!(&atom, TaggedAtomicParams::Frame(_)));
+            .find(|&atom| matches!(&atom.params, TaggedAtomicParams::Frame(_)));
 
-        if let Some(TaggedAtomicParams::Frame(frame_params)) = tagged_frame {
-            let FrameParams {
-                width,
-                height,
-                left,
-                bottom,
-                thickness,
-            } = *frame_params;
+        for atom in display.atoms.iter() {
+            if let TaggedAtomicParams::Frame(fp) = atom.params {
+                let FrameParams {
+                    width,
+                    height,
+                    left,
+                    bottom,
+                    thickness,
+                } = fp;
 
-            // Update the window size
-            window.set_resolution(width - thickness * 2.0, height - thickness * 2.0);
-            window.set_resizable(false);
+                // Update the window size
+                window.set_resolution(width - thickness * 2.0, height - thickness * 2.0);
+                window.set_resizable(false);
 
-            let (mut orth_proj, mut transform) = query.single_mut();
-            orth_proj.scale = 1.0;
-            transform.translation.x = left + width / 2.0;
-            transform.translation.y = bottom + height / 2.0;
-        } else {
-            panic!("no frame???");
+                let (mut orth_proj, mut transform) = query.single_mut();
+                orth_proj.scale = 1.0;
+                transform.translation.x = left + width / 2.0;
+                transform.translation.y = bottom + height / 2.0;
+                break;
+            }
         }
     } else {
         println!("Error finding primary window (entering present mode)");

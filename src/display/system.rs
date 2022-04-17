@@ -10,8 +10,8 @@ use super::{
     analog_stick::AnalogStickAtomicDisplay,
     button::ButtonAtomicDisplay,
     display::{
-        AtomicInputDisplay, InputDisplayRes, QueuedInputDisplayRes, RootAtomicDisplayMarker,
-        TaggedAtomicParams,
+        AtomicDisplay, AtomicInputDisplay, InputDisplay, QueuedInputDisplay,
+        RootAtomicDisplayMarker, TaggedAtomicParams,
     },
     frame::FrameAtomicDisplay,
 };
@@ -29,44 +29,48 @@ macro_rules! add_atomic_display_systems {
     }};
 }
 
-pub fn on_queued_display(queued_event: Option<Res<QueuedInputDisplayRes>>) -> ShouldRun {
+pub fn on_queued_display(queued_event: Option<Res<QueuedInputDisplay>>) -> ShouldRun {
     match queued_event {
         Some(_) => ShouldRun::Yes,
         None => ShouldRun::No,
     }
 }
 
-pub fn spawn_atomic_display(mut commands: &mut Commands, atom: &TaggedAtomicParams) {
-    match atom {
+pub fn spawn_atomic_display(mut commands: &mut Commands, mut atom: &mut AtomicDisplay) {
+    // Spawn entities for the parameters of `atom` and save a reference to the root spawned `Entity`.
+    let entity = match atom.params {
         TaggedAtomicParams::Button(b) => ButtonAtomicDisplay::spawn(&mut commands, &b),
         TaggedAtomicParams::AnalogStick(asp) => {
             AnalogStickAtomicDisplay::spawn(&mut commands, &asp)
         }
         TaggedAtomicParams::Frame(f) => FrameAtomicDisplay::spawn(&mut commands, &f),
-    }
+    };
+
+    // Record the root entity associated to `atom`.
+    atom.entity = Some(entity);
 }
 
 // Spawn the `QueuedInputDisplayRes` resource as an input display,
 // then move it to the `InputDisplayRes` resource.
 pub fn spawn_queued_display_system(
     mut commands: Commands,
-    queued_display_res: Option<Res<QueuedInputDisplayRes>>,
+    mut queued_display_res: Option<ResMut<QueuedInputDisplay>>,
 ) {
-    if let Some(queued_display) = queued_display_res {
-        for atom in queued_display.display.atoms.iter() {
-            spawn_atomic_display(&mut commands, &atom);
+    if let Some(mut queued) = queued_display_res {
+        for mut atom in queued.display.atoms.iter_mut() {
+            spawn_atomic_display(&mut commands, &mut atom);
         }
 
-        commands.insert_resource(queued_display.display.to_owned());
-        commands.remove_resource::<QueuedInputDisplayRes>();
+        commands.insert_resource(queued.display.to_owned());
+        commands.remove_resource::<QueuedInputDisplay>();
     }
 }
 
 pub fn insert_display_from_file(mut commands: Commands, path: &str) {
     // Attempt to inject an input display from a file, and inject an empty display if that fails.
-    match read_from_file::<InputDisplayRes>(path) {
+    match read_from_file::<InputDisplay>(path) {
         Ok(display) => {
-            commands.insert_resource(QueuedInputDisplayRes { display });
+            commands.insert_resource(QueuedInputDisplay { display });
         }
         Err(e) => {
             println!("Error reading input display from file '{}': {:?}", path, e);
@@ -74,7 +78,7 @@ pub fn insert_display_from_file(mut commands: Commands, path: &str) {
     }
 }
 
-pub fn save_display_to_file(mut commands: Commands, display: Res<InputDisplayRes>) {
+pub fn save_display_to_file(mut commands: Commands, display: Res<InputDisplay>) {
     write_to_file(display.into_inner(), "display.json");
 }
 

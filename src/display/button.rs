@@ -72,7 +72,7 @@ impl ButtonAtomicDisplay {
 }
 
 impl AtomicInputDisplay<ButtonParams> for ButtonAtomicDisplay {
-    fn spawn(commands: &mut Commands, display_data: &ButtonParams) {
+    fn spawn(commands: &mut Commands, display_data: &ButtonParams) -> Entity {
         let ButtonParams {
             displayable,
             on_mode,
@@ -98,7 +98,8 @@ impl AtomicInputDisplay<ButtonParams> for ButtonAtomicDisplay {
                     .spawn_bundle(off_bundle)
                     .insert(ChildButtonMarker { pressed: false })
                     .insert(InputSink::new(vec![button_key]));
-            });
+            })
+            .id()
     }
 
     fn add_teardown_systems(app: &mut App) {

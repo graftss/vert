@@ -10,7 +10,7 @@ use super::{
     system::on_queued_display,
 };
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Component)]
 pub struct FrameParams {
     pub left: f32,
     pub bottom: f32,
@@ -19,13 +19,25 @@ pub struct FrameParams {
     pub thickness: f32,
 }
 
+impl Default for FrameParams {
+    fn default() -> Self {
+        Self {
+            left: -100.0,
+            bottom: -80.0,
+            height: 160.0,
+            width: 200.0,
+            thickness: 3.0,
+        }
+    }
+}
+
 #[derive(Component)]
 pub struct RootFrameMarker;
 
 pub struct FrameAtomicDisplay;
 
 impl AtomicInputDisplay<FrameParams> for FrameAtomicDisplay {
-    fn spawn(commands: &mut Commands, params: &FrameParams) {
+    fn spawn(commands: &mut Commands, params: &FrameParams) -> Entity {
         let FrameParams {
             thickness,
             left,
@@ -48,7 +60,8 @@ impl AtomicInputDisplay<FrameParams> for FrameAtomicDisplay {
             .spawn_bundle(frame_bundle)
             .insert(RootFrameMarker)
             .insert(RootAtomicDisplayMarker)
-            .insert(Name::new("Frame"));
+            .insert(Name::new("Frame"))
+            .id()
     }
 
     fn add_update_systems(app: &mut App) {}

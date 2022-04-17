@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_inspector_egui::{egui::Ui, Context, Inspectable};
 use bevy_prototype_lyon::{
     entity::ShapeBundle,
     prelude::*,
@@ -44,19 +45,13 @@ impl Renderable {
     }
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
-pub enum TaggedAtomicParams {
-    Button(ButtonParams),
-    AnalogStick(AnalogStickParams),
-    Frame(FrameParams),
-}
-
 pub trait AtomicInputDisplay<P>
 where
     P: Clone + Copy,
 {
     // Spawn an instance of the atomic input display from its parameters.
-    fn spawn(commands: &mut Commands, params: &P);
+    // Returns the `Entity` of the root entity associated to the params.
+    fn spawn(commands: &mut Commands, params: &P) -> Entity;
 
     // Add systems to `app` which update all atomic displays of this type
     // while the app has state `display_state`.
@@ -67,18 +62,34 @@ where
     fn add_teardown_systems(app: &mut App);
 }
 
-#[derive(Serialize, Deserialize, Clone)]
-pub struct InputDisplayRes {
-    pub atoms: Vec<TaggedAtomicParams>,
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub enum TaggedAtomicParams {
+    Button(ButtonParams),
+    AnalogStick(AnalogStickParams),
+    Frame(FrameParams),
 }
 
-impl Default for InputDisplayRes {
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub struct AtomicDisplay {
+    pub params: TaggedAtomicParams,
+
+    // If `Some(entity)`, the root entity associated with this atomic display.
+    #[serde(skip_serializing, default)]
+    pub entity: Option<Entity>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct InputDisplay {
+    pub atoms: Vec<AtomicDisplay>,
+}
+
+impl Default for InputDisplay {
     fn default() -> Self {
-        InputDisplayRes { atoms: vec![] }
+        InputDisplay { atoms: vec![] }
     }
 }
 
-#[derive(Clone)]
-pub struct QueuedInputDisplayRes {
-    pub display: InputDisplayRes,
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct QueuedInputDisplay {
+    pub display: InputDisplay,
 }

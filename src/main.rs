@@ -3,12 +3,13 @@ use state::{add_state_systems, state_hotkey_system, AppState};
 
 use bevy_egui::EguiPlugin;
 use bevy_inspector_egui::{
-    widgets::InspectorQuery, InspectorPlugin, WorldInspectorParams, WorldInspectorPlugin,
+    widgets::InspectorQuery, InspectableRegistry, InspectorPlugin, RegisterInspectable,
+    WorldInspectorParams, WorldInspectorPlugin,
 };
 use bevy_prototype_lyon::prelude::*;
 use controller::system::add_controller_systems;
 use display::{
-    display::RootAtomicDisplayMarker,
+    display::{InputDisplay, RootAtomicDisplayMarker},
     present::add_present_systems,
     system::add_display_systems,
     test::{inject_debug_display, reinject_debug_display},
@@ -75,8 +76,9 @@ fn add_debug_tools(app: &mut App) {
     //     highlight_changes: true,
     //     ..Default::default()
     // });
-    app.add_plugin(WorldInspectorPlugin::new().filter::<With<RootAtomicDisplayMarker>>());
 
+    // app.add_plugin(WorldInspectorPlugin::new().filter::<With<RootAtomicDisplayMarker>>());
+    // app.register_inspectable::<InputDisplayRes>();
     // add console-based FPS logging
     // app.add_plugin(LogDiagnosticsPlugin::default());
     // app.add_plugin(FrameTimeDiagnosticsPlugin::default());

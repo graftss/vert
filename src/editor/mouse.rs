@@ -22,7 +22,13 @@ pub fn editor_mouse_run_criteria(
     app_state: Res<State<AppState>>,
     mut egui_input: ResMut<EguiContext>,
 ) -> ShouldRun {
-    if *app_state.current() == AppState::Editor && !egui_input.ctx_mut().is_pointer_over_area() {
+    let ctx = egui_input.ctx_mut();
+
+    // Ignore mouse input if the cursor is over an egui window
+    // or if egui is using the current mouse input.
+    let is_egui_using_mouse = ctx.is_pointer_over_area() || ctx.wants_pointer_input();
+
+    if *app_state.current() == AppState::Editor && !is_egui_using_mouse {
         return ShouldRun::Yes;
     }
 
