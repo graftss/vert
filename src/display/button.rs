@@ -31,7 +31,7 @@ pub struct ButtonParams {
 
 impl ButtonParams {
     pub fn root_bundle(self) -> impl Bundle {
-        let name = format!("Button ({})", self.button_key.key.to_string());
+        let name = "Button".to_string();
         (
             GlobalTransform::identity(),
             Into::<Transform>::into(self.transform),
@@ -133,10 +133,7 @@ impl AtomicInputDisplay<ButtonParams> for ButtonAtomicDisplay {
         let mut root = commands.spawn_bundle(params.root_bundle());
 
         let mut my_params = *params;
-        my_params.button_key.id = Some(InputSinkId {
-            entity: Some(root.id()),
-            idx: 0,
-        });
+        my_params.button_key.bind(root.id(), 0);
 
         root.insert(my_params)
             .with_children(|parent| {

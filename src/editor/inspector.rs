@@ -20,12 +20,24 @@ pub struct InputSinkId {
 pub struct BoundControllerKey {
     #[serde(skip)]
     pub id: Option<InputSinkId>,
-    pub key: ControllerKey,
+    pub key: Option<ControllerKey>,
+}
+
+impl BoundControllerKey {
+    pub fn bind(&mut self, entity: Entity, idx: usize) {
+        self.id = Some(InputSinkId {
+            entity: Some(entity),
+            idx,
+        });
+    }
 }
 
 impl From<ControllerKey> for BoundControllerKey {
     fn from(key: ControllerKey) -> Self {
-        BoundControllerKey { id: None, key }
+        BoundControllerKey {
+            id: None,
+            key: Some(key),
+        }
     }
 }
 
@@ -42,7 +54,11 @@ impl Inspectable for BoundControllerKey {
 
         ui.horizontal(|ui| {
             // Render the currently bound `ControllerKey` value as a label.
-            ui.label(self.key.to_string());
+            let label_text = match self.key {
+                Some(key) => key.to_string(),
+                None => "-".to_string(),
+            };
+            ui.label(label_text);
 
             // Render a button to rebind this key.
             context.resource_scope(
@@ -54,7 +70,7 @@ impl Inspectable for BoundControllerKey {
                             ui.button("listening...");
                             if let Some(ListenerResult::KeyToSink(key, _)) = input_listener.result {
                                 println!("found change {:?}", key);
-                                self.key = key;
+                                self.key = Some(key);
                                 input_listener.consume_result();
                                 input_listener.stop_listening();
                                 changed = true;

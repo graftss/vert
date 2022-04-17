@@ -11,3 +11,14 @@
     - analog stick distance moved??
 - reset `InputListener` when appstate changes
 - layout.json isn't updating anymore
+
+- impl inspectable for remaining params fields
+- create new atom
+    - spawn in center of screen
+- delete atom
+    - add button in inspector ui
+- filter out all non-params components from inspector
+- fs stuff
+    - list of all displays in a folder
+    - drag display file into editor to load into
+    - load display file from url??

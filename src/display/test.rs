@@ -64,11 +64,11 @@ pub fn debug_analog_stick_data() -> Vec<Box<TaggedAtomicParams>> {
         bg_display: Renderable::Circle(bg_shape),
         bg_mode: bg_mode.into(),
         transform: transform.into(),
-        pos_x: ControllerKey::Ps2(Ps2Key::LeftPosX),
-        neg_x: ControllerKey::Ps2(Ps2Key::LeftNegX),
-        pos_y: ControllerKey::Ps2(Ps2Key::LeftPosY),
-        neg_y: ControllerKey::Ps2(Ps2Key::LeftNegY),
-        trigger: Some(ControllerKey::Ps2(Ps2Key::L3)),
+        pos_x: ControllerKey::Ps2(Ps2Key::LeftPosX).into(),
+        neg_x: ControllerKey::Ps2(Ps2Key::LeftNegX).into(),
+        pos_y: ControllerKey::Ps2(Ps2Key::LeftPosY).into(),
+        neg_y: ControllerKey::Ps2(Ps2Key::LeftNegY).into(),
+        trigger: ControllerKey::Ps2(Ps2Key::L3).into(),
         stick_radius: 20.0,
     };
 
@@ -83,11 +83,11 @@ pub fn debug_analog_stick_data() -> Vec<Box<TaggedAtomicParams>> {
             transform.translation.z,
         )
         .into(),
-        pos_x: ControllerKey::Ps2(Ps2Key::RightPosX),
-        neg_x: ControllerKey::Ps2(Ps2Key::RightNegX),
-        pos_y: ControllerKey::Ps2(Ps2Key::RightPosY),
-        neg_y: ControllerKey::Ps2(Ps2Key::RightNegY),
-        trigger: Some(ControllerKey::Ps2(Ps2Key::R3)),
+        pos_x: ControllerKey::Ps2(Ps2Key::RightPosX).into(),
+        neg_x: ControllerKey::Ps2(Ps2Key::RightNegX).into(),
+        pos_y: ControllerKey::Ps2(Ps2Key::RightPosY).into(),
+        neg_y: ControllerKey::Ps2(Ps2Key::RightNegY).into(),
+        trigger: ControllerKey::Ps2(Ps2Key::R3).into(),
         stick_radius: 20.0,
     };
 

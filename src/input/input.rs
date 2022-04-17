@@ -159,7 +159,7 @@ pub fn poll_input_sources(
 pub struct InputSink {
     // The abstract controller keys associated with this sink.
     // Updating `keys` will automatically propagate to both `sources` and then `values`.
-    pub keys: Vec<ControllerKey>,
+    pub keys: Vec<Option<ControllerKey>>,
 
     // The concrete input sources associated with this sink.
     // Updating `sources` will automatically propagate to `values`.
@@ -176,7 +176,7 @@ pub struct InputSink {
 }
 
 impl InputSink {
-    pub fn new(keys: Vec<ControllerKey>) -> InputSink {
+    pub fn new(keys: Vec<Option<ControllerKey>>) -> InputSink {
         let size = keys.len();
         InputSink {
             keys,
@@ -202,12 +202,12 @@ pub fn resolve_dirty_sources_system(
         // Collect the `InputSource` bindings associated to each `ControllerKey`.
         let mut bindings = vec![];
         for &key in sink.keys.iter() {
-            bindings.push(layouts.get_binding(key));
+            bindings.push(key.map(|k| layouts.get_binding(k)).flatten());
         }
 
         // Write those bindings to the `InputSink`.
-        for (i, &key) in bindings.iter().enumerate() {
-            sink.sources[i] = key.map(|source| *source);
+        for (i, &source) in bindings.iter().enumerate() {
+            sink.sources[i] = source.map(|source| *source);
         }
 
         sink.sources_dirty = false;

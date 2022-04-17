@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     controller::layout::ControllerKey,
+    editor::inspector::BoundControllerKey,
     input::input::{InputSink, InputSource, InputValue},
     state::AppState,
     util::despawn_all_with,
@@ -29,16 +30,11 @@ pub struct AnalogStickParams {
     #[inspectable(ignore)]
     pub bg_mode: DrawModeDef,
     pub transform: TransformDef,
-    #[inspectable(ignore)]
-    pub pos_x: ControllerKey,
-    #[inspectable(ignore)]
-    pub neg_x: ControllerKey,
-    #[inspectable(ignore)]
-    pub pos_y: ControllerKey,
-    #[inspectable(ignore)]
-    pub neg_y: ControllerKey,
-    #[inspectable(ignore)]
-    pub trigger: Option<ControllerKey>,
+    pub pos_x: BoundControllerKey,
+    pub neg_x: BoundControllerKey,
+    pub pos_y: BoundControllerKey,
+    pub neg_y: BoundControllerKey,
+    pub trigger: BoundControllerKey,
 }
 
 impl AnalogStickParams {
@@ -53,10 +49,7 @@ impl AnalogStickParams {
         } = self;
 
         // Collect the input sources needed by this display
-        let mut sources = vec![pos_x, neg_x, pos_y, neg_y];
-        if let Some(source) = trigger {
-            sources.push(source);
-        }
+        let mut sources = vec![pos_x.key, neg_x.key, pos_y.key, neg_y.key, trigger.key];
         let input_sink = InputSink::new(sources);
 
         (
@@ -159,7 +152,7 @@ impl AnalogStickAtomicDisplay {
                     stick_transform.translation.y = pos.y * params.stick_radius;
 
                     // Handle trigger presses
-                    if params.trigger.is_some() {
+                    if params.trigger.key.is_some() {
                         if Self::is_trigger_pressed(&sink.values) {
                             if let DrawMode::Outlined {
                                 ref mut fill_mode, ..
@@ -207,9 +200,17 @@ impl AnalogStickAtomicDisplay {
 
 impl AtomicInputDisplay<AnalogStickParams> for AnalogStickAtomicDisplay {
     fn spawn(commands: &mut Commands, params: &AnalogStickParams) -> Entity {
-        commands
-            .spawn_bundle(params.root_bundle())
-            .insert(*params)
+        let mut root = commands.spawn_bundle(params.root_bundle());
+        let root_entity = root.id();
+
+        let mut my_params = *params;
+        my_params.pos_x.bind(root_entity, 0);
+        my_params.neg_x.bind(root_entity, 1);
+        my_params.pos_y.bind(root_entity, 2);
+        my_params.neg_y.bind(root_entity, 3);
+        my_params.trigger.bind(root_entity, 4);
+
+        root.insert(my_params)
             .with_children(|parent| {
                 params.insert_stick_bundle(parent.spawn());
                 params.insert_bg_bundle(parent.spawn());
