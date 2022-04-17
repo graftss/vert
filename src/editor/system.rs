@@ -10,10 +10,10 @@ use crate::{
     state::AppState,
 };
 
-use super::mouse::{
+use super::{mouse::{
     editor_mouse_drag_system, editor_mouse_run_criteria, editor_mouse_scroll_system,
     release_mouse_when_unfocused_system,
-};
+}, display_fs::display_fs_system};
 
 fn enter_editor_system(mut inspector_windows: Option<ResMut<WorldInspectorParams>>) {
     if let Some(mut params) = inspector_windows {
@@ -35,6 +35,11 @@ pub fn add_editor_systems(app: &mut App, editor_state: AppState) {
     app.add_system_set(SystemSet::on_exit(AppState::Editor).with_system(exit_editor_system));
 
     app.add_system(release_mouse_when_unfocused_system);
+
+    app.add_system_set(
+        SystemSet::on_update(editor_state)
+            .with_system(display_fs_system)
+    );
 
     app.add_system_set(
         SystemSet::new()

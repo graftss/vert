@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::VERSION;
+use crate::{input::listener::InputListener, VERSION};
 
 // All possible app states.
 #[derive(PartialEq, Eq, Clone, Copy, Debug, Hash)]
@@ -49,7 +49,11 @@ fn find_params(state: AppState) -> &'static AppStateParams {
 }
 
 // Contains behavior that should occur every time a state is entered.
-fn generic_state_transition(mut windows: ResMut<Windows>, state: AppState) {
+fn generic_state_transition(
+    state: AppState,
+    mut windows: ResMut<Windows>,
+    mut input_listener: Option<ResMut<InputListener>>,
+) {
     println!("success changing appstate: {:?}", state);
     let params = find_params(state);
 
@@ -57,12 +61,18 @@ fn generic_state_transition(mut windows: ResMut<Windows>, state: AppState) {
     if let Some(window) = windows.get_primary_mut() {
         window.set_title(format!("{} [vert {}]", params.title, VERSION));
     }
+
+    // Attempt to reset the input listener state
+    if let Some(mut il) = input_listener {
+        il.stop_listening();
+    }
 }
 
 pub fn state_transition_system(
     mut app_state: ResMut<State<AppState>>,
     mut er_reqstate: EventReader<RequestStateEvent>,
     mut windows: ResMut<Windows>,
+    mut input_listener: Option<ResMut<InputListener>>,
 ) {
     for RequestStateEvent(state) in er_reqstate.iter() {
         if *app_state.current() == *state {
@@ -76,7 +86,7 @@ pub fn state_transition_system(
         }
 
         // Succeeded changing states.
-        generic_state_transition(windows, *state);
+        generic_state_transition(*state, windows, input_listener);
 
         // Ignore more than the first successful state change per system execution.
         break;
@@ -101,7 +111,7 @@ pub fn state_hotkey_system(
 }
 
 pub fn initial_state_transition(mut windows: ResMut<Windows>) {
-    generic_state_transition(windows, INITIAL_STATE);
+    generic_state_transition(INITIAL_STATE, windows, None);
 }
 
 pub fn add_state_systems(app: &mut App) {

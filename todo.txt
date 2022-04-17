@@ -9,7 +9,6 @@
 - statistics?
     - total presses for each button
     - analog stick distance moved??
-- reset `InputListener` when appstate changes
 - layout.json isn't updating anymore
 
 - create new atom
@@ -20,3 +19,9 @@
     - list of all displays in a folder
     - drag display file into editor to load into
     - load display file from url??
+
+
+hotkeys:
+    - F2 = editor
+    - F3 = configure controller
+    - F4 = present
