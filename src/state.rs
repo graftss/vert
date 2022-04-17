@@ -37,7 +37,7 @@ const STATE_PARAMS: [AppStateParams; 3] = [
     AppStateParams {
         hotkey: KeyCode::F4,
         state: AppState::Present,
-        title: "presentation",
+        title: "present",
     },
 ];
 
@@ -55,7 +55,7 @@ fn generic_state_transition(mut windows: ResMut<Windows>, state: AppState) {
 
     // Attempt to change the window title
     if let Some(window) = windows.get_primary_mut() {
-        window.set_title(format!("vert {} [{}]", VERSION, params.title));
+        window.set_title(format!("{} [vert {}]", params.title, VERSION));
     }
 }
 

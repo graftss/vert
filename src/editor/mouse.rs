@@ -66,7 +66,7 @@ pub fn editor_mouse_drag_system(
     >,
 ) {
     if mouse_buttons.pressed(MouseButton::Left) {
-        // Mouse is held down.
+        // Enter drag mode.
         let (mut transform, orth_proj, camera) = query.single_mut();
 
         if mouse_buttons.just_pressed(MouseButton::Left) {
@@ -85,26 +85,34 @@ pub fn editor_mouse_drag_system(
                 transform.translation.y += ev.delta.y * FIXED_DRAG_SPEED * orth_proj.scale;
             }
         }
-    } else if mouse_buttons.just_released(MouseButton::Left) {
-        // Mouse was just released.
-        // If we have recorded a world position of the cursor, restore it (by moving the cursor there).
-        let new_cursor_pos = frozen_pos.map(|frozen| {
-            let (transform, _, camera) = query.single_mut();
-            camera
-                .world_to_screen(&windows, &transform, frozen.world_pos.extend(1.0))
-                .unwrap()
-        });
+    } else {
+        // Check if drag mode should be stopped.
+        let mut should_exit_drag = mouse_buttons.just_released(MouseButton::Left);
+        if let Some(window) = windows.get_primary() {
+            should_exit_drag |= !window.is_focused()
+        }
 
-        if let Some(window) = windows.get_primary_mut() {
-            // Restore the world position of the cursor if one exists.
-            if let Some(pos) = new_cursor_pos {
-                window.set_cursor_position(pos);
-                commands.remove_resource::<FrozenCursorPos>();
+        if should_exit_drag {
+            // Mouse was just released.
+            // If we have recorded a world position of the cursor, restore it (by moving the cursor there).
+            let new_cursor_pos = frozen_pos.map(|frozen| {
+                let (transform, _, camera) = query.single_mut();
+                camera
+                    .world_to_screen(&windows, &transform, frozen.world_pos.extend(1.0))
+                    .unwrap()
+            });
+
+            if let Some(window) = windows.get_primary_mut() {
+                // Restore the world position of the cursor if one exists.
+                if let Some(pos) = new_cursor_pos {
+                    window.set_cursor_position(pos);
+                    commands.remove_resource::<FrozenCursorPos>();
+                }
+
+                // Restore normal movement/visibility of the cursor.
+                window.set_cursor_lock_mode(false);
+                window.set_cursor_visibility(true);
             }
-
-            // Restore normal movement/visibility of the cursor.
-            window.set_cursor_lock_mode(false);
-            window.set_cursor_visibility(true);
         }
     }
 }
