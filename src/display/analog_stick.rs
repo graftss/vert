@@ -1,4 +1,5 @@
-use bevy::prelude::*;
+use bevy::{ecs::system::EntityCommands, prelude::*};
+use bevy_inspector_egui::{Inspectable, RegisterInspectable};
 use bevy_prototype_lyon::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -15,19 +16,81 @@ use super::{
 };
 
 // The data parameterizing an analog stick input display.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Component, Inspectable)]
 pub struct AnalogStickParams {
+    #[inspectable(ignore)]
     pub stick_display: Renderable,
+    #[inspectable(ignore)]
     pub stick_mode: DrawModeDef,
+    #[inspectable(min = 0.0, suffix = "px")]
     pub stick_radius: f32,
+    #[inspectable(ignore)]
     pub bg_display: Renderable,
+    #[inspectable(ignore)]
     pub bg_mode: DrawModeDef,
     pub transform: TransformDef,
+    #[inspectable(ignore)]
     pub pos_x: ControllerKey,
+    #[inspectable(ignore)]
     pub neg_x: ControllerKey,
+    #[inspectable(ignore)]
     pub pos_y: ControllerKey,
+    #[inspectable(ignore)]
     pub neg_y: ControllerKey,
+    #[inspectable(ignore)]
     pub trigger: Option<ControllerKey>,
+}
+
+impl AnalogStickParams {
+    fn root_bundle(self) -> impl Bundle {
+        let Self {
+            pos_x,
+            neg_x,
+            pos_y,
+            neg_y,
+            trigger,
+            ..
+        } = self;
+
+        // Collect the input sources needed by this display
+        let mut sources = vec![pos_x, neg_x, pos_y, neg_y];
+        if let Some(source) = trigger {
+            sources.push(source);
+        }
+        let input_sink = InputSink::new(sources);
+
+        (
+            GlobalTransform::identity(),
+            Into::<Transform>::into(self.transform),
+            RootAnalogStickMarker,
+            RootAtomicDisplayMarker,
+            Name::new("Analog Stick"),
+            input_sink,
+        )
+    }
+
+    fn insert_stick_bundle(self, mut commands: EntityCommands) {
+        let Self {
+            stick_display,
+            stick_mode,
+            ..
+        } = self;
+        commands
+            .insert_bundle(stick_display.build_as(stick_mode.into(), Transform::identity()))
+            .insert(ChildStickMarker);
+    }
+
+    fn insert_bg_bundle(self, mut commands: EntityCommands) {
+        let Self {
+            bg_display,
+            bg_mode,
+            ..
+        } = self;
+
+        commands
+            .insert_bundle(bg_display.build_as(bg_mode.into(), Transform::identity()))
+            .insert(ChildBgMarker);
+    }
 }
 
 // An entity with this marker will have an `InputSink` with a source vector of:
@@ -35,22 +98,7 @@ pub struct AnalogStickParams {
 //   - 5 entries, if `use_trigger` is `true`.
 // These entries will be in the same order as they appear in `AnalogStickDisplayData`.
 #[derive(Component)]
-pub struct RootAnalogStickMarker {
-    pub stick_radius: f32,
-    pub use_trigger: bool,
-}
-
-impl RootAnalogStickMarker {
-    pub fn build_root(transform: Transform, marker: RootAnalogStickMarker) -> impl Bundle {
-        (
-            GlobalTransform::identity(),
-            transform,
-            marker,
-            RootAtomicDisplayMarker,
-            Name::new("Analog Stick"),
-        )
-    }
-}
+pub struct RootAnalogStickMarker;
 
 #[derive(Component)]
 pub struct ChildStickMarker;
@@ -99,19 +147,19 @@ impl AnalogStickAtomicDisplay {
     }
 
     fn analog_stick_display_system(
-        q_parent: Query<(&InputSink, &Children, &RootAnalogStickMarker)>,
+        q_parent: Query<(&InputSink, &Children, &AnalogStickParams)>,
         mut q_child_stick: Query<(&mut Transform, &mut DrawMode), With<ChildStickMarker>>,
     ) {
-        for (sink, children, asdm) in q_parent.iter() {
+        for (sink, children, params) in q_parent.iter() {
             for child in children.iter() {
                 if let Ok((mut stick_transform, mut draw_mode)) = q_child_stick.get_mut(*child) {
                     // Move the stick child according to the axis input
                     let pos = Self::axes_to_positions(&sink.values);
-                    stick_transform.translation.x = pos.x * asdm.stick_radius;
-                    stick_transform.translation.y = pos.y * asdm.stick_radius;
+                    stick_transform.translation.x = pos.x * params.stick_radius;
+                    stick_transform.translation.y = pos.y * params.stick_radius;
 
                     // Handle trigger presses
-                    if asdm.use_trigger {
+                    if params.trigger.is_some() {
                         if Self::is_trigger_pressed(&sink.values) {
                             if let DrawMode::Outlined {
                                 ref mut fill_mode, ..
@@ -132,52 +180,46 @@ impl AnalogStickAtomicDisplay {
             }
         }
     }
+
+    fn regenerate_system(
+        mut commands: Commands,
+        parent_query: Query<(Entity, &AnalogStickParams, &Children), Changed<AnalogStickParams>>,
+        child_stick_query: Query<Entity, With<ChildStickMarker>>,
+        child_bg_query: Query<Entity, With<ChildBgMarker>>,
+    ) {
+        for (root_entity, params, children) in parent_query.iter() {
+            // Regenerate the root entity
+            commands
+                .entity(root_entity)
+                .insert_bundle(params.root_bundle());
+
+            // Rengenerate the child entities
+            for &child_entity in children.iter() {
+                if let Ok(stick_entity) = child_stick_query.get(child_entity) {
+                    params.insert_stick_bundle(commands.entity(stick_entity));
+                } else if let Ok(bg_entity) = child_bg_query.get(child_entity) {
+                    params.insert_bg_bundle(commands.entity(bg_entity));
+                }
+            }
+        }
+    }
 }
 
 impl AtomicInputDisplay<AnalogStickParams> for AnalogStickAtomicDisplay {
-    fn spawn(commands: &mut Commands, display_data: &AnalogStickParams) -> Entity {
-        let AnalogStickParams {
-            stick_display,
-            stick_mode,
-            bg_display,
-            bg_mode,
-            transform,
-            pos_x,
-            neg_x,
-            pos_y,
-            neg_y,
-            stick_radius,
-            trigger,
-        } = *display_data;
-
-        let stick_bundle =
-            stick_display.build_as(stick_mode.into(), Transform::from_xyz(0.0, 0.0, 0.0));
-        let bg_bundle = bg_display.build_as(bg_mode.into(), Transform::identity());
-
-        let mut sources = vec![pos_x, neg_x, pos_y, neg_y];
-        let mut use_trigger = false;
-        if let Some(source) = trigger {
-            sources.push(source);
-            use_trigger = true;
-        }
-        let input_sink = InputSink::new(sources);
-        let marker = RootAnalogStickMarker {
-            stick_radius,
-            use_trigger,
-        };
-
+    fn spawn(commands: &mut Commands, params: &AnalogStickParams) -> Entity {
         commands
-            .spawn_bundle(RootAnalogStickMarker::build_root(transform.into(), marker))
-            .insert(input_sink)
+            .spawn_bundle(params.root_bundle())
+            .insert(*params)
             .with_children(|parent| {
-                parent.spawn_bundle(stick_bundle).insert(ChildStickMarker);
-
-                parent.spawn_bundle(bg_bundle).insert(ChildBgMarker);
+                params.insert_stick_bundle(parent.spawn());
+                params.insert_bg_bundle(parent.spawn());
             })
             .id()
     }
 
     fn add_update_systems(app: &mut App) {
-        app.add_system_set(SystemSet::new().with_system(Self::analog_stick_display_system));
+        app.add_system(Self::analog_stick_display_system);
+        app.add_system(Self::regenerate_system);
+        app.register_inspectable::<AnalogStickParams>();
     }
 }
