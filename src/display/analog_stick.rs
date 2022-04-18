@@ -12,7 +12,7 @@ use crate::{
 };
 
 use super::{
-    display::{AtomicInputDisplay, RootAtomicDisplayMarker},
+    display::{AtomicInputDisplay, RootAtomicDisplayMarker, TaggedAtomicParams},
     renderable::Renderable,
     serialization::{CircleDef, DrawModeDef, TransformDef},
 };
@@ -191,32 +191,35 @@ impl AnalogStickAtomicDisplay {
     }
 
     fn analog_stick_display_system(
-        q_parent: Query<(&InputSink, &Children, &AnalogStickParams)>,
+        q_parent: Query<(&InputSink, &Children, &TaggedAtomicParams), With<RootAnalogStickMarker>>,
         mut q_child_stick: Query<(&mut Transform, &mut DrawMode), With<ChildStickMarker>>,
     ) {
-        for (sink, children, params) in q_parent.iter() {
-            for child in children.iter() {
-                if let Ok((mut stick_transform, mut draw_mode)) = q_child_stick.get_mut(*child) {
-                    // Move the stick child according to the axis input
-                    let pos = Self::axes_to_positions(&sink.values);
-                    stick_transform.translation.x = pos.x * params.stick_radius;
-                    stick_transform.translation.y = pos.y * params.stick_radius;
+        for (sink, children, tagged_params) in q_parent.iter() {
+            if let TaggedAtomicParams::AnalogStick(params) = tagged_params {
+                for child in children.iter() {
+                    if let Ok((mut stick_transform, mut draw_mode)) = q_child_stick.get_mut(*child)
+                    {
+                        // Move the stick child according to the axis input
+                        let pos = Self::axes_to_positions(&sink.values);
+                        stick_transform.translation.x = pos.x * params.stick_radius;
+                        stick_transform.translation.y = pos.y * params.stick_radius;
 
-                    // Handle trigger presses
-                    if params.trigger.key.is_some() {
-                        if Self::is_trigger_pressed(&sink.values) {
-                            if let DrawMode::Outlined {
-                                ref mut fill_mode, ..
-                            } = *draw_mode
-                            {
-                                fill_mode.color = Color::RED;
-                            }
-                        } else {
-                            if let DrawMode::Outlined {
-                                ref mut fill_mode, ..
-                            } = *draw_mode
-                            {
-                                fill_mode.color = Color::BLACK;
+                        // Handle trigger presses
+                        if params.trigger.key.is_some() {
+                            if Self::is_trigger_pressed(&sink.values) {
+                                if let DrawMode::Outlined {
+                                    ref mut fill_mode, ..
+                                } = *draw_mode
+                                {
+                                    fill_mode.color = Color::RED;
+                                }
+                            } else {
+                                if let DrawMode::Outlined {
+                                    ref mut fill_mode, ..
+                                } = *draw_mode
+                                {
+                                    fill_mode.color = Color::BLACK;
+                                }
                             }
                         }
                     }
@@ -227,22 +230,27 @@ impl AnalogStickAtomicDisplay {
 
     fn regenerate_system(
         mut commands: Commands,
-        parent_query: Query<(Entity, &AnalogStickParams, &Children), Changed<AnalogStickParams>>,
+        parent_query: Query<
+            (Entity, &TaggedAtomicParams, &Children),
+            (With<RootAnalogStickMarker>, Changed<TaggedAtomicParams>),
+        >,
         child_stick_query: Query<Entity, With<ChildStickMarker>>,
         child_bg_query: Query<Entity, With<ChildBgMarker>>,
     ) {
-        for (root_entity, params, children) in parent_query.iter() {
-            // Regenerate the root entity
-            commands
-                .entity(root_entity)
-                .insert_bundle(params.root_bundle());
+        for (root_entity, tagged_params, children) in parent_query.iter() {
+            if let TaggedAtomicParams::AnalogStick(params) = tagged_params {
+                // Regenerate the root entity
+                commands
+                    .entity(root_entity)
+                    .insert_bundle(params.root_bundle());
 
-            // Rengenerate the child entities
-            for &child_entity in children.iter() {
-                if let Ok(stick_entity) = child_stick_query.get(child_entity) {
-                    params.insert_stick_bundle(commands.entity(stick_entity));
-                } else if let Ok(bg_entity) = child_bg_query.get(child_entity) {
-                    params.insert_bg_bundle(commands.entity(bg_entity));
+                // Rengenerate the child entities
+                for &child_entity in children.iter() {
+                    if let Ok(stick_entity) = child_stick_query.get(child_entity) {
+                        params.insert_stick_bundle(commands.entity(stick_entity));
+                    } else if let Ok(bg_entity) = child_bg_query.get(child_entity) {
+                        params.insert_bg_bundle(commands.entity(bg_entity));
+                    }
                 }
             }
         }
@@ -261,7 +269,7 @@ impl AtomicInputDisplay<AnalogStickParams> for AnalogStickAtomicDisplay {
         my_params.neg_y.bind(root_entity, 3);
         my_params.trigger.bind(root_entity, 4);
 
-        root.insert(my_params)
+        root.insert(TaggedAtomicParams::AnalogStick(my_params))
             .with_children(|parent| {
                 params.insert_stick_bundle(parent.spawn());
                 params.insert_bg_bundle(parent.spawn());

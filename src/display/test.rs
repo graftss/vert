@@ -165,7 +165,7 @@ pub fn save_display_hotkey(
 ) {
     if keyboard_input.just_pressed(KeyCode::F6) {
         println!("saving display");
-        event_writer.send(RequestSaveDisplay("display.json".to_string()));
+        event_writer.send(RequestSaveDisplay);
     }
 }
 

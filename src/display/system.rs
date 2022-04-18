@@ -1,4 +1,7 @@
+use std::path::Path;
+
 use bevy::{ecs::schedule::ShouldRun, prelude::*};
+use bevy_inspector_egui::RegisterInspectable;
 
 use crate::{
     controller::layout::ControllerLayoutsRes,
@@ -72,7 +75,7 @@ fn handle_request_despawn_all_system(
     }
 }
 
-pub struct RequestSaveDisplay(pub String);
+pub struct RequestSaveDisplay;
 
 pub fn handle_request_save_display(
     mut event_reader: EventReader<RequestSaveDisplay>,
@@ -80,14 +83,20 @@ pub fn handle_request_save_display(
 ) {
     for e in event_reader.iter() {
         let mut atoms = vec![];
+
         for atom in display.atoms.iter() {
             let x = *atom.params;
             println!("atom: {:?}", x);
             atoms.push(x);
         }
 
-        let serial_display = SerialInputDisplay { atoms };
-        write_to_file(&serial_display, &e.0);
+        let title = display.title.clone();
+        let path = &format!("displays/{}.json", title)[..];
+        let serial_display = SerialInputDisplay {
+            atoms,
+            title: display.title.clone(),
+        };
+        write_to_file(&serial_display, path);
     }
 }
 // pub fn insert_display_from_file(mut commands: Commands, path: &str) {
@@ -108,6 +117,7 @@ pub fn handle_request_save_display(
 
 pub fn add_display_systems(app: &mut App) {
     // app.add_system(spawn_queued_display_system.after("teardown"));
+    app.register_inspectable::<TaggedAtomicParams>();
 
     app.add_event::<RequestDespawnAtom>();
     app.add_system(handle_request_despawn_atom_system);

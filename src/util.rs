@@ -35,7 +35,7 @@ where
         Ok(json) => {
             if let Err(err) = std::fs::write(path, json) {
                 println!(
-                    "Error writing '{:?}' data to '{:?}': {:?}",
+                    "Error writing {:?} data to {:?}: {:?}",
                     std::any::type_name::<T>(),
                     path,
                     err
@@ -44,7 +44,7 @@ where
         }
         Err(err) => {
             println!(
-                "Error serializing '{:?}' data: {:?}.",
+                "Error serializing {:?} data: {:?}.",
                 std::any::type_name::<T>(),
                 err
             );

@@ -19,7 +19,7 @@
     - list of all displays in a folder
     - drag display file into editor to load into
     - load display file from url??
-
+- analog trigger color
 
 hotkeys:
     - F2 = editor

@@ -4,7 +4,7 @@ use crate::{state::AppState, MainCameraMarker};
 
 use super::{
     display::{InputDisplay, TaggedAtomicParams},
-    frame::FrameParams,
+    frame::{FrameParams, RootFrameMarker},
     system::add_display_systems,
 };
 
@@ -16,11 +16,11 @@ pub struct StateBeforePresent {
 pub fn enter_present_system(
     mut windows: ResMut<Windows>,
     mut camera_query: Query<(&mut OrthographicProjection, &mut Transform), With<MainCameraMarker>>,
-    mut frame_query: Query<(&FrameParams)>,
+    mut frame_query: Query<&TaggedAtomicParams, With<RootFrameMarker>>,
 ) {
     if let Some(window) = windows.get_primary_mut() {
         // Set the window size equal to the frame size
-        if let Ok(fp) = frame_query.get_single() {
+        if let Ok(TaggedAtomicParams::Frame(fp)) = frame_query.get_single() {
             let FrameParams {
                 width,
                 height,

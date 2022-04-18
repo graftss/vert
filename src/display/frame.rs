@@ -95,26 +95,30 @@ pub struct FrameAtomicDisplay;
 impl FrameAtomicDisplay {
     fn regenerate_system(
         mut commands: Commands,
-        mut parent_query: Query<(Entity, &FrameParams, &Children), Changed<FrameParams>>,
+        mut parent_query: Query<
+            (Entity, &TaggedAtomicParams, &Children),
+            (With<RootFrameMarker>, Changed<TaggedAtomicParams>),
+        >,
         mut child_query: Query<&ChildFrameMarker>,
     ) {
-        for (root_entity, params, children) in parent_query.iter_mut() {
-            // Regenerate the root entity
-            commands
-                .entity(root_entity)
-                .insert_bundle(params.root_bundle());
+        for (root_entity, tagged_params, children) in parent_query.iter_mut() {
+            if let TaggedAtomicParams::Frame(params) = tagged_params {
+                // Regenerate the root entity
+                commands
+                    .entity(root_entity)
+                    .insert_bundle(params.root_bundle());
 
-            for &child_entity in children.iter() {
-                match child_query.get(child_entity) {
-                    Ok(_) => {
-                        params.insert_child_bundle(commands.entity(child_entity));
-                    }
-                    Err(_) => {
-                        panic!("failed to regenerate frame");
+                for &child_entity in children.iter() {
+                    match child_query.get(child_entity) {
+                        Ok(_) => {
+                            params.insert_child_bundle(commands.entity(child_entity));
+                        }
+                        Err(_) => {
+                            panic!("failed to regenerate frame");
+                        }
                     }
                 }
             }
-            // params.insert_child_bundle(commands.entity(entity));
         }
     }
 }
@@ -122,13 +126,10 @@ impl FrameAtomicDisplay {
 impl AtomicInputDisplay<FrameParams> for FrameAtomicDisplay {
     fn spawn(commands: &mut Commands, params: &FrameParams) -> Entity {
         let mut root_entity = commands.spawn();
-        let my_params = params.clone();
 
         let id = root_entity
-            .insert(RootFrameMarker)
-            .insert(RootAtomicDisplayMarker)
-            .insert(Name::new("** Frame"))
-            .insert(my_params)
+            .insert_bundle(params.root_bundle())
+            .insert(TaggedAtomicParams::Frame(params.clone()))
             .id();
 
         root_entity.with_children(|parent| {

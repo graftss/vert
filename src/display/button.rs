@@ -12,7 +12,7 @@ use crate::{
 };
 
 use super::{
-    display::{AtomicInputDisplay, RootAtomicDisplayMarker},
+    display::{AtomicInputDisplay, RootAtomicDisplayMarker, TaggedAtomicParams},
     renderable::Renderable,
     serialization::{DrawModeDef, TransformDef},
 };
@@ -100,27 +100,32 @@ impl ButtonAtomicDisplay {
 
     fn regenerate_system(
         mut commands: Commands,
-        parent_query: Query<(Entity, &ButtonParams, &Children), Changed<ButtonParams>>,
+        parent_query: Query<
+            (Entity, &TaggedAtomicParams, &Children),
+            (With<RootButtonMarker>, Changed<TaggedAtomicParams>),
+        >,
         child_query: Query<&ChildButtonMarker>,
     ) {
-        for (root_entity, params, children) in parent_query.iter() {
-            // Regenerate the root entity
-            commands
-                .entity(root_entity)
-                .insert_bundle(params.root_bundle());
+        for (root_entity, tagged_params, children) in parent_query.iter() {
+            if let TaggedAtomicParams::Button(params) = tagged_params {
+                // Regenerate the root entity
+                commands
+                    .entity(root_entity)
+                    .insert_bundle(params.root_bundle());
 
-            // Rengenerate the child entities
-            for &child_entity in children.iter() {
-                match child_query.get(child_entity) {
-                    Ok(marker) => {
-                        if marker.pressed {
-                            params.insert_on_bundle(&mut commands.entity(child_entity));
-                        } else {
-                            params.insert_off_bundle(&mut commands.entity(child_entity));
+                // Rengenerate the child entities
+                for &child_entity in children.iter() {
+                    match child_query.get(child_entity) {
+                        Ok(marker) => {
+                            if marker.pressed {
+                                params.insert_on_bundle(&mut commands.entity(child_entity));
+                            } else {
+                                params.insert_off_bundle(&mut commands.entity(child_entity));
+                            }
                         }
-                    }
-                    _ => {
-                        panic!("weird thing happened when regenerating a button");
+                        _ => {
+                            panic!("weird thing happened when regenerating a button");
+                        }
                     }
                 }
             }
@@ -135,7 +140,7 @@ impl AtomicInputDisplay<ButtonParams> for ButtonAtomicDisplay {
         let mut my_params = *params;
         my_params.button_key.bind(root.id(), 0);
 
-        root.insert(my_params)
+        root.insert(TaggedAtomicParams::Button(my_params))
             .with_children(|parent| {
                 params.insert_on_bundle(&mut parent.spawn());
                 params.insert_off_bundle(&mut parent.spawn());

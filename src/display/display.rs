@@ -33,7 +33,7 @@ where
     fn add_update_systems(app: &mut App);
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Component, Inspectable)]
 pub enum TaggedAtomicParams {
     Button(ButtonParams),
     AnalogStick(AnalogStickParams),
@@ -48,17 +48,22 @@ pub struct AtomicDisplay {
 
 #[derive(Debug)]
 pub struct InputDisplay {
+    pub title: String,
     pub atoms: Vec<AtomicDisplay>,
 }
 
 impl Default for InputDisplay {
     fn default() -> Self {
-        InputDisplay { atoms: vec![] }
+        InputDisplay {
+            title: "New display".to_string(),
+            atoms: vec![],
+        }
     }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SerialInputDisplay {
+    pub title: String,
     pub atoms: Vec<TaggedAtomicParams>,
 }
 
@@ -72,7 +77,10 @@ impl Into<InputDisplay> for SerialInputDisplay {
             });
         }
 
-        InputDisplay { atoms }
+        InputDisplay {
+            atoms,
+            title: self.title,
+        }
     }
 }
 
@@ -82,6 +90,9 @@ impl From<InputDisplay> for SerialInputDisplay {
         for atom in display.atoms {
             atoms.push(*atom.params);
         }
-        SerialInputDisplay { atoms }
+        SerialInputDisplay {
+            atoms,
+            title: display.title,
+        }
     }
 }
