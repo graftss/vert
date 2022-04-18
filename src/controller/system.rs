@@ -43,7 +43,7 @@ const CONTROLLER_WINDOW_TITLE: &'static str = "Controller";
 
 pub fn ui_system(
     mut egui_ctx: ResMut<EguiContext>,
-    mut layout: ResMut<ControllerLayoutsRes>,
+    mut layouts: ResMut<ControllerLayoutsRes>,
     mut input_listener: ResMut<InputListener>,
     mut event_reader: EventReader<ListenerResult>,
 ) {
@@ -62,12 +62,13 @@ pub fn ui_system(
                     ui.button(LISTEN_FOR_BINDING.to_string());
                     for ev in event_reader.iter() {
                         if let ListenerResult::SourceToKey(source, key) = ev {
-                            layout.set_binding(*key, source);
+                            layouts.set_binding(*key, source);
+                            write_layouts_to_file(&layouts);
                             input_listener.stop_listening();
                         }
                     }
                 } else {
-                    let binding_str = &layout
+                    let binding_str = &layouts
                         .get_binding(key)
                         .map_or(NO_BINDING.to_string(), |key| key.to_string());
 
@@ -82,12 +83,8 @@ pub fn ui_system(
     });
 }
 
-fn save_layouts(layouts: Res<ControllerLayoutsRes>) {
-    write_to_file(&layouts.into_inner(), LAYOUTS_FILE_PATH);
-}
-
-pub fn add_controller_teardown_system(app: &mut App, controller_state: AppState) {
-    app.add_system_set(SystemSet::on_exit(controller_state).with_system(save_layouts));
+fn write_layouts_to_file(layouts: &ControllerLayoutsRes) {
+    write_to_file(layouts, LAYOUTS_FILE_PATH);
 }
 
 pub fn add_controller_systems(app: &mut App, controller_state: AppState) {
@@ -96,7 +93,4 @@ pub fn add_controller_systems(app: &mut App, controller_state: AppState) {
 
     // Update
     app.add_system_set(SystemSet::on_update(controller_state).with_system(ui_system));
-
-    // Teardown
-    add_controller_teardown_system(app, controller_state);
 }

@@ -9,17 +9,14 @@
 - statistics?
     - total presses for each button
     - analog stick distance moved??
-- layout.json isn't updating anymore
 
 - create new atom
     - spawn in center of screen
-- delete atom
-    - add button in inspector ui
 - fs stuff
-    - list of all displays in a folder
     - drag display file into editor to load into
     - load display file from url??
 - analog trigger color
+- clamp scroll zoom to be positive
 
 hotkeys:
     - F2 = editor
