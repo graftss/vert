@@ -77,43 +77,60 @@ fn handle_request_despawn_all_system(
 
 pub struct RequestSaveDisplay;
 
+// TODO: replace `display` with a metadata resource
 pub fn handle_request_save_display(
     mut event_reader: EventReader<RequestSaveDisplay>,
+    query: Query<&TaggedAtomicParams>,
     display: Res<InputDisplay>,
 ) {
     for e in event_reader.iter() {
         let mut atoms = vec![];
 
-        for atom in display.atoms.iter() {
-            let x = *atom.params;
+        for atom in query.iter() {
+            let x = *atom;
             println!("atom: {:?}", x);
             atoms.push(x);
         }
 
-        let title = display.title.clone();
-        let path = &format!("displays/{}.json", title)[..];
-        let serial_display = SerialInputDisplay {
-            atoms,
-            title: display.title.clone(),
-        };
+        let metadata = display.metadata.clone();
+        let path = &format!("displays/{}.json", metadata.title)[..];
+        let serial_display = SerialInputDisplay { atoms, metadata };
         write_to_file(&serial_display, path);
     }
 }
-// pub fn insert_display_from_file(mut commands: Commands, path: &str) {
-//     // Attempt to inject an input display from a file, and inject an empty display if that fails.
-//     match read_from_file::<InputDisplay>(path) {
-//         Ok(display) => {
-//             commands.insert_resource(QueuedInputDisplay { display });
-//         }
-//         Err(e) => {
-//             println!("Error reading input display from file '{}': {:?}", path, e);
-//         }
-//     }
-// }
 
-// pub fn save_display_to_file(mut commands: Commands, display: Res<InputDisplay>) {
-//     write_to_file(display.into_inner(), "display.json");
-// }
+pub struct RequestLoadDisplay(pub String);
+
+pub fn handle_request_load_display(
+    mut commands: Commands,
+    mut er_reqload: EventReader<RequestLoadDisplay>,
+    mut query: Query<Entity, With<RootAtomicDisplayMarker>>,
+    mut ew_spawn: EventWriter<RequestSpawnAtom>,
+) {
+    for RequestLoadDisplay(path) in er_reqload.iter() {
+        match read_from_file::<SerialInputDisplay>(&path) {
+            Ok(display) => {
+                // Clear the current display
+                for atom_entity in query.iter_mut() {
+                    commands.entity(atom_entity).despawn_recursive();
+                }
+
+                // Spawn the requested display
+                for params in display.atoms {
+                    ew_spawn.send(RequestSpawnAtom(AtomicDisplay {
+                        params: Box::new(params),
+                        entity: None,
+                    }));
+                }
+
+                commands.insert_resource(display.metadata);
+            }
+            Err(e) => {
+                println!("Error reading input display from file '{}': {:?}", path, e);
+            }
+        }
+    }
+}
 
 pub fn add_display_systems(app: &mut App) {
     // app.add_system(spawn_queued_display_system.after("teardown"));
@@ -130,6 +147,9 @@ pub fn add_display_systems(app: &mut App) {
 
     app.add_event::<RequestSaveDisplay>();
     app.add_system(handle_request_save_display);
+
+    app.add_event::<RequestLoadDisplay>();
+    app.add_system(handle_request_load_display);
 
     app.insert_resource(InputDisplay::default());
 

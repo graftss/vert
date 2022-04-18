@@ -46,16 +46,23 @@ pub struct AtomicDisplay {
     pub entity: Option<Entity>,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct InputDisplayMetadata {
+    pub title: String,
+}
+
 #[derive(Debug)]
 pub struct InputDisplay {
-    pub title: String,
+    pub metadata: InputDisplayMetadata,
     pub atoms: Vec<AtomicDisplay>,
 }
 
 impl Default for InputDisplay {
     fn default() -> Self {
         InputDisplay {
-            title: "New display".to_string(),
+            metadata: InputDisplayMetadata {
+                title: "New display".to_string(),
+            },
             atoms: vec![],
         }
     }
@@ -63,7 +70,7 @@ impl Default for InputDisplay {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SerialInputDisplay {
-    pub title: String,
+    pub metadata: InputDisplayMetadata,
     pub atoms: Vec<TaggedAtomicParams>,
 }
 
@@ -79,20 +86,7 @@ impl Into<InputDisplay> for SerialInputDisplay {
 
         InputDisplay {
             atoms,
-            title: self.title,
-        }
-    }
-}
-
-impl From<InputDisplay> for SerialInputDisplay {
-    fn from(display: InputDisplay) -> Self {
-        let mut atoms = vec![];
-        for atom in display.atoms {
-            atoms.push(*atom.params);
-        }
-        SerialInputDisplay {
-            atoms,
-            title: display.title,
+            metadata: self.metadata,
         }
     }
 }

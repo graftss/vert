@@ -50,6 +50,7 @@ fn main() {
     app.insert_resource(WorldInspectorParams {
         enabled: false,
         despawnable_entities: true,
+        sort_components: true,
         ignore_components: [
             TypeId::of::<GlobalTransform>(),
             TypeId::of::<Children>(),
