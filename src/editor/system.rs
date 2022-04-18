@@ -11,11 +11,11 @@ use crate::{
 };
 
 use super::{
-    display_fs::{display_fs_system, read_saved_displays_dir},
     mouse::{
         editor_mouse_drag_system, editor_mouse_run_criteria, editor_mouse_scroll_system,
         release_mouse_when_unfocused_system,
     },
+    top_bar::{display_top_bar_system, read_saved_displays_dir, top_bar_startup_system},
 };
 
 fn enter_editor_system(mut inspector_windows: Option<ResMut<WorldInspectorParams>>) {
@@ -41,9 +41,9 @@ pub fn add_editor_systems(app: &mut App, editor_state: AppState) {
     app.add_system(release_mouse_when_unfocused_system);
 
     // Update top bar in editor
-    app.add_system_set(SystemSet::on_update(editor_state).with_system(display_fs_system));
+    app.add_system_set(SystemSet::on_update(editor_state).with_system(display_top_bar_system));
 
-    app.add_startup_system(read_saved_displays_dir);
+    app.add_startup_system(top_bar_startup_system);
 
     // Editor mouse events rely on knowing where all the egui windows are,
     // so they need to be run after all egui stuff has been drawn (?? i think)

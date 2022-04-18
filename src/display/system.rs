@@ -5,6 +5,7 @@ use bevy_inspector_egui::RegisterInspectable;
 
 use crate::{
     controller::layout::ControllerLayoutsRes,
+    editor::top_bar::TopBarState,
     util::{read_from_file, write_to_file},
     AppState,
 };
@@ -13,8 +14,8 @@ use super::{
     analog_stick::AnalogStickAtomicDisplay,
     button::ButtonAtomicDisplay,
     display::{
-        AtomicDisplay, AtomicInputDisplay, InputDisplay, RootAtomicDisplayMarker,
-        SerialInputDisplay, TaggedAtomicParams,
+        AtomicDisplay, AtomicInputDisplay, InputDisplay, InputDisplayMetadata,
+        RootAtomicDisplayMarker, SerialInputDisplay, TaggedAtomicParams,
     },
     frame::FrameAtomicDisplay,
 };
@@ -77,25 +78,26 @@ fn handle_request_despawn_all_system(
 
 pub struct RequestSaveDisplay;
 
-// TODO: replace `display` with a metadata resource
 pub fn handle_request_save_display(
     mut event_reader: EventReader<RequestSaveDisplay>,
     query: Query<&TaggedAtomicParams>,
-    display: Res<InputDisplay>,
+    top_bar_state: Res<TopBarState>,
 ) {
     for e in event_reader.iter() {
         let mut atoms = vec![];
 
         for atom in query.iter() {
             let x = *atom;
-            println!("atom: {:?}", x);
             atoms.push(x);
         }
 
-        let metadata = display.metadata.clone();
-        let path = &format!("displays/{}.json", metadata.title)[..];
+        let display_name = top_bar_state.display_name.clone();
+        let path = format!("displays/{}.json", display_name);
+        let metadata = InputDisplayMetadata {
+            title: display_name,
+        };
         let serial_display = SerialInputDisplay { atoms, metadata };
-        write_to_file(&serial_display, path);
+        write_to_file(&serial_display, &path);
     }
 }
 
@@ -103,9 +105,10 @@ pub struct RequestLoadDisplay(pub String);
 
 pub fn handle_request_load_display(
     mut commands: Commands,
-    mut er_reqload: EventReader<RequestLoadDisplay>,
     mut query: Query<Entity, With<RootAtomicDisplayMarker>>,
+    mut er_reqload: EventReader<RequestLoadDisplay>,
     mut ew_spawn: EventWriter<RequestSpawnAtom>,
+    mut top_bar_state: ResMut<TopBarState>,
 ) {
     for RequestLoadDisplay(path) in er_reqload.iter() {
         match read_from_file::<SerialInputDisplay>(&path) {
@@ -123,7 +126,7 @@ pub fn handle_request_load_display(
                     }));
                 }
 
-                commands.insert_resource(display.metadata);
+                top_bar_state.display_name = path[9..path.len() - 5].to_string();
             }
             Err(e) => {
                 println!("Error reading input display from file '{}': {:?}", path, e);
