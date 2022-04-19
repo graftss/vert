@@ -49,6 +49,12 @@ pub fn debug_analog_stick_data() -> Vec<Box<TaggedAtomicParams>> {
         outline_mode: StrokeMode::new(Color::BLACK, 1.0),
     };
 
+    let trigger_mode = DrawMode::Outlined {
+        fill_mode: FillMode::color(Color::RED),
+        outline_mode: StrokeMode::new(Color::BLACK, 1.0),
+    }
+    .into();
+
     let bg_shape = CircleDef {
         radius: 30.0,
         ..CircleDef::default()
@@ -67,6 +73,7 @@ pub fn debug_analog_stick_data() -> Vec<Box<TaggedAtomicParams>> {
     let left_stick = AnalogStickParams {
         stick_display: Renderable::Circle(stick_shape),
         stick_mode: stick_mode.into(),
+        trigger_mode,
         bg_display: Renderable::Circle(bg_shape),
         bg_mode: bg_mode.into(),
         transform: transform.into(),
@@ -81,6 +88,7 @@ pub fn debug_analog_stick_data() -> Vec<Box<TaggedAtomicParams>> {
     let right_stick = AnalogStickParams {
         stick_display: Renderable::Circle(stick_shape),
         stick_mode: stick_mode.into(),
+        trigger_mode,
         bg_display: Renderable::Circle(bg_shape),
         bg_mode: bg_mode.into(),
         transform: Transform::from_xyz(

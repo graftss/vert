@@ -14,11 +14,11 @@ use crate::{
 use super::{
     display::{AtomicInputDisplay, RootAtomicDisplayMarker, TaggedAtomicParams},
     renderable::Renderable,
-    serialization::{DrawModeDef, TransformDef},
+    serialization::{CircleDef, DrawModeDef, FillModeDef, TransformDef},
 };
 
 // The data parameterizing a button input display.
-#[derive(Debug, Clone, Serialize, Deserialize, Component, Inspectable, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Component, Inspectable)]
 pub struct ButtonParams {
     #[inspectable(label = "Button")]
     pub button_key: BoundControllerKey,
@@ -30,6 +30,24 @@ pub struct ButtonParams {
     pub on_mode: DrawModeDef,
     #[inspectable(label = "Off texture")]
     pub off_mode: DrawModeDef,
+}
+
+impl Default for ButtonParams {
+    fn default() -> Self {
+        Self {
+            on_mode: DrawModeDef::Fill(FillModeDef {
+                options: Default::default(),
+                color: Color::RED,
+            }),
+            off_mode: DrawModeDef::Fill(FillModeDef {
+                options: Default::default(),
+                color: Color::BLACK,
+            }),
+            button_key: Default::default(),
+            transform: Default::default(),
+            displayable: Renderable::Circle(CircleDef { radius: 10.0 }),
+        }
+    }
 }
 
 impl ButtonParams {
@@ -92,7 +110,8 @@ impl ButtonAtomicDisplay {
                     vis.is_visible = !marker.pressed;
                 }
                 _ => {
-                    vis.is_visible = false;
+                    // If no input source has been bound to this button, always display it as unpressed.
+                    vis.is_visible = !marker.pressed;
                 }
             }
         }

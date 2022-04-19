@@ -38,6 +38,8 @@ pub struct AnalogStickParams {
     pub stick_display: Renderable,
     #[inspectable(label = "Stick texture")]
     pub stick_mode: DrawModeDef,
+    #[inspectable(label = "Trigger texture")]
+    pub trigger_mode: DrawModeDef,
     #[inspectable(label = "BG model")]
     pub bg_display: Renderable,
     #[inspectable(label = "BG texture")]
@@ -53,6 +55,12 @@ impl Default for AnalogStickParams {
 
         let stick_mode = DrawMode::Outlined {
             fill_mode: FillMode::color(Color::BLACK),
+            outline_mode: StrokeMode::new(Color::BLACK, 1.0),
+        }
+        .into();
+
+        let trigger_mode = DrawMode::Outlined {
+            fill_mode: FillMode::color(Color::RED),
             outline_mode: StrokeMode::new(Color::BLACK, 1.0),
         }
         .into();
@@ -83,6 +91,7 @@ impl Default for AnalogStickParams {
             stick_radius: 30.0,
             stick_display: Renderable::Circle(stick_display),
             stick_mode,
+            trigger_mode,
             bg_display: Renderable::Circle(bg_display),
             bg_mode,
         }
@@ -207,19 +216,9 @@ impl AnalogStickAtomicDisplay {
                         // Handle trigger presses
                         if params.trigger.key.is_some() {
                             if Self::is_trigger_pressed(&sink.values) {
-                                if let DrawMode::Outlined {
-                                    ref mut fill_mode, ..
-                                } = *draw_mode
-                                {
-                                    fill_mode.color = Color::RED;
-                                }
+                                *draw_mode = params.trigger_mode.into();
                             } else {
-                                if let DrawMode::Outlined {
-                                    ref mut fill_mode, ..
-                                } = *draw_mode
-                                {
-                                    fill_mode.color = Color::BLACK;
-                                }
+                                *draw_mode = params.stick_mode.into();
                             }
                         }
                     }

@@ -10,12 +10,9 @@
     - total presses for each button
     - analog stick distance moved??
 
-- create new atom
-    - spawn in center of screen
 - fs stuff
     - drag display file into editor to load into
     - load display file from url??
-- analog trigger color
 
 hotkeys:
     - F2 = editor
