@@ -4,8 +4,8 @@ use std::{fs, path::Path};
 
 use crate::{
     display::{
-        display::{InputDisplay, SerialInputDisplay},
-        system::{RequestLoadDisplay, RequestSaveDisplay},
+        display::{AtomicParamsTag, InputDisplay, SerialInputDisplay},
+        system::{RequestLoadDisplay, RequestSaveDisplay, RequestSpawnAtom},
     },
     util::read_from_file,
 };
@@ -39,6 +39,7 @@ pub fn read_saved_displays_dir() -> SavedInputDisplays {
 #[derive(Debug, Default)]
 pub struct TopBarState {
     pub display_name: String,
+    pub created_atom: AtomicParamsTag,
 }
 
 pub fn top_bar_startup_system(mut commands: Commands) {
@@ -47,9 +48,10 @@ pub fn top_bar_startup_system(mut commands: Commands) {
 
 pub fn display_top_bar_system(
     mut egui_ctx: ResMut<EguiContext>,
-    mut top_bar_state: ResMut<TopBarState>,
+    mut state: ResMut<TopBarState>,
     mut ew_save: EventWriter<RequestSaveDisplay>,
     mut ew_load: EventWriter<RequestLoadDisplay>,
+    mut ew_spawn: EventWriter<RequestSpawnAtom>,
 ) {
     egui::TopBottomPanel::top(TOP_PANEL_ID).show(egui_ctx.ctx_mut(), |ui| {
         ui.horizontal_top(|ui| {
@@ -71,12 +73,31 @@ pub fn display_top_bar_system(
                     }
                 });
 
+                ui.separator();
+
                 // button to "Save" the current input display
                 if ui.button("Save as:").clicked() {
                     ew_save.send(RequestSaveDisplay);
                 }
 
-                ui.text_edit_singleline(&mut top_bar_state.display_name);
+                ui.add_sized(
+                    bevy_egui::egui::Vec2::new(90.0, 20.0),
+                    egui::TextEdit::singleline(&mut state.display_name),
+                );
+
+                ui.separator();
+
+                if ui.button("Add: ").clicked() {
+                    ew_spawn.send(RequestSpawnAtom::New(state.created_atom, Vec2::ZERO));
+                }
+
+                egui::ComboBox::new("create_atom", "")
+                    .selected_text(state.created_atom.to_string())
+                    .show_ui(ui, |ui| {
+                        for atom in AtomicParamsTag::CAN_CREATE {
+                            ui.selectable_value(&mut state.created_atom, atom, atom.to_string());
+                        }
+                    });
             });
         });
     });

@@ -23,7 +23,7 @@ pub struct RootAtomicDisplayMarker;
 
 pub trait AtomicInputDisplay<P>
 where
-    P: Clone + Copy,
+    P: Clone,
 {
     // Spawn an instance of the atomic input display from its parameters.
     // Returns the `Entity` of the root entity associated to the params.
@@ -33,11 +33,37 @@ where
     fn add_update_systems(app: &mut App);
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, Component, Inspectable)]
+#[derive(Debug, Clone, Serialize, Deserialize, Component, Inspectable)]
 pub enum TaggedAtomicParams {
     Button(ButtonParams),
     AnalogStick(AnalogStickParams),
     Frame(FrameParams),
+}
+
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
+pub enum AtomicParamsTag {
+    Button,
+    AnalogStick,
+}
+
+impl AtomicParamsTag {
+    pub const CAN_CREATE: [AtomicParamsTag; 2] =
+        [AtomicParamsTag::Button, AtomicParamsTag::AnalogStick];
+}
+
+impl ToString for AtomicParamsTag {
+    fn to_string(&self) -> String {
+        match self {
+            AtomicParamsTag::Button => "Button".to_string(),
+            AtomicParamsTag::AnalogStick => "Analog stick".to_string(),
+        }
+    }
+}
+
+impl Default for AtomicParamsTag {
+    fn default() -> Self {
+        Self::Button
+    }
 }
 
 #[derive(Debug, Clone)]

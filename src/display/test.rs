@@ -155,7 +155,7 @@ pub fn inject_debug_display(
     }
 
     for atom in atoms {
-        event_writer.send(RequestSpawnAtom(atom));
+        event_writer.send(RequestSpawnAtom::Existing(atom));
     }
 }
 

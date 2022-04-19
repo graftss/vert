@@ -11,10 +11,10 @@ use crate::{
 };
 
 use super::{
-    analog_stick::AnalogStickAtomicDisplay,
-    button::ButtonAtomicDisplay,
+    analog_stick::{AnalogStickAtomicDisplay, AnalogStickParams},
+    button::{ButtonAtomicDisplay, ButtonParams},
     display::{
-        AtomicDisplay, AtomicInputDisplay, InputDisplay, InputDisplayMetadata,
+        AtomicDisplay, AtomicInputDisplay, AtomicParamsTag, InputDisplay, InputDisplayMetadata,
         RootAtomicDisplayMarker, SerialInputDisplay, TaggedAtomicParams,
     },
     frame::FrameAtomicDisplay,
@@ -22,7 +22,7 @@ use super::{
 
 pub fn spawn_atomic_display(mut commands: &mut Commands, mut atom: &mut AtomicDisplay) {
     // Spawn entities for the parameters of `atom` and save a reference to the root spawned `Entity`.
-    let entity = match *atom.params {
+    let entity = match atom.params.as_ref() {
         TaggedAtomicParams::Button(b) => ButtonAtomicDisplay::spawn(&mut commands, &b),
         TaggedAtomicParams::AnalogStick(asp) => {
             AnalogStickAtomicDisplay::spawn(&mut commands, &asp)
@@ -34,14 +34,44 @@ pub fn spawn_atomic_display(mut commands: &mut Commands, mut atom: &mut AtomicDi
     atom.entity = Some(entity);
 }
 
-pub struct RequestSpawnAtom(pub AtomicDisplay);
+#[derive(Debug, Clone)]
+pub enum RequestSpawnAtom {
+    // Spawn an existing atom from its params.
+    Existing(AtomicDisplay),
+    // Spawn a new atom of the given type at the given position.
+    New(AtomicParamsTag, Vec2),
+}
 
 fn handle_request_spawn_atom_system(
     mut event_reader: EventReader<RequestSpawnAtom>,
     mut commands: Commands,
 ) {
-    for RequestSpawnAtom(atom) in event_reader.iter() {
-        spawn_atomic_display(&mut commands, &mut atom.clone());
+    for e in event_reader.iter() {
+        match e {
+            RequestSpawnAtom::Existing(atom) => {
+                let mut x = atom.clone();
+                spawn_atomic_display(&mut commands, &mut x);
+            }
+            &RequestSpawnAtom::New(tag, pos) => {
+                let entity = None;
+                let params = match tag {
+                    AtomicParamsTag::Button => Box::new(TaggedAtomicParams::Button(ButtonParams {
+                        transform: Transform::from_xyz(pos.x, pos.y, 0.0).into(),
+                        ..Default::default()
+                    })),
+                    AtomicParamsTag::AnalogStick => {
+                        Box::new(TaggedAtomicParams::AnalogStick(AnalogStickParams {
+                            transform: Transform::from_xyz(pos.x, pos.y, 0.0).into(),
+                            ..Default::default()
+                        }))
+                    }
+                };
+
+                spawn_atomic_display(&mut commands, &mut AtomicDisplay { params, entity })
+            }
+            _ => {}
+        }
+        break;
     }
 }
 
@@ -87,8 +117,7 @@ pub fn handle_request_save_display(
         let mut atoms = vec![];
 
         for atom in query.iter() {
-            let x = *atom;
-            atoms.push(x);
+            atoms.push(atom.clone());
         }
 
         let display_name = top_bar_state.display_name.clone();
@@ -120,7 +149,7 @@ pub fn handle_request_load_display(
 
                 // Spawn the requested display
                 for params in display.atoms {
-                    ew_spawn.send(RequestSpawnAtom(AtomicDisplay {
+                    ew_spawn.send(RequestSpawnAtom::Existing(AtomicDisplay {
                         params: Box::new(params),
                         entity: None,
                     }));

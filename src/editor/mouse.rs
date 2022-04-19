@@ -9,7 +9,10 @@ use bevy_egui::EguiContext;
 
 use crate::{state::AppState, util::screen_to_world, MainCameraMarker};
 
-const FIXED_SCROLL_SPEED: f32 = 0.1;
+const MIN_ZOOM: f32 = 0.1;
+const MAX_ZOOM: f32 = 5.0;
+const LINE_SCROLL_SPEED: f32 = 0.1;
+const PIXEL_SCROLL_SPEED: f32 = 0.04;
 const FIXED_DRAG_SPEED: f32 = 0.8;
 
 // A record of the world position when the cursor was frozen and hidden during an editor drag.
@@ -56,15 +59,17 @@ pub fn editor_mouse_scroll_system(
     mut query: Query<(&mut OrthographicProjection), With<MainCameraMarker>>,
 ) {
     use bevy::input::mouse::MouseScrollUnit;
-
     for ev in evr_scroll.iter() {
         match ev.unit {
             MouseScrollUnit::Line => {
                 let mut orth_proj = query.single_mut();
-                orth_proj.scale -= FIXED_SCROLL_SPEED * ev.y;
+                orth_proj.scale -= LINE_SCROLL_SPEED * ev.y;
+                orth_proj.scale = orth_proj.scale.clamp(MIN_ZOOM, MAX_ZOOM);
             }
             MouseScrollUnit::Pixel => {
-                todo!();
+                let mut orth_proj = query.single_mut();
+                orth_proj.scale -= PIXEL_SCROLL_SPEED * ev.y;
+                orth_proj.scale = orth_proj.scale.clamp(MIN_ZOOM, MAX_ZOOM);
             }
         }
     }

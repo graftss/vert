@@ -18,7 +18,7 @@ use super::{
 };
 
 // The data parameterizing a button input display.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, Component, Inspectable, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Component, Inspectable, Default)]
 pub struct ButtonParams {
     #[inspectable(label = "Button")]
     pub button_key: BoundControllerKey,
@@ -33,7 +33,7 @@ pub struct ButtonParams {
 }
 
 impl ButtonParams {
-    pub fn root_bundle(self) -> impl Bundle {
+    pub fn root_bundle(&self) -> impl Bundle {
         let name = "** Button".to_string();
         (
             GlobalTransform::identity(),
@@ -135,9 +135,9 @@ impl ButtonAtomicDisplay {
 
 impl AtomicInputDisplay<ButtonParams> for ButtonAtomicDisplay {
     fn spawn(commands: &mut Commands, params: &ButtonParams) -> Entity {
-        let mut root = commands.spawn_bundle(params.root_bundle());
+        let mut my_params = params.clone();
+        let mut root = commands.spawn_bundle(my_params.root_bundle());
 
-        let mut my_params = *params;
         my_params.button_key.bind(root.id(), 0);
 
         root.insert(TaggedAtomicParams::Button(my_params))

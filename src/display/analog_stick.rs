@@ -18,7 +18,7 @@ use super::{
 };
 
 // The data parameterizing an analog stick input display.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, Component, Inspectable)]
+#[derive(Debug, Clone, Serialize, Deserialize, Component, Inspectable)]
 pub struct AnalogStickParams {
     #[inspectable(label = "X+ axis")]
     pub pos_x: BoundControllerKey,
@@ -90,7 +90,7 @@ impl Default for AnalogStickParams {
 }
 
 impl AnalogStickParams {
-    fn root_bundle(self) -> impl Bundle {
+    fn root_bundle(&self) -> impl Bundle {
         let Self {
             pos_x,
             neg_x,
@@ -114,25 +114,25 @@ impl AnalogStickParams {
         )
     }
 
-    fn insert_stick_bundle(self, mut commands: EntityCommands) {
+    fn insert_stick_bundle(&self, mut commands: EntityCommands) {
         let Self {
             stick_display,
             stick_mode,
             ..
         } = self;
 
-        stick_display.insert_bundle(&mut commands, stick_mode.into(), Transform::identity());
+        stick_display.insert_bundle(&mut commands, (*stick_mode).into(), Transform::identity());
         commands.insert(ChildStickMarker);
     }
 
-    fn insert_bg_bundle(self, mut commands: EntityCommands) {
+    fn insert_bg_bundle(&self, mut commands: EntityCommands) {
         let Self {
             bg_display,
             bg_mode,
             ..
         } = self;
 
-        bg_display.insert_bundle(&mut commands, bg_mode.into(), Transform::identity());
+        bg_display.insert_bundle(&mut commands, (*bg_mode).into(), Transform::identity());
         commands.insert(ChildBgMarker);
     }
 }
@@ -259,10 +259,10 @@ impl AnalogStickAtomicDisplay {
 
 impl AtomicInputDisplay<AnalogStickParams> for AnalogStickAtomicDisplay {
     fn spawn(commands: &mut Commands, params: &AnalogStickParams) -> Entity {
-        let mut root = commands.spawn_bundle(params.root_bundle());
+        let mut my_params = params.clone();
+        let mut root = commands.spawn_bundle(my_params.root_bundle());
         let root_entity = root.id();
 
-        let mut my_params = *params;
         my_params.pos_x.bind(root_entity, 0);
         my_params.neg_x.bind(root_entity, 1);
         my_params.pos_y.bind(root_entity, 2);

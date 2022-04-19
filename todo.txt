@@ -16,7 +16,6 @@
     - drag display file into editor to load into
     - load display file from url??
 - analog trigger color
-- clamp scroll zoom to be positive
 
 hotkeys:
     - F2 = editor
