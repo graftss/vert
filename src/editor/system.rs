@@ -1,30 +1,24 @@
-use bevy::{prelude::*, utils::HashMap, window::WindowId};
-use bevy_egui::{egui, EguiContext, EguiInput, EguiSystem};
-use bevy_inspector_egui::{
-    plugin::InspectorWindows, InspectorPlugin, RegisterInspectable, WorldInspectorParams,
-    WorldInspectorPlugin,
-};
+use bevy::prelude::*;
 
-use crate::{
-    display::display::{InputDisplay, TaggedAtomicParams},
-    state::AppState,
-};
+use bevy_inspector_egui::WorldInspectorParams;
+
+use crate::state::AppState;
 
 use super::{
     mouse::{
         editor_mouse_drag_system, editor_mouse_run_criteria, editor_mouse_scroll_system,
         release_mouse_when_unfocused_system,
     },
-    top_bar::{display_top_bar_system, read_saved_displays_dir, top_bar_startup_system},
+    top_bar::{display_top_bar_system, top_bar_startup_system},
 };
 
-fn enter_editor_system(mut inspector_windows: Option<ResMut<WorldInspectorParams>>) {
+fn enter_editor_system(inspector_windows: Option<ResMut<WorldInspectorParams>>) {
     if let Some(mut params) = inspector_windows {
         params.enabled = true;
     }
 }
 
-fn exit_editor_system(mut inspector_windows: Option<ResMut<WorldInspectorParams>>) {
+fn exit_editor_system(inspector_windows: Option<ResMut<WorldInspectorParams>>) {
     if let Some(mut params) = inspector_windows {
         params.enabled = false;
     }
@@ -32,10 +26,10 @@ fn exit_editor_system(mut inspector_windows: Option<ResMut<WorldInspectorParams>
 
 pub fn add_editor_systems(app: &mut App, editor_state: AppState) {
     // Enter editor state
-    app.add_system_set(SystemSet::on_enter(AppState::Editor).with_system(enter_editor_system));
+    app.add_system_set(SystemSet::on_enter(editor_state).with_system(enter_editor_system));
 
     // Exit editor state
-    app.add_system_set(SystemSet::on_exit(AppState::Editor).with_system(exit_editor_system));
+    app.add_system_set(SystemSet::on_exit(editor_state).with_system(exit_editor_system));
 
     // Fix mouse state when window is unfocused
     app.add_system(release_mouse_when_unfocused_system);

@@ -1,7 +1,7 @@
 use super::serialization::*;
-use bevy::{ecs::system::EntityCommands, math::Vec2, prelude::Bundle};
+use bevy::{ecs::system::EntityCommands, math::Vec2};
 use bevy_inspector_egui::Inspectable;
-use bevy_prototype_lyon::{entity::ShapeBundle, prelude::*};
+use bevy_prototype_lyon::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, Inspectable)]
@@ -21,7 +21,7 @@ impl Default for Renderable {
 impl Renderable {
     pub fn insert_bundle(
         &self,
-        mut commands: &mut EntityCommands,
+        commands: &mut EntityCommands,
         mode: DrawMode,
         transform: bevy::prelude::Transform,
     ) {

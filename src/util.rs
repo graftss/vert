@@ -1,7 +1,7 @@
 use std::{error::Error, fs::File, io::BufReader};
 
 use bevy::prelude::*;
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{de::DeserializeOwned, Serialize};
 
 pub fn despawn_all_with<C: Component>(mut commands: Commands, query: Query<Entity, With<C>>) {
     for entity in query.iter() {
@@ -15,7 +15,7 @@ pub fn invert_color(color: Color) -> Color {
             red,
             green,
             blue,
-            alpha,
+            alpha: _,
         } => Color::Rgba {
             red: 1.0 - red,
             green: 1.0 - green,

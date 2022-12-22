@@ -1,22 +1,9 @@
-use std::ops::Deref;
-
 use bevy::prelude::*;
-use bevy_inspector_egui::{egui::Ui, Context, Inspectable};
-use bevy_prototype_lyon::{
-    entity::ShapeBundle,
-    prelude::*,
-    shapes::{Circle, Rectangle},
-};
+use bevy_inspector_egui::Inspectable;
+
 use serde::{Deserialize, Serialize};
 
-use crate::state::AppState;
-
-use super::{
-    analog_stick::AnalogStickParams,
-    button::ButtonParams,
-    frame::FrameParams,
-    serialization::{CircleDef, RectangleDef, RegularPolygonDef},
-};
+use super::{analog_stick::AnalogStickParams, button::ButtonParams, frame::FrameParams};
 
 #[derive(Component)]
 pub struct RootAtomicDisplayMarker;

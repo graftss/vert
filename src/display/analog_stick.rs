@@ -4,11 +4,8 @@ use bevy_prototype_lyon::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    controller::layout::ControllerKey,
     editor::inspector::BoundControllerKey,
-    input::input::{InputSink, InputSource, InputValue},
-    state::AppState,
-    util::despawn_all_with,
+    input::input::{InputSink, InputValue},
 };
 
 use super::{
@@ -110,7 +107,7 @@ impl AnalogStickParams {
         } = self;
 
         // Collect the input sources needed by this display
-        let mut sources = vec![pos_x.key, neg_x.key, pos_y.key, neg_y.key, trigger.key];
+        let sources = vec![pos_x.key, neg_x.key, pos_y.key, neg_y.key, trigger.key];
         let input_sink = InputSink::new(sources);
 
         (
@@ -267,6 +264,8 @@ impl AtomicInputDisplay<AnalogStickParams> for AnalogStickAtomicDisplay {
         my_params.pos_y.bind(root_entity, 2);
         my_params.neg_y.bind(root_entity, 3);
         my_params.trigger.bind(root_entity, 4);
+
+        println!("analog stick binding {:?}", my_params);
 
         root.insert(TaggedAtomicParams::AnalogStick(my_params))
             .with_children(|parent| {

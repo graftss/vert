@@ -1,9 +1,7 @@
 use bevy::{
     ecs::schedule::ShouldRun,
     input::mouse::{MouseMotion, MouseWheel},
-    pbr::VisiblePointLights,
     prelude::*,
-    render::camera::CameraProjection,
 };
 use bevy_egui::EguiContext;
 
@@ -56,7 +54,7 @@ pub fn release_mouse_when_unfocused_system(
 // A system to zoom the main camera in response to mouse scrolling.
 pub fn editor_mouse_scroll_system(
     mut evr_scroll: EventReader<MouseWheel>,
-    mut query: Query<(&mut OrthographicProjection), With<MainCameraMarker>>,
+    mut query: Query<&mut OrthographicProjection, With<MainCameraMarker>>,
 ) {
     use bevy::input::mouse::MouseScrollUnit;
     for ev in evr_scroll.iter() {
@@ -77,8 +75,8 @@ pub fn editor_mouse_scroll_system(
 
 // A system to move the main camera in response to mouse dragging.
 pub fn editor_mouse_drag_system(
-    mut mouse_buttons: ResMut<Input<MouseButton>>,
-    mut frozen_pos: Option<Res<FrozenCursorPos>>,
+    mouse_buttons: ResMut<Input<MouseButton>>,
+    frozen_pos: Option<Res<FrozenCursorPos>>,
     mut commands: Commands,
     mut windows: ResMut<Windows>,
     mut evr_motion: EventReader<MouseMotion>,
@@ -118,7 +116,7 @@ pub fn editor_mouse_drag_system(
             let window = windows.get_primary_mut().unwrap();
             window.set_cursor_lock_mode(true);
             window.set_cursor_visibility(false);
-            if let Some(mut screen_pos) = window.cursor_position() {
+            if let Some(screen_pos) = window.cursor_position() {
                 let world_pos = screen_to_world(&transform, &camera, &window, &screen_pos);
                 commands.insert_resource(FrozenCursorPos { world_pos });
             }

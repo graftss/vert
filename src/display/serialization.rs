@@ -4,7 +4,7 @@ use bevy_prototype_lyon::{
     prelude::*,
     shapes::{Circle, Rectangle},
 };
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
 // Serialization type for `RegularPolygon`
 

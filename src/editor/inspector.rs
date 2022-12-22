@@ -64,7 +64,7 @@ impl Inspectable for BoundControllerKey {
             context.resource_scope(
                 ui,
                 "InputListener",
-                |mut ui, ctx, mut input_listener: Mut<InputListener>| {
+                |ui, _ctx, mut input_listener: Mut<InputListener>| {
                     if let Some(sink_id) = self.id {
                         if input_listener.has_sink_consumer(sink_id) {
                             ui.button("listening...");
@@ -89,5 +89,5 @@ impl Inspectable for BoundControllerKey {
         changed
     }
 
-    fn setup(app: &mut App) {}
+    fn setup(_app: &mut App) {}
 }

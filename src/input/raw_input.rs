@@ -1,10 +1,9 @@
 use super::input::{
     AxisSign, HidAxisId, HidButtonId, HidHatSwitchId, HidId, InputSource, InputValue,
-    MIN_LISTENABLE_AXIS_MAG,
 };
 
 pub trait RawInputReader {
-    fn update(&mut self);
+    fn update(&mut self, id: HidId);
 
     // Returns the `InputSource` of the first joystick event captured by the update, if such an event exists.
     fn listen(&mut self) -> Option<InputSource>;
@@ -22,15 +21,25 @@ pub trait RawInputReader {
 
 #[cfg(target_os = "windows")]
 pub mod windows {
+    use std::time::Instant;
+
     use super::RawInputReader;
-    use crate::input::input::*;
-    use bevy::prelude::NonSendMut;
+    use crate::{controller::layout::ControllerLayoutsRes, input::input::*};
+    use bevy::prelude::{NonSendMut, Res};
     use multiinput::JoystickState;
 
     // A bevy system to poll the `RawInputManager`.
     // Polling is what sync the internal state of `RawInputManager` to the current rawinput.
-    pub fn poll_rawinput_system(mut raw_input: NonSendMut<RawInputRes>) {
-        raw_input.0.update();
+    pub fn poll_rawinput_system(
+        mut raw_input: NonSendMut<RawInputRes>,
+        controller: Res<ControllerLayoutsRes>,
+    ) {
+        for (_, source) in controller.ps2.sources.iter() {
+            if let Some(id) = source.get_hid_id() {
+                raw_input.0.update(id);
+                break;
+            }
+        }
     }
 
     // The non-send bevy resource for HID/DirectInput gamepads.
@@ -71,7 +80,7 @@ pub mod windows {
 
     impl super::RawInputReader for RawInput {
         // Syncs the state of the `RawInputManager` based on pending rawinput events.
-        fn update(&mut self) {
+        fn update(&mut self, id: HidId) {
             loop {
                 // Reading the events one by one like this has the effect of also updating
                 // the internal joystick state of `RawInputManager`.
@@ -80,7 +89,8 @@ pub mod windows {
                     break;
                 }
             }
-            self.joystick_state = self.manager.get_joystick_state(0);
+
+            self.joystick_state = self.manager.get_joystick_state(id);
         }
 
         fn listen(&mut self) -> Option<InputSource> {

@@ -1,28 +1,25 @@
-use crate::{
-    controller::layout::{ControllerKey, Ps2Key},
-    input::input::*,
-};
+use crate::controller::layout::{ControllerKey, Ps2Key};
 use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
 
 use super::{
     analog_stick::AnalogStickParams,
     button::ButtonParams,
-    display::{AtomicDisplay, InputDisplay, TaggedAtomicParams},
+    display::{AtomicDisplay, TaggedAtomicParams},
     frame::FrameParams,
     renderable::Renderable,
-    serialization::{CircleDef, RectangleDef, RegularPolygonDef, RegularPolygonFeatureDef},
+    serialization::{CircleDef, RegularPolygonDef, RegularPolygonFeatureDef},
     system::{RequestDespawnAll, RequestSaveDisplay, RequestSpawnAtom},
 };
 
 pub fn debug_frame_data() -> Vec<Box<TaggedAtomicParams>> {
-    const left: f32 = -120.0;
-    const bottom: f32 = -70.0;
+    let left: f32 = -100.0;
+    let bottom: f32 = -64.0;
 
     let frame_params = FrameParams {
-        position: Vec2::new(left - 10.0, bottom + 10.0),
-        height: bottom * -2.0,
-        width: left * -2.0,
+        position: Vec2::new(left, bottom),
+        height: 128.0,
+        width: 200.0,
         thickness: 3.0,
         color: Color::Rgba {
             red: 0.0,
@@ -145,13 +142,9 @@ pub fn debug_button_data() -> Vec<Box<TaggedAtomicParams>> {
     result
 }
 
-pub fn inject_debug_display(
-    mut commands: Commands,
-    mut event_writer: EventWriter<RequestSpawnAtom>,
-) {
+pub fn inject_debug_display(_commands: Commands, mut event_writer: EventWriter<RequestSpawnAtom>) {
     let mut atom_params = vec![];
     atom_params.append(&mut debug_analog_stick_data());
-    atom_params.append(&mut debug_button_data());
     atom_params.append(&mut debug_frame_data());
 
     let mut atoms = vec![];
@@ -188,13 +181,11 @@ pub fn clear_display_hotkey(
 }
 
 pub fn inject_debug_display_hotkey(
-    mut commands: Commands,
+    commands: Commands,
     keyboard_input: Res<Input<KeyCode>>,
-    mut event_writer: EventWriter<RequestSpawnAtom>,
+    event_writer: EventWriter<RequestSpawnAtom>,
 ) {
     if keyboard_input.just_pressed(KeyCode::F8) {
-        println!("injecting display");
-
         inject_debug_display(commands, event_writer);
     }
 }

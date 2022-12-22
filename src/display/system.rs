@@ -1,13 +1,9 @@
-use std::path::Path;
-
-use bevy::{ecs::schedule::ShouldRun, prelude::*};
+use bevy::prelude::*;
 use bevy_inspector_egui::RegisterInspectable;
 
 use crate::{
-    controller::layout::ControllerLayoutsRes,
     editor::top_bar::TopBarState,
     util::{read_from_file, write_to_file},
-    AppState,
 };
 
 use super::{
@@ -71,7 +67,6 @@ fn handle_request_spawn_atom_system(
             }
             _ => {}
         }
-        break;
     }
 }
 
@@ -113,7 +108,7 @@ pub fn handle_request_save_display(
     query: Query<&TaggedAtomicParams>,
     top_bar_state: Res<TopBarState>,
 ) {
-    for e in event_reader.iter() {
+    for _e in event_reader.iter() {
         let mut atoms = vec![];
 
         for atom in query.iter() {

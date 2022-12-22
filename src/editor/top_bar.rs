@@ -2,12 +2,9 @@ use bevy::prelude::*;
 use bevy_egui::{egui, EguiContext};
 use std::{fs, path::Path};
 
-use crate::{
-    display::{
-        display::{AtomicParamsTag, InputDisplay, SerialInputDisplay},
-        system::{RequestLoadDisplay, RequestSaveDisplay, RequestSpawnAtom},
-    },
-    util::read_from_file,
+use crate::display::{
+    display::AtomicParamsTag,
+    system::{RequestLoadDisplay, RequestSaveDisplay, RequestSpawnAtom},
 };
 
 const TOP_PANEL_ID: &'static str = "TOP_PANEL";

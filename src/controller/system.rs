@@ -1,23 +1,14 @@
-use bevy::{prelude::*, utils::HashMap};
+use bevy::prelude::*;
 use bevy_egui::EguiContext;
 use bevy_inspector_egui::egui;
 
 use crate::{
-    input::{
-        input::InputSource,
-        listener::{
-            cleanup_input_listener_system, input_listener_system, InputListener, ListenerResult,
-        },
-        raw_input_reader::RawInputRes,
-        RawInputReader,
-    },
+    input::listener::{InputListener, ListenerResult},
     state::AppState,
-    util::{despawn_all_with, read_from_file, write_to_file},
+    util::{read_from_file, write_to_file},
 };
 
-use super::layout::{
-    ControllerKey, ControllerLayout, ControllerLayoutsRes, Ps2Key, Ps2Layout, PS2_KEY_ORDER,
-};
+use super::layout::{ControllerKey, ControllerLayout, ControllerLayoutsRes, PS2_KEY_ORDER};
 
 pub const LAYOUTS_FILE_PATH: &'static str = "layouts.json";
 

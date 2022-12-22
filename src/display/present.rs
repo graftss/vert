@@ -1,11 +1,10 @@
-use bevy::{pbr::VisiblePointLights, prelude::*};
+use bevy::prelude::*;
 
 use crate::{state::AppState, MainCameraMarker};
 
 use super::{
-    display::{InputDisplay, TaggedAtomicParams},
+    display::TaggedAtomicParams,
     frame::{FrameParams, RootFrameMarker},
-    system::add_display_systems,
 };
 
 pub struct StateBeforePresent {
@@ -16,7 +15,7 @@ pub struct StateBeforePresent {
 pub fn enter_present_system(
     mut windows: ResMut<Windows>,
     mut camera_query: Query<(&mut OrthographicProjection, &mut Transform), With<MainCameraMarker>>,
-    mut frame_query: Query<&TaggedAtomicParams, With<RootFrameMarker>>,
+    frame_query: Query<&TaggedAtomicParams, With<RootFrameMarker>>,
 ) {
     if let Some(window) = windows.get_primary_mut() {
         // Set the window size equal to the frame size
@@ -43,7 +42,7 @@ pub fn enter_present_system(
     }
 }
 
-pub fn exit_present_system(mut windows: ResMut<Windows>, mut window_desc: Res<WindowDescriptor>) {
+pub fn exit_present_system(mut windows: ResMut<Windows>, window_desc: Res<WindowDescriptor>) {
     if let Some(window) = windows.get_primary_mut() {
         window.set_resolution(window_desc.width, window_desc.height);
         window.set_resizable(true);

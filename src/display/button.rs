@@ -1,14 +1,11 @@
 use bevy::{ecs::system::EntityCommands, prelude::*};
 use bevy_inspector_egui::{Inspectable, RegisterInspectable};
-use bevy_prototype_lyon::prelude::*;
+
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    controller::layout::ControllerKey,
-    editor::inspector::{BoundControllerKey, InputSinkId},
+    editor::inspector::BoundControllerKey,
     input::input::{InputSink, InputValue},
-    state::AppState,
-    util::despawn_all_with,
 };
 
 use super::{
@@ -62,7 +59,7 @@ impl ButtonParams {
         )
     }
 
-    pub fn insert_on_bundle(&self, mut commands: &mut EntityCommands) {
+    pub fn insert_on_bundle(&self, commands: &mut EntityCommands) {
         // Insert the model and texture bundles
         self.displayable
             .insert_bundle(commands, self.on_mode.into(), Transform::identity());
@@ -73,7 +70,7 @@ impl ButtonParams {
             .insert(InputSink::new(vec![self.button_key.key]));
     }
 
-    fn insert_off_bundle(&self, mut commands: &mut EntityCommands) {
+    fn insert_off_bundle(&self, commands: &mut EntityCommands) {
         self.displayable
             .insert_bundle(commands, self.off_mode.into(), Transform::identity());
 

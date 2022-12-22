@@ -52,9 +52,8 @@ fn find_params(state: AppState) -> &'static AppStateParams {
 fn generic_state_transition(
     state: AppState,
     mut windows: ResMut<Windows>,
-    mut input_listener: Option<ResMut<InputListener>>,
+    input_listener: Option<ResMut<InputListener>>,
 ) {
-    println!("success changing appstate: {:?}", state);
     let params = find_params(state);
 
     // Attempt to change the window title
@@ -71,8 +70,8 @@ fn generic_state_transition(
 pub fn state_transition_system(
     mut app_state: ResMut<State<AppState>>,
     mut er_reqstate: EventReader<RequestStateEvent>,
-    mut windows: ResMut<Windows>,
-    mut input_listener: Option<ResMut<InputListener>>,
+    windows: ResMut<Windows>,
+    input_listener: Option<ResMut<InputListener>>,
 ) {
     for RequestStateEvent(state) in er_reqstate.iter() {
         if *app_state.current() == *state {
@@ -104,13 +103,13 @@ pub fn state_hotkey_system(
         hotkey: key, state, ..
     } in STATE_PARAMS
     {
-        if (keyboard_input.pressed(key) && state != current_state) {
+        if keyboard_input.pressed(key) && state != current_state {
             ew_reqstate.send(RequestStateEvent(state));
         }
     }
 }
 
-pub fn initial_state_transition(mut windows: ResMut<Windows>) {
+pub fn initial_state_transition(windows: ResMut<Windows>) {
     generic_state_transition(INITIAL_STATE, windows, None);
 }
 

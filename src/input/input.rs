@@ -107,6 +107,15 @@ pub enum InputSource {
 }
 
 impl InputSource {
+    pub fn get_hid_id(self) -> Option<HidId> {
+        match self {
+            InputSource::HidButton(id, _) => Some(id),
+            InputSource::HidAxis(id, _, _) => Some(id),
+            InputSource::HidHatSwitch(id, _) => Some(id),
+            _ => None,
+        }
+    }
+
     pub fn to_string(self) -> String {
         format!("{:?}", self)
     }
@@ -248,6 +257,7 @@ pub fn resolve_input_sinks_system(
 }
 
 const POLL_INPUT_TIME_STEP: f32 = 1.0 / 60.0;
+// const POLL_INPUT_TIME_STEP: f32 = 1.0 / 3.0;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, SystemLabel)]
 pub enum InputSystemLabel {

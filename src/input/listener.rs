@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
-    controller::layout::{ControllerKey, ControllerLayout, ControllerLayoutsRes, PS2_KEY_ORDER},
+    controller::layout::{ControllerKey, ControllerLayout, ControllerLayoutsRes},
     editor::inspector::InputSinkId,
     input::{
         input::{AxisSign, InputSink, InputSource, GAMEPAD_AXES, MIN_LISTENABLE_AXIS_MAG},
@@ -139,11 +139,11 @@ pub fn listen_for_input_source(
 
 pub fn input_listener_system(
     mut input_listener: ResMut<InputListener>,
-    mut layouts: ResMut<ControllerLayoutsRes>,
+    layouts: ResMut<ControllerLayoutsRes>,
     keyboard: Res<Input<KeyCode>>,
     buttons: Res<Input<GamepadButton>>,
     axes: Res<Axis<GamepadAxis>>,
-    mut raw: NonSendMut<RawInputRes>,
+    raw: NonSendMut<RawInputRes>,
     gamepads: Res<Gamepads>,
     mut event_writer: EventWriter<ListenerResult>,
 ) {
@@ -176,7 +176,7 @@ pub fn input_listener_system(
 }
 
 pub fn cleanup_input_listener_system(
-    mut input_listener: ResMut<InputListener>,
+    input_listener: ResMut<InputListener>,
     mut sinks: Query<&mut InputSink>,
 ) {
     if input_listener.state != ListenerState::Inactive {

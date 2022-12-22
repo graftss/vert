@@ -1,13 +1,13 @@
 use std::any::TypeId;
 
-use bevy::prelude::*;
-use state::{add_state_systems, state_hotkey_system, AppState};
+use bevy::{
+    diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
+    prelude::*,
+};
+use state::{add_state_systems, AppState};
 
 use bevy_egui::EguiPlugin;
-use bevy_inspector_egui::{
-    widgets::InspectorQuery, InspectableRegistry, InspectorPlugin, RegisterInspectable,
-    WorldInspectorParams, WorldInspectorPlugin,
-};
+use bevy_inspector_egui::{WorldInspectorParams, WorldInspectorPlugin};
 use bevy_prototype_lyon::prelude::*;
 use controller::system::add_controller_systems;
 use display::{
@@ -17,10 +17,7 @@ use display::{
     frame::RootFrameMarker,
     present::add_present_systems,
     system::add_display_systems,
-    test::{
-        clear_display_hotkey, inject_debug_display, inject_debug_display_hotkey,
-        save_display_hotkey,
-    },
+    test::{clear_display_hotkey, inject_debug_display_hotkey, save_display_hotkey, inject_debug_display},
 };
 use editor::system::add_editor_systems;
 use input::input::{add_input_systems, InputSink};
@@ -83,6 +80,9 @@ fn main() {
     add_present_systems(&mut app, AppState::Present);
     add_controller_systems(&mut app, AppState::ConfigureController);
     add_editor_systems(&mut app, AppState::Editor);
+
+    // automatically inject the debug display for release, since that's the main use case
+    app.add_startup_system(inject_debug_display);
 
     app.run();
 }

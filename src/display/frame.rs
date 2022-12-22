@@ -1,18 +1,14 @@
-use bevy::{ecs::system::EntityCommands, prelude::*, sprite::Mesh2dHandle};
+use bevy::{ecs::system::EntityCommands, prelude::*};
 use bevy_inspector_egui::{Inspectable, RegisterInspectable};
-use bevy_prototype_lyon::{
-    prelude::{DrawMode, FillMode, StrokeMode},
-    render::Shape,
-    shapes::{self, Rectangle},
-};
+use bevy_prototype_lyon::prelude::{DrawMode, FillMode, StrokeMode};
 use serde::{Deserialize, Serialize};
 
-use crate::util::{despawn_all_with, invert_color};
+use crate::util::invert_color;
 
 use super::{
     display::{AtomicInputDisplay, RootAtomicDisplayMarker, TaggedAtomicParams},
     renderable::Renderable,
-    serialization::{RectangleDef, RegularPolygonDef},
+    serialization::RectangleDef,
 };
 
 const FRAME_Z_POS: f32 = 0.0;
@@ -50,7 +46,7 @@ impl FrameParams {
     fn insert_child_bundle(self, mut commands: EntityCommands) -> impl Bundle {
         let FrameParams {
             thickness,
-            position,
+            position: _,
             height,
             width,
             color,
@@ -99,7 +95,7 @@ impl FrameAtomicDisplay {
             (Entity, &TaggedAtomicParams, &Children),
             (With<RootFrameMarker>, Changed<TaggedAtomicParams>),
         >,
-        mut child_query: Query<&ChildFrameMarker>,
+        child_query: Query<&ChildFrameMarker>,
     ) {
         for (root_entity, tagged_params, children) in parent_query.iter_mut() {
             if let TaggedAtomicParams::Frame(params) = tagged_params {

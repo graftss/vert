@@ -1,11 +1,8 @@
 use bevy::utils::HashMap;
-use bevy_inspector_egui::Inspectable;
+
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    editor::inspector::{BoundControllerKey, InputSinkId},
-    input::input::InputSource,
-};
+use crate::input::input::InputSource;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Serialize, Deserialize)]
 pub enum Ps2Key {
