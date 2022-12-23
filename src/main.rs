@@ -1,3 +1,4 @@
+#![windows_subsystem = "windows"]
 use std::any::TypeId;
 
 use bevy::{
@@ -35,8 +36,8 @@ fn main() {
     let mut app = App::new();
 
     app.insert_resource(WindowDescriptor {
-        width: 1200.,
-        height: 900.,
+        width: 800.0,
+        height: 600.0,
         ..WindowDescriptor::default()
     });
 
