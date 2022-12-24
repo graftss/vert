@@ -1,5 +1,6 @@
 #![windows_subsystem = "windows"]
-use std::any::TypeId;
+
+use std::{any::TypeId, backtrace::Backtrace, fs::OpenOptions, panic};
 
 use bevy::{
     diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
@@ -18,7 +19,10 @@ use display::{
     frame::RootFrameMarker,
     present::add_present_systems,
     system::add_display_systems,
-    test::{clear_display_hotkey, inject_debug_display_hotkey, save_display_hotkey, inject_debug_display},
+    test::{
+        clear_display_hotkey, inject_debug_display, inject_debug_display_hotkey,
+        save_display_hotkey,
+    },
 };
 use editor::system::add_editor_systems;
 use input::input::{add_input_systems, InputSink};
@@ -33,6 +37,25 @@ mod util;
 pub const VERSION: &'static str = "0.1";
 
 fn main() {
+    panic::set_hook(Box::new(|panic_info| {
+        use std::io::Write;
+
+        let mut file = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .append(true)
+            .open("./errors.log")
+            .unwrap();
+
+        if let Err(e) = writeln!(
+            file,
+            "=======error=======\n{:?}\n===================",
+            panic_info
+        ) {
+            eprintln!("Couldn't write to file: {}", e);
+        }
+    }));
+
     let mut app = App::new();
 
     app.insert_resource(WindowDescriptor {

@@ -185,7 +185,5 @@ pub fn inject_debug_display_hotkey(
     keyboard_input: Res<Input<KeyCode>>,
     event_writer: EventWriter<RequestSpawnAtom>,
 ) {
-    if keyboard_input.just_pressed(KeyCode::F8) {
-        inject_debug_display(commands, event_writer);
-    }
+    if keyboard_input.just_pressed(KeyCode::F8) {}
 }

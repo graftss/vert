@@ -1,3 +1,5 @@
+use std::fs::OpenOptions;
+
 use bevy::prelude::*;
 
 use crate::{
@@ -122,14 +124,15 @@ pub fn listen_for_input_source(
         for axis in GAMEPAD_AXES {
             let gamepad_axis = GamepadAxis(*gamepad, axis);
             let axis_input = axes.get(gamepad_axis);
-            return match axis_input {
+
+            match axis_input {
                 Some(f) if f > (MIN_LISTENABLE_AXIS_MAG as f32) => {
-                    Some(InputSource::Axis(gamepad_axis, AxisSign::Plus))
+                    return Some(InputSource::Axis(gamepad_axis, AxisSign::Plus))
                 }
                 Some(f) if f < (-MIN_LISTENABLE_AXIS_MAG as f32) => {
-                    Some(InputSource::Axis(gamepad_axis, AxisSign::Minus))
+                    return Some(InputSource::Axis(gamepad_axis, AxisSign::Minus))
                 }
-                _ => None,
+                _ => (),
             };
         }
     }

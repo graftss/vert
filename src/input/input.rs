@@ -84,7 +84,7 @@ impl AxisSign {
     pub fn clamp_f32(&self, axis_value: f32) -> f32 {
         match self {
             AxisSign::Plus => axis_value.clamp(0.0, 1.0),
-            AxisSign::Minus => -axis_value.clamp(0.0, -1.0),
+            AxisSign::Minus => -axis_value.clamp(-1.0, 0.0),
         }
     }
 
